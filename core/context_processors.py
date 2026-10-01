@@ -9,7 +9,6 @@ NAV_ITEMS = [
     ("candidates:list", _("Candidates"), "users", "candidates:"),
     ("clients:vacancy_list", _("Vacancies"), "briefcase", "clients:vacancy"),
     ("clients:client_list", _("Clients"), "building", "clients:client"),
-    ("admin_page:employee_list", _("Employees"), "id", "admin_page:"),
 ]
 
 
@@ -18,7 +17,12 @@ def navigation(request):
     current = match.view_name if match else ""
     return {
         "nav_items": [
-            {"url_name": url_name, "label": label, "icon": icon, "active": current.startswith(prefix)}
+            {
+                "url_name": url_name,
+                "label": label,
+                "icon": icon,
+                "active": current.startswith(prefix),
+            }
             for url_name, label, icon, prefix in NAV_ITEMS
         ]
     }
