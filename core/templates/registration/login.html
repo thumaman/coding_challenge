@@ -11,7 +11,7 @@
 <body class="grid min-h-screen place-items-center bg-slate-900 font-[Inter,system-ui,sans-serif] text-sm text-gray-800">
     <form method="post" class="flex w-[min(380px,92vw)] flex-col gap-3 {{ ui.card }}">
         {% csrf_token %}
-        <h1 class="mb-1.5 text-xl font-bold">TalentRate · {% trans "Recruiter login" %}</h1>
+        <h1 class="mb-1.5 text-xl font-bold">IndependentRecruiters · {% trans "Recruiter login" %}</h1>
         {% if form.errors %}<p class="text-red-700">{% trans "Invalid username or password." %}</p>{% endif %}
         <div class="flex flex-col gap-1">
             <label for="id_username" class="font-medium">{% trans "Username" %}</label>

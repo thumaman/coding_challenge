@@ -1,6 +1,6 @@
 {% load static %}{
-    "name": "TalentRate: Recruiter pricing",
-    "short_name": "TalentRate",
+    "name": "IndependentRecruiters: Recruiter pricing",
+    "short_name": "IndependentRecruiters",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
