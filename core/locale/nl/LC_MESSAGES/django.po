@@ -999,8 +999,3 @@ msgstr "Hoe wordt de kostprijs berekend?"
 #: clients/templates/clients/vacancy_detail.html
 msgid "Score"
 msgstr "Score"
-
-#: clients/templates/clients/vacancy_detail.html
-#, python-format
-msgid "Vacancy allows %(days)s remote days"
-msgstr "Vacature staat %(days)s thuiswerkdagen toe"
