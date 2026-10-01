@@ -38,11 +38,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Project apps (owner in brackets, see docs/PLAN.md)
-    "core",        # Joseph: shell, layout, PWA, i18n
+    "core",  # Joseph: shell, layout, PWA, i18n
     "candidates",  # Vidic: candidate CRUD
-    "pricing",     # Teun: pricing engine + calculator
-    "clients",     # Ivan: clients, vacancies, matching, AI advisor
-    "admin_page",  # employee list (DataTables example)
+    "pricing",  # Teun: pricing engine + calculator
+    "clients",  # Ivan: clients, vacancies, matching, AI advisor
 ]
 
 MIDDLEWARE = [
@@ -143,7 +142,9 @@ LOGOUT_REDIRECT_URL = "login"
 ANTHROPIC_MODEL = "claude-opus-5"
 
 # Travel distance (Teun): OpenStreetMap Nominatim + OSRM require an identifying User-Agent
-TRAVEL_API_USER_AGENT = "TalentRate-hackathon/0.1 (+https://github.com/thumaman/coding_challenge)"
+TRAVEL_API_USER_AGENT = (
+    "TalentRate-hackathon/0.1 (+https://github.com/thumaman/coding_challenge)"
+)
 
 
 # Email
