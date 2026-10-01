@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from django.utils.translation import gettext_lazy as _
 
-from pricing.travel import route_distance_km
-
 
 def _budget_points(candidate, vacancy):
     rate = candidate.pricing_for(vacancy).final_rate
@@ -32,14 +30,17 @@ def _hours_per_week_points(candidate, vacancy):
 
 
 def _location_points(candidate, vacancy):
-    vacancy_city = vacancy.city or (vacancy.location if hasattr(vacancy, "location") else "")
-    if not candidate.city or not vacancy_city:
-        return 0
-    if candidate.city.strip().lower() == vacancy_city.strip().lower():
+    if candidate.city and vacancy.city and candidate.city.strip().lower() == vacancy.city.strip().lower():
         return 1
-    result = route_distance_km(candidate.city, vacancy_city)
-    if result and result["km"] <= 25:
-        return 1
+
+    if candidate.travel_distance_km is None and candidate.city and vacancy.location:
+        candidate.refresh_travel_distance()
+        if candidate.travel_distance_km is not None and candidate.pk:
+            type(candidate).objects.filter(pk=candidate.pk).update(travel_distance_km=candidate.travel_distance_km)
+
+    if candidate.travel_distance_km is not None:
+        return 1 if candidate.travel_distance_km <= 25 else 0
+
     return 0
 
 

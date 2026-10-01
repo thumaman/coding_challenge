@@ -122,4 +122,6 @@ class Candidate(models.Model):
 
     def save(self, *args, **kwargs):
         self.__dict__.pop("_pricing_cache", None)
+        if self._state.adding and self.travel_distance_km is None:
+            self.refresh_travel_distance()
         super().save(*args, **kwargs)
