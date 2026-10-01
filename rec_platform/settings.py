@@ -136,7 +136,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Auth: the whole platform is recruiter-only (LoginRequiredMiddleware above)
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "core:dashboard"
+LOGIN_REDIRECT_URL = "candidates:list"
 LOGOUT_REDIRECT_URL = "login"
 
 # AI advisor (Ivan): optional, falls back to rule-based ranking when unset

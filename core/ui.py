@@ -50,7 +50,7 @@ UI = {
         "unknown": f"{_BADGE} bg-slate-100 text-gray-500",
     },
 
-    # Simple key/value table (dashboard, detail pages)
+    # Simple key/value table (detail pages)
     "kv_table": "w-full border-collapse [&_td]:border-b [&_td]:border-dashed [&_td]:border-slate-200 [&_td]:py-1.75",
     "kv_value": "text-right font-semibold tabular-nums",
 

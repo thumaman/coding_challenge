@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f172a">
-    <title>{% block title %}{% trans "Dashboard" %}{% endblock %} · TalentRate</title>
+    <title>{% block title %}TalentRate{% endblock %} · TalentRate</title>
 
     <link rel="manifest" href="{% url 'core:manifest' %}">
     <link rel="icon" href="{% static 'core/icons/icon.svg' %}" type="image/svg+xml">
@@ -24,7 +24,7 @@
 
     {# Desktop: data-collapsed shrinks it to icons. Mobile (< lg): off-canvas, data-open slides it in. Toggled in app.js #}
     <aside id="sidebar" class="group/sidebar sticky top-0 flex h-screen w-58 shrink-0 flex-col bg-slate-900 text-slate-300 transition-[width,translate] duration-200 lg:data-collapsed:w-16 max-lg:fixed max-lg:z-20 max-lg:-translate-x-full max-lg:data-open:translate-x-0">
-        <a class="flex items-center gap-2.5 px-4.5 py-5 text-base font-bold text-white" href="{% url 'core:dashboard' %}">
+        <a class="flex items-center gap-2.5 px-4.5 py-5 text-base font-bold text-white" href="{% url 'candidates:list' %}">
             <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-blue-600 text-[13px]">TR</span>
             <span class="lg:group-data-collapsed/sidebar:hidden">TalentRate</span>
         </a>
