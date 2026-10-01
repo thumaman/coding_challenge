@@ -16,18 +16,16 @@ Stack: Django 6.1 (`rec_platform/` settings), DataTables 2.3.4, a PWA (installab
 - **Rate → salary** (before meeting a candidate):
   `cost = max_rate − margin` → `hourly = cost ÷ factor` → `monthly = hourly × hours × 13 ÷ 3`
   - Example: €120 → 110 → 55 → **€9,533.33** per month (an indicative maximum).
-- **Travel rule:** travel cost is only part of the calculation when a concrete candidate's travel data is known.
-- **Defaults:** margin €10/h; cost factor 2.0 (about 2× the gross labour cost).
+- **Inputs (for now):** employer (vacancy), desired gross salary, desired working hours, travel distance and travel means (car / public transport).
+- **Cost price factor** (default 2.0, about 2× the gross labour cost) covers vacation days, sick leave and all other secondary employment conditions. They are not separate inputs.
+- **Margin:** between €5 and €15 per hour, default €10.
+- **Result:** cost price + travel costs + margin = advised tariff.
+- **Travel distance** is calculated automatically from the candidate's home location to the vacancy location (OpenStreetMap geocoding + OSRM road distance, see `pricing/travel.py`). The recruiter can still overwrite it.
+- **Travel costs:** `km_one_way × 2 × workdays × €/km ÷ hours_per_week`, where workdays = hours ÷ 8 (max 5). Rates: car €0.23/km, public transport €0.20/km (`pricing/constants.py`, *assumption: check with the client*).
+- **Travel rule:** travel costs only count when the distance is known, and **not** when the client pays the travel costs itself (a setting per vacancy).
 - **Warnings:**
-  - The proposed rate is **more than 10% below** the client's max rate. Candidates get rejected for being "too cheap".
-  - The rate is **above** the max rate. This triggers the AI advisor.
-- **Remote days** reduce office days, and so travel cost:
-  `travel_per_hour = km_one_way × 2 × office_days × €/km ÷ hours_per_week`
-  The rates are car €0.23/km and public transport (OV) €0.20/km. They are constants in `pricing/constants.py`.
-- **Vacation and sick days** adjust the effective cost factor. *This is an assumption; check it with the client.*
-  `effective_factor = base_factor × base_productive_days ÷ productive_days`
-  `productive_days = 261 − holidays − vacation − sick` (reference: 25 vacation days, 8 sick days)
-- **Secondary benefits** (€ per month) are added to the hourly cost as `monthly × 3 ÷ 13 ÷ hours`.
+  - The tariff is **more than 10% below** the client's max tariff. Candidates get rejected for being "too cheap".
+  - The tariff is **above** the max tariff. This triggers the AI advisor.
 - **Language:** the UI is available in Dutch and English.
 - **Out of scope:** assessments, importing candidates, and access for clients or candidates.
 
@@ -36,20 +34,18 @@ Stack: Django 6.1 (`rec_platform/` settings), DataTables 2.3.4, a PWA (installab
 
 | Group | Fields |
 | --- | --- |
-| Personal | `first_name`, `last_name`, `email`, `phone`, `city`, `desired_role` |
+| Personal | `first_name`, `last_name`, `email`, `phone`, `city` (home location), `desired_role` |
 | Status | `status` (intake / available / proposed / placed / inactive) |
 | Salary & hours | `expected_salary_month`, `hours_per_week` (40) |
-| Travel & remote | `travel_known` (bool), `travel_distance_km` (one way), `transport_type` (car / ov / bike / none), `remote_days_per_week` (0–5) |
-| Days off | `vacation_days` (25), `sick_days_estimate` (8) |
-| Benefits | `secondary_benefits_month`, `benefits_description` |
-| Pricing overrides | `cost_factor` (2.0), `margin_per_hour` (10.0), `proposed_rate` (nullable) |
+| Travel | `travel_distance_km` (one way, calculated automatically), `transport_type` (car / ov), `remote_days_per_week` (0–5, matching only) |
+| Pricing | `cost_factor` (2.0), `margin_per_hour` (5–15, default 10), `proposed_rate` (nullable) |
 | Links & meta | `vacancy` (FK to `clients.Vacancy`, nullable), `notes`, `created_at`, `updated_at` |
 
 - The property `pricing` returns `pricing.engine.calculate(...)`.
 
 **Client:** `name`, `industry`, `city`, `contact_name`, `contact_email`
 
-**Vacancy:** `client` (FK), `title`, `city`, `max_rate_per_hour`, `hours_per_week`, `remote_days_allowed`, `min_salary`, `max_salary`, `skills`, `is_open`
+**Vacancy:** `client` (FK), `title`, `address`, `city`, `max_rate_per_hour`, `client_pays_travel`, `hours_per_week`, `remote_days_allowed`, `min_salary`, `max_salary`, `skills`, `is_open`
 
 ## Architecture
 ```

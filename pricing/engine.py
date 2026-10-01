@@ -3,18 +3,21 @@
 Everything else (candidate list, calculator, matching, AI advisor) imports from here.
 Never copy these formulas elsewhere, and never re-implement them in JavaScript.
 
-Salary → rate (candidate known):
+Salary → tariff (candidate known):
     hourly      = monthly × 3 ÷ 13 ÷ hours_per_week
-    cost        = hourly × cost_factor
-    all_in_cost = cost + travel_per_hour   (only when travel data is known!)
-    rate        = all_in_cost + margin
+    cost        = hourly × cost_factor          (vacation days etc. are included in the factor)
+    travel      = only when the travel distance is known AND the client doesn't pay travel itself
+    tariff      = cost + travel + margin
 
-Rate → salary (indicative, before meeting a candidate, travel EXCLUDED):
+Tariff → salary (indicative, before meeting a candidate, travel EXCLUDED):
     cost    = max_rate − margin
     hourly  = cost ÷ cost_factor
     monthly = hourly × hours_per_week × 13 ÷ 3
 
 Calculations use unrounded Decimals; results are rounded to cents only on output.
+
+`breakdown` is a list of groups; each group is a chain of rows with an operator
+("", "+", "−", "×", "÷", "=") so the UI can show exactly which operation happens where.
 """
 
 from __future__ import annotations
@@ -22,12 +25,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.utils.translation import gettext as _
+
 from . import constants as C
 
 CENT = Decimal("0.01")
 
 
-def money(value: Decimal) -> Decimal:
+def money(value) -> Decimal:
     return Decimal(value).quantize(CENT, rounding=ROUND_HALF_UP)
 
 
@@ -38,46 +43,69 @@ def D(value) -> Decimal:
     return value if isinstance(value, Decimal) else Decimal(str(value))
 
 
+def num(value) -> str:
+    """Plain number without trailing zeros or exponent: Decimal("40.00") -> "40" (not "4E+1")."""
+    return format(D(value).normalize(), "f")
+
+
+def _opt(value) -> Decimal | None:
+    return None if value in (None, "") else D(value)
+
+
+def row(op, label, value, kind="eur", detail=""):
+    """kind: eur | hours | factor | text. `value` is the operand of `op`, rounded for display only."""
+    if kind == "text":
+        shown = value
+    elif kind == "eur":
+        shown = money(value)
+    else:
+        shown = num(D(value).quantize(Decimal("0.01")))
+    return {"op": op, "label": label, "value": str(shown), "kind": kind, "detail": detail}
+
+
 @dataclass
 class PricingInput:
     salary_month: Decimal
     hours_per_week: Decimal = C.DEFAULT_HOURS_PER_WEEK
     cost_factor: Decimal = C.DEFAULT_COST_FACTOR
     margin: Decimal = C.DEFAULT_MARGIN
-    # Travel only counts when the candidate's travel data is known (business rule)
-    travel_known: bool = False
-    travel_distance_km: Decimal = Decimal(0)  # one way
-    transport_type: str = "none"  # car | ov | bike | none
-    remote_days: int = 0
+    # Travel only counts when the distance is known (business rule) and the client doesn't pay it
+    travel_distance_km: Decimal | None = None  # one way
+    transport_type: str = "car"  # car | ov
+    client_pays_travel: bool = False
     # Use a fixed travel cost per hour instead of computing it from km (e.g. €2.13 in the brief)
     travel_per_hour_override: Decimal | None = None
-    vacation_days: int = C.REFERENCE_VACATION_DAYS
-    sick_days: int = C.REFERENCE_SICK_DAYS
-    benefits_month: Decimal = Decimal(0)  # secondary benefits in € per month
     max_rate: Decimal | None = None  # client's maximum hourly rate (from the vacancy)
-    proposed_rate: Decimal | None = None  # recruiter's manual override
+    proposed_rate: Decimal | None = None  # recruiter's chosen rate for a candidate (optional)
 
     def __post_init__(self):
-        for name in ("salary_month", "hours_per_week", "cost_factor", "margin", "travel_distance_km", "benefits_month"):
+        for name in ("salary_month", "hours_per_week", "cost_factor", "margin"):
             setattr(self, name, D(getattr(self, name)))
-        for name in ("max_rate", "proposed_rate", "travel_per_hour_override"):
-            value = getattr(self, name)
-            setattr(self, name, None if value in (None, "") else D(value))
-        self.remote_days = int(self.remote_days or 0)
-        self.vacation_days = int(self.vacation_days if self.vacation_days is not None else C.REFERENCE_VACATION_DAYS)
-        self.sick_days = int(self.sick_days if self.sick_days is not None else C.REFERENCE_SICK_DAYS)
+        for name in ("travel_distance_km", "travel_per_hour_override", "max_rate", "proposed_rate"):
+            setattr(self, name, _opt(getattr(self, name)))
+        self.client_pays_travel = self.client_pays_travel in (True, "true", "on", "1", 1)
         if self.hours_per_week <= 0:
             raise ValueError("hours_per_week must be positive")
+        if self.cost_factor <= 0:
+            raise ValueError("cost_factor must be positive")
+        if not C.MIN_MARGIN <= self.margin <= C.MAX_MARGIN:
+            raise ValueError(f"margin must be between {C.MIN_MARGIN} and {C.MAX_MARGIN}")
+
+    @property
+    def travel_known(self) -> bool:
+        return self.travel_per_hour_override is not None or (
+            self.travel_distance_km is not None and self.transport_type in C.TRAVEL_RATE_PER_KM
+        )
 
 
 @dataclass
 class PricingResult:
     hourly_wage: Decimal
-    effective_factor: Decimal
     cost_price: Decimal
-    benefits_per_hour: Decimal
-    travel_per_hour: Decimal
-    all_in_cost: Decimal
+    travel_per_hour: Decimal  # what travel costs per hour (also when the client pays it)
+    travel_in_tariff: Decimal  # the part included in the tariff
+    travel_known: bool
+    client_pays_travel: bool
     margin: Decimal
     advised_rate: Decimal
     final_rate: Decimal  # proposed_rate if set, else advised_rate
@@ -87,9 +115,7 @@ class PricingResult:
     breakdown: list[dict] = field(default_factory=list)
 
     def as_dict(self) -> dict:
-        data = {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
-        data["breakdown"] = [{**row, "value": str(row["value"])} for row in self.breakdown]
-        return data
+        return {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
 
 
 def hourly_from_monthly(salary_month, hours_per_week) -> Decimal:
@@ -100,34 +126,14 @@ def monthly_from_hourly(hourly, hours_per_week) -> Decimal:
     return D(hourly) * D(hours_per_week) / C.MONTH_TO_WEEK
 
 
-def per_hour_from_monthly(amount_month, hours_per_week) -> Decimal:
-    return D(amount_month) * C.MONTH_TO_WEEK / D(hours_per_week)
+def workdays_per_week(hours_per_week) -> Decimal:
+    return min(D(hours_per_week) / C.HOURS_PER_WORKDAY, Decimal(C.MAX_WORKDAYS_PER_WEEK))
 
 
-def travel_cost_per_hour(distance_km, transport_type, remote_days, hours_per_week) -> Decimal:
-    """ASSUMPTION: km_one_way × 2 × office_days × €/km ÷ hours_per_week.
-
-    office_days = workdays (hours ÷ 8, max 5) − remote days.
-    TODO(Teun): validate with the client (public transport passes, fixed allowances).
-    """
+def travel_cost_per_hour(distance_km, transport_type, hours_per_week) -> Decimal:
+    """km one way × 2 × workdays × €/km ÷ hours per week. ASSUMPTION: validate rates with the client."""
     rate = C.TRAVEL_RATE_PER_KM.get(transport_type, Decimal(0))
-    workdays = min(D(hours_per_week) / C.HOURS_PER_WORKDAY, Decimal(C.MAX_WORKDAYS_PER_WEEK))
-    office_days = max(workdays - D(remote_days), Decimal(0))
-    return D(distance_km) * 2 * office_days * rate / D(hours_per_week)
-
-
-def effective_factor(base_factor, vacation_days, sick_days) -> Decimal:
-    """ASSUMPTION: scale the cost factor by productive days vs. the reference situation.
-
-    With the reference values (25 vacation, 8 sick days) the factor is unchanged.
-    TODO(Teun): validate with the client.
-    """
-    def productive(vacation, sick):
-        return C.WORKDAYS_PER_YEAR - C.PUBLIC_HOLIDAYS - vacation - sick
-
-    reference = productive(C.REFERENCE_VACATION_DAYS, C.REFERENCE_SICK_DAYS)
-    actual = max(productive(vacation_days, sick_days), 1)
-    return D(base_factor) * Decimal(reference) / Decimal(actual)
+    return D(distance_km) * 2 * workdays_per_week(hours_per_week) * rate / D(hours_per_week)
 
 
 def budget_status(rate, max_rate) -> str:
@@ -140,45 +146,71 @@ def budget_status(rate, max_rate) -> str:
     return "ok"
 
 
+def _travel_detail(inp: PricingInput) -> str:
+    if inp.travel_per_hour_override is not None:
+        return _("fixed amount")
+    rate = C.TRAVEL_RATE_PER_KM[inp.transport_type]
+    return _("%(km)s km × 2 × %(days)s days × €%(rate)s ÷ %(hours)s h") % {
+        "km": num(inp.travel_distance_km), "days": num(workdays_per_week(inp.hours_per_week)),
+        "rate": rate, "hours": num(inp.hours_per_week),
+    }
+
+
 def calculate(inp: PricingInput) -> PricingResult:
-    """Salary → rate."""
-    hourly = hourly_from_monthly(inp.salary_month, inp.hours_per_week)
-    factor = effective_factor(inp.cost_factor, inp.vacation_days, inp.sick_days)
-    cost = hourly * factor
-    benefits = per_hour_from_monthly(inp.benefits_month, inp.hours_per_week)
+    """Salary → tariff."""
+    weekly = D(inp.salary_month) * C.MONTH_TO_WEEK
+    hourly = weekly / inp.hours_per_week
+    cost = hourly * inp.cost_factor
 
     if not inp.travel_known:
         travel = Decimal(0)
     elif inp.travel_per_hour_override is not None:
         travel = inp.travel_per_hour_override
     else:
-        travel = travel_cost_per_hour(inp.travel_distance_km, inp.transport_type, inp.remote_days, inp.hours_per_week)
+        travel = travel_cost_per_hour(inp.travel_distance_km, inp.transport_type, inp.hours_per_week)
+    travel_in_tariff = Decimal(0) if inp.client_pays_travel else travel
 
-    all_in = cost + benefits + travel
-    advised = all_in + inp.margin
+    advised = cost + travel_in_tariff + inp.margin
     final = inp.proposed_rate if inp.proposed_rate is not None else advised
     status = budget_status(money(final), inp.max_rate)
 
+    if not inp.travel_known:
+        travel_row = row("+", _("Travel costs / hour"), 0, detail=_("unknown yet, not included"))
+    elif inp.client_pays_travel:
+        travel_row = row("+", _("Travel costs / hour"), 0,
+                         detail=_("€%(amount)s paid by the client, not included") % {"amount": money(travel)})
+    else:
+        travel_row = row("+", _("Travel costs / hour"), travel, detail=_travel_detail(inp))
+
     breakdown = [
-        {"key": "hourly", "label": "Gross hourly wage", "formula": f"€{money(inp.salary_month)} × 3 ÷ 13 ÷ {inp.hours_per_week}h", "value": money(hourly)},
-        {"key": "cost", "label": "Cost price", "formula": f"× factor {factor.quantize(Decimal('0.001'))}", "value": money(cost)},
-    ]
-    if benefits:
-        breakdown.append({"key": "benefits", "label": "Secondary benefits", "formula": f"€{money(inp.benefits_month)}/month", "value": money(benefits)})
-    breakdown += [
-        {"key": "travel", "label": "Travel costs", "formula": "per hour" if inp.travel_known else "not known yet, excluded", "value": money(travel)},
-        {"key": "all_in", "label": "All-in cost price", "formula": "", "value": money(all_in)},
-        {"key": "margin", "label": "Margin", "formula": "per hour", "value": money(inp.margin)},
-        {"key": "advised", "label": "Advised rate", "formula": "", "value": money(advised)},
+        {"title": _("Gross hourly wage"), "rows": [
+            row("", _("Gross salary / month"), inp.salary_month),
+            row("×", _("Month → week"), "3 ÷ 13", kind="text",
+                detail=_("= €%(amount)s / week") % {"amount": money(weekly)}),
+            row("÷", _("Hours per week"), inp.hours_per_week, kind="hours"),
+            row("=", _("Gross hourly wage"), hourly),
+        ]},
+        {"title": _("Cost price"), "rows": [
+            row("", _("Gross hourly wage"), hourly),
+            row("×", _("Cost price factor"), inp.cost_factor, kind="factor",
+                detail=_("includes vacation days and other employment conditions")),
+            row("=", _("Cost price / hour"), cost),
+        ]},
+        {"title": _("Advised tariff"), "rows": [
+            row("", _("Cost price / hour"), cost),
+            travel_row,
+            row("+", _("Margin / hour"), inp.margin),
+            row("=", _("Advised tariff / hour"), advised),
+        ]},
     ]
 
     return PricingResult(
         hourly_wage=money(hourly),
-        effective_factor=factor,
         cost_price=money(cost),
-        benefits_per_hour=money(benefits),
         travel_per_hour=money(travel),
-        all_in_cost=money(all_in),
+        travel_in_tariff=money(travel_in_tariff),
+        travel_known=inp.travel_known,
+        client_pays_travel=inp.client_pays_travel,
         margin=money(inp.margin),
         advised_rate=money(advised),
         final_rate=money(final),
@@ -191,20 +223,33 @@ def calculate(inp: PricingInput) -> PricingResult:
 
 def rate_to_salary(max_rate, margin=C.DEFAULT_MARGIN, cost_factor=C.DEFAULT_COST_FACTOR,
                    hours_per_week=C.DEFAULT_HOURS_PER_WEEK) -> dict:
-    """Rate → salary: indicative max gross monthly salary. Travel is deliberately excluded."""
-    cost = D(max_rate) - D(margin)
-    hourly = cost / D(cost_factor)
-    weekly = hourly * D(hours_per_week)
-    monthly = monthly_from_hourly(hourly, hours_per_week)
+    """Tariff → salary: indicative max gross monthly salary. Travel is deliberately excluded."""
+    max_rate, margin, cost_factor, hours = D(max_rate), D(margin), D(cost_factor), D(hours_per_week)
+    cost = max_rate - margin
+    hourly = cost / cost_factor
+    weekly = hourly * hours
+    monthly = monthly_from_hourly(hourly, hours)
     return {
         "cost_price": money(cost),
         "hourly_wage": money(hourly),
         "weekly_salary": money(weekly),
         "monthly_salary": money(monthly),
         "breakdown": [
-            {"key": "cost", "label": "Cost price", "formula": f"€{money(max_rate)} − €{money(margin)} margin", "value": money(cost)},
-            {"key": "hourly", "label": "Gross hourly wage", "formula": f"÷ factor {D(cost_factor)}", "value": money(hourly)},
-            {"key": "weekly", "label": "Gross weekly salary", "formula": f"× {D(hours_per_week)}h", "value": money(weekly)},
-            {"key": "monthly", "label": "Indicative max monthly salary", "formula": "× 13 ÷ 3 (excl. travel costs)", "value": money(monthly)},
+            {"title": _("Cost price"), "rows": [
+                row("", _("Client tariff / hour"), max_rate),
+                row("−", _("Margin / hour"), margin),
+                row("=", _("Cost price / hour"), cost),
+            ]},
+            {"title": _("Gross hourly wage"), "rows": [
+                row("", _("Cost price / hour"), cost),
+                row("÷", _("Cost price factor"), cost_factor, kind="factor"),
+                row("=", _("Gross hourly wage"), hourly),
+            ]},
+            {"title": _("Gross salary / month"), "rows": [
+                row("", _("Gross hourly wage"), hourly),
+                row("×", _("Hours per week"), hours, kind="hours", detail=_("= €%(amount)s / week") % {"amount": money(weekly)}),
+                row("×", _("Week → month"), "13 ÷ 3", kind="text"),
+                row("=", _("Max gross salary / month"), monthly, detail=_("excl. travel costs")),
+            ]},
         ],
     }

@@ -21,7 +21,7 @@
                 <th>{% trans "Hours" %}</th>
                 <th>{% trans "Remote days" %}</th>
                 <th>{% trans "Status" %}</th>
-                <th>{% trans "Actions" %}</th>
+                <th></th>
             </tr>
         </thead>
     </table>
@@ -42,11 +42,10 @@ new DataTable("#vacancies", {
         {data: "hours"},
         {data: "remote"},
         {data: "is_open", render: (d) => d ? '<span class="badge badge-ok">{% trans "Open" %}</span>' : '<span class="badge">{% trans "Closed" %}</span>'},
-        {data: null, orderable: false, searchable: false, render: (d, t, row) => `
-            <div class="action-buttons">
-                <button class="btn btn-sm btn-edit" data-modal-url="${row.urls.update}" data-table="#vacancies">{% trans "Edit" %}</button>
-                <button class="btn btn-sm btn-danger" data-modal-url="${row.urls.delete}" data-table="#vacancies">{% trans "Delete" %}</button>
-            </div>`},
+        {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
+            {label: "{% trans "Edit" %}", url: row.urls.update, table: "#vacancies"},
+            {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#vacancies", danger: true},
+        ])},
     ],
 });
 </script>

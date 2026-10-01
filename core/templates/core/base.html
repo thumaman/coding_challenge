@@ -83,6 +83,14 @@
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.2.5/js/dataTables.buttons.js"></script>
 <script src="https://cdn.datatables.net/cardview/1.1.2/js/dataTables.cardView.js"></script>
+<script>
+    {% trans "Actions" as t_actions %}{% trans "Could not load the form." as t_load %}{% trans "Something went wrong. Please try again." as t_error %}
+    window.APP_I18N = {actions: "{{ t_actions|escapejs }}", load_failed: "{{ t_load|escapejs }}", error: "{{ t_error|escapejs }}"};
+    {% if LANGUAGE_CODE == "nl" %}
+    // DataTables UI (search, paging, "Showing x to y") in Dutch
+    DataTable.defaults.language = {url: "https://cdn.datatables.net/plug-ins/2.3.4/i18n/nl-NL.json"};
+    {% endif %}
+</script>
 <script src="{% static 'core/js/app.js' %}"></script>
 <script>
     if ("serviceWorker" in navigator) {

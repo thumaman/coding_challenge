@@ -21,6 +21,8 @@ class Client(models.Model):
 class Vacancy(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="vacancies", verbose_name=_("client"))
     title = models.CharField(_("title"), max_length=200)
+    address = models.CharField(_("address / postcode"), max_length=200, blank=True,
+                               help_text=_("Work location, used to calculate travel distance"))
     city = models.CharField(_("city"), max_length=100, blank=True)
     max_rate_per_hour = models.DecimalField(_("max client rate / hour (€)"), max_digits=7, decimal_places=2)
     hours_per_week = models.PositiveSmallIntegerField(_("hours per week"), default=40)
@@ -28,11 +30,21 @@ class Vacancy(models.Model):
     min_salary = models.DecimalField(_("min salary / month (€)"), max_digits=8, decimal_places=2, null=True, blank=True)
     max_salary = models.DecimalField(_("max salary / month (€)"), max_digits=8, decimal_places=2, null=True, blank=True)
     skills = models.TextField(_("skills / keywords"), blank=True, help_text=_("Comma separated"))
+    client_pays_travel = models.BooleanField(
+        _("client pays travel costs"), default=False,
+        help_text=_("Travel costs are then left out of the tariff"),
+    )
     is_open = models.BooleanField(_("open"), default=True)
 
     class Meta:
         ordering = ["client__name", "title"]
-        verbose_name_plural = "vacancies"
+        verbose_name = _("vacancy")
+        verbose_name_plural = _("vacancies")
 
     def __str__(self):
         return f"{self.client.name} · {self.title}"
+
+    @property
+    def location(self):
+        """Work location for the travel distance (address + city, falling back to the client's city)."""
+        return ", ".join(part for part in (self.address, self.city or self.client.city) if part)

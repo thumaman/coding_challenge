@@ -1,15 +1,19 @@
 from decimal import Decimal
 
+from unittest import mock
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+
+from clients.models import Client, Vacancy
 
 from .models import Candidate
 
 VALID = {
     "first_name": "Sanne", "last_name": "de Vries", "status": "intake", "expected_salary_month": "6000",
-    "hours_per_week": "40", "transport_type": "none", "remote_days_per_week": "0", "vacation_days": "25",
-    "sick_days_estimate": "8", "secondary_benefits_month": "0", "cost_factor": "2.0", "margin_per_hour": "10",
+    "hours_per_week": "40", "transport_type": "car", "remote_days_per_week": "0", "cost_factor": "2.0",
+    "margin_per_hour": "10",
 }
 
 
@@ -40,6 +44,18 @@ class CandidateCrudTests(TestCase):
         response = self.client.post(reverse("candidates:delete", args=[candidate.pk]))
         self.assertTrue(response.json()["ok"])
         self.assertFalse(Candidate.objects.exists())
+
+    def test_margin_must_be_between_5_and_15(self):
+        response = self.client.post(reverse("candidates:create"), {**VALID, "margin_per_hour": "20"})
+        self.assertFalse(response.json()["ok"])
+
+    @mock.patch("candidates.models.route_distance_km", return_value={"km": Decimal("45.9"), "source": "route"})
+    def test_travel_distance_calculated_automatically(self, route):
+        company = Client.objects.create(name="ACME", city="Amsterdam")
+        vacancy = Vacancy.objects.create(client=company, title="Engineer", city="Amsterdam", max_rate_per_hour=100)
+        self.client.post(reverse("candidates:create"), {**VALID, "city": "Utrecht", "vacancy": vacancy.pk})
+        self.assertEqual(Candidate.objects.get().travel_distance_km, Decimal("45.9"))
+        route.assert_called_once_with("Utrecht", "Amsterdam")
 
     def test_data_endpoint(self):
         Candidate.objects.create(first_name="A", last_name="B", expected_salary_month=6000)

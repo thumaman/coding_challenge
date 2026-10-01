@@ -8,6 +8,8 @@ TODO(Ivan): tune weights, use real distance instead of city equality, smarter ke
 
 from decimal import Decimal
 
+from django.utils.translation import gettext_lazy as _
+
 WEIGHTS = {"budget": 40, "salary": 20, "remote": 15, "location": 15, "role": 10}
 
 
@@ -39,7 +41,7 @@ def _remote_points(candidate, vacancy):
 def _location_points(candidate, vacancy):
     if candidate.city and vacancy.city and candidate.city.strip().lower() == vacancy.city.strip().lower():
         return WEIGHTS["location"]
-    if candidate.travel_known and candidate.travel_distance_km is not None:
+    if candidate.travel_distance_km is not None:
         return max(0, WEIGHTS["location"] - float(candidate.travel_distance_km) / 10)
     return WEIGHTS["location"] / 2
 
@@ -52,11 +54,11 @@ def _role_points(candidate, vacancy):
 
 
 PARTS = [
-    ("budget", "Budget fit", _budget_points),
-    ("salary", "Salary in range", _salary_points),
-    ("remote", "Remote days", _remote_points),
-    ("location", "Location", _location_points),
-    ("role", "Role / skills", _role_points),
+    ("budget", _("Budget fit"), _budget_points),
+    ("salary", _("Salary in range"), _salary_points),
+    ("remote", _("Remote days"), _remote_points),
+    ("location", _("Location"), _location_points),
+    ("role", _("Role / skills"), _role_points),
 ]
 
 

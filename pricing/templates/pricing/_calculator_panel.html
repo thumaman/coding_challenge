@@ -1,19 +1,28 @@
 {% load i18n %}
-{# Reusable pricing panel for a candidate (included on candidates/detail.html). Owner: Teun. #}
+{# Pricing panel for a candidate (included on candidates/detail.html). Owner: Teun. #}
 {# TODO(Teun): make this interactive (sliders + "Save to candidate" that POSTs and calls App.toast). #}
 {% with p=candidate.pricing %}
 <div class="card">
-    <h2>{% trans "Pricing" %}</h2>
-    <div class="big-number">€{{ p.final_rate|floatformat:2 }}</div>
-    <p>
-        <span class="badge badge-{{ p.budget_status }}">{{ p.budget_status }}</span>
+    <div class="summary-grid">
+        <div class="summary-item"><span>{% trans "Cost price" %}</span><strong>€{{ p.cost_price }}</strong></div>
+        <div class="summary-op">+</div>
+        <div class="summary-item"><span>{% trans "Travel costs" %}</span><strong>{% if not p.travel_known %}{% trans "unknown" %}{% else %}€{{ p.travel_in_tariff }}{% endif %}</strong></div>
+        <div class="summary-op">+</div>
+        <div class="summary-item"><span>{% trans "Margin" %}</span><strong>€{{ p.margin }}</strong></div>
+        <div class="summary-op">=</div>
+        <div class="summary-item summary-total"><span>{% trans "Advised tariff" %}</span><strong>€{{ p.advised_rate }}</strong></div>
+    </div>
+    <p class="budget-line">
+        <span class="badge badge-{{ p.budget_status }}">
+            {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum: too cheap?" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
+        </span>
         {% if p.max_rate %}<span class="muted">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
+        {% if candidate.proposed_rate %}<span class="muted">· {% trans "proposed" %} €{{ candidate.proposed_rate }}</span>{% endif %}
     </p>
-    <table class="breakdown">
-        {% for row in p.breakdown %}
-            <tr><td>{{ row.label }}</td><td class="formula">{{ row.formula }}</td><td class="value">€{{ row.value }}</td></tr>
-        {% endfor %}
-    </table>
+</div>
+<div class="card">
+    <h2>{% trans "How it is calculated" %}</h2>
+    {% include "pricing/_breakdown.html" with breakdown=p.breakdown %}
     <p style="margin-top: 14px"><a class="btn btn-secondary" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a></p>
 </div>
 {% endwith %}

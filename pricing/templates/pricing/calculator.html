@@ -1,81 +1,108 @@
 {% extends "core/base.html" %}
-{% load i18n static %}
+{% load i18n static l10n %}
 
 {% block title %}{% trans "Calculator" %}{% endblock %}
-{% block heading %}{% trans "Rate calculator" %}{% endblock %}
+{% block heading %}{% trans "Tariff calculator" %}{% if initial.candidate %} <span class="muted">· {{ initial.candidate.full_name }}</span>{% endif %}{% endblock %}
 
 {% block content %}
 {# Owner: Teun. All maths happens server-side in pricing/engine.py via the JSON API. #}
 <div class="tabs" role="tablist">
-    <button class="btn btn-secondary active" data-tab="forward">{% trans "Salary → rate" %}</button>
-    <button class="btn btn-secondary" data-tab="reverse">{% trans "Rate → salary" %}</button>
+    <button class="btn btn-secondary active" data-tab="forward">{% trans "Salary → tariff" %}</button>
+    <button class="btn btn-secondary" data-tab="reverse">{% trans "Tariff → salary" %}</button>
 </div>
 
-<section class="grid grid-2" data-panel="forward" style="margin-top: 16px">
-    <form class="card calc-form" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}">
-        <h2>{% trans "Intake" %}</h2>
+<section class="calc-layout" data-panel="forward">
+    <form class="card calc-form" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}" autocomplete="off">
+        <h2>{% trans "Employer" %}</h2>
         <div class="field">
-            <label>{% trans "Vacancy (client max rate)" %}</label>
-            <select name="vacancy_id">
-                <option value="">{% trans "— none —" %}</option>
+            <label for="id_vacancy">{% trans "Employer / vacancy" %}</label>
+            <select name="vacancy_id" id="id_vacancy">
+                <option value="">{% trans "— choose a vacancy —" %}</option>
                 {% for v in vacancies %}
-                    <option value="{{ v.pk }}">{{ v.client.name }} · {{ v.title }} (max €{{ v.max_rate_per_hour }})</option>
+                    <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
+                        {{ v.client.name }} · {{ v.title }} ({{ v.location }}, max €{{ v.max_rate_per_hour }})
+                    </option>
                 {% endfor %}
             </select>
         </div>
-        {% include "pricing/_slider.html" with name="salary_month" label=_("Gross salary / month (€)") min=1500 max=12000 step=50 value=4500 %}
-        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Hours per week") min=8 max=40 step=1 value=40 %}
-        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost factor") min=1.5 max=2.5 step=0.05 value=2.0 %}
-        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour (€)") min=0 max=30 step=0.5 value=10 %}
-        {% include "pricing/_slider.html" with name="vacation_days" label=_("Vacation days") min=20 max=40 step=1 value=25 %}
-        {% include "pricing/_slider.html" with name="sick_days" label=_("Expected sick days") min=0 max=20 step=1 value=8 %}
-        {% include "pricing/_slider.html" with name="benefits_month" label=_("Secondary benefits / month (€)") min=0 max=1500 step=25 value=0 %}
-
         <div class="field field-check">
-            <label for="travel_known">{% trans "Travel details known" %}</label>
-            <label class="switch"><input type="checkbox" id="travel_known" name="travel_known"><span></span></label>
+            <label for="id_client_pays_travel">{% trans "Client pays the travel costs" %}</label>
+            <label class="switch"><input type="checkbox" id="id_client_pays_travel" name="client_pays_travel"{% if initial.client_pays_travel %} checked{% endif %}><span></span></label>
         </div>
-        <div class="travel-fields">
-            <div class="field">
-                <label>{% trans "Transport" %}</label>
-                <select name="transport_type">
-                    <option value="car">{% trans "Car" %}</option>
-                    <option value="ov">{% trans "Public transport" %}</option>
-                    <option value="bike">{% trans "Bike" %}</option>
-                </select>
-            </div>
-            {% include "pricing/_slider.html" with name="travel_distance_km" label=_("Distance one way (km)") min=0 max=150 step=1 value=25 %}
-            {% include "pricing/_slider.html" with name="remote_days" label=_("Remote days / week") min=0 max=5 step=1 value=0 %}
+
+        <h2>{% trans "Candidate" %}</h2>
+        {% include "pricing/_slider.html" with name="salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=50000 step=50 value=initial.salary_month|default:4500 unit_before="€" %}
+        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=8 max=40 hard_max=60 step=1 value=initial.hours_per_week|default:40 unit_after="h" %}
+
+        <div class="field">
+            <label for="id_home">{% trans "Home location" %}</label>
+            <input type="text" id="id_home" name="home_location" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
         </div>
         <div class="field">
-            <label>{% trans "Proposed rate (optional override, €)" %}</label>
-            <input type="number" name="proposed_rate" step="0.01" min="0">
+            <label>{% trans "Travel means" %}</label>
+            <div class="segmented">
+                <label><input type="radio" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span>{% trans "Car" %}</span></label>
+                <label><input type="radio" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span>{% trans "Public transport" %}</span></label>
+            </div>
         </div>
+        <div class="field">
+            <label for="id_travel_distance_km">{% trans "Travel distance one way" %}</label>
+            <div class="number-input">
+                <input type="number" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                <span class="unit">km</span>
+            </div>
+            <small class="help" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
+        </div>
+
+        <h2>{% trans "Pricing" %}</h2>
+        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=5 step=0.05 value=initial.cost_factor|default:"2.0" %}
+        <small class="help">{% trans "Includes vacation days and other secondary employment conditions." %}</small>
+        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=initial.margin|default:C.DEFAULT_MARGIN unit_before="€" %}
     </form>
 
-    <div class="card">
-        <h2>{% trans "Advised rate" %}</h2>
-        <div class="big-number" id="advised-rate">–</div>
-        <p><span class="badge" id="budget-badge">{% trans "no vacancy selected" %}</span> <span class="muted" id="room"></span></p>
-        <table class="breakdown" id="forward-breakdown"></table>
+    <div class="calc-result">
+        <div class="card">
+            <div class="summary-grid">
+                <div class="summary-item"><span>{% trans "Cost price" %}</span><strong id="sum-cost">–</strong></div>
+                <div class="summary-op">+</div>
+                <div class="summary-item"><span>{% trans "Travel costs" %}</span><strong id="sum-travel">–</strong></div>
+                <div class="summary-op">+</div>
+                <div class="summary-item"><span>{% trans "Margin" %}</span><strong id="sum-margin">–</strong></div>
+                <div class="summary-op">=</div>
+                <div class="summary-item summary-total"><span>{% trans "Advised tariff" %}</span><strong id="sum-tariff">–</strong></div>
+            </div>
+            <p class="budget-line"><span class="badge" id="budget-badge"></span> <span class="muted" id="room"></span></p>
+        </div>
+        <div class="card">
+            <h2>{% trans "How it is calculated" %}</h2>
+            <div id="forward-breakdown"></div>
+        </div>
     </div>
 </section>
 
-<section class="grid grid-2" data-panel="reverse" style="margin-top: 16px" hidden>
-    <form class="card calc-form" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}">
-        <h2>{% trans "Client budget" %}</h2>
-        {% include "pricing/_slider.html" with name="max_rate" label=_("Max client rate / hour (€)") min=30 max=200 step=1 value=120 %}
-        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour (€)") min=0 max=30 step=0.5 value=10 %}
-        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost factor") min=1.5 max=2.5 step=0.05 value=2.0 %}
-        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Hours per week") min=8 max=40 step=1 value=40 %}
+<section class="calc-layout" data-panel="reverse" hidden>
+    <form class="card calc-form" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}" autocomplete="off">
+        <h2>{% trans "What the client pays" %}</h2>
+        {% include "pricing/_slider.html" with prefix="r_" name="max_rate" label=_("Client tariff / hour") min=30 max=200 hard_max=1000 step=1 value=120 unit_before="€" %}
+        {% include "pricing/_slider.html" with prefix="r_" name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=C.DEFAULT_MARGIN unit_before="€" %}
+        {% include "pricing/_slider.html" with prefix="r_" name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=5 step=0.05 value=2.0 %}
+        {% include "pricing/_slider.html" with prefix="r_" name="hours_per_week" label=_("Working hours / week") min=8 max=40 hard_max=60 step=1 value=40 unit_after="h" %}
     </form>
-    <div class="card">
-        <h2>{% trans "Indicative max salary" %}</h2>
-        <div class="big-number" id="reverse-salary">–</div>
-        <p class="muted">{% trans "Per month, gross. Travel costs are excluded until a concrete candidate is known." %}</p>
-        <table class="breakdown" id="reverse-breakdown"></table>
+    <div class="calc-result">
+        <div class="card">
+            <div class="summary-grid">
+                <div class="summary-item summary-total"><span>{% trans "Max gross salary / month" %}</span><strong id="reverse-salary">–</strong></div>
+            </div>
+            <p class="muted">{% trans "Indicative. Travel costs are excluded until a concrete candidate is known." %}</p>
+        </div>
+        <div class="card">
+            <h2>{% trans "How it is calculated" %}</h2>
+            <div id="reverse-breakdown"></div>
+        </div>
     </div>
 </section>
+
+{{ i18n|json_script:"calc-i18n" }}
 {% endblock %}
 
 {% block extra_js %}

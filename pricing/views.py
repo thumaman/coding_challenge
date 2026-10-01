@@ -2,20 +2,58 @@ import json
 
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET, require_POST
 
+from candidates.models import Candidate
 from clients.models import Vacancy
 
 from . import constants as C
 from .engine import PricingInput, calculate, rate_to_salary
+from .travel import route_distance_km
 
 INPUT_FIELDS = set(PricingInput.__dataclass_fields__)
 
 
+def _initial_from_candidate(candidate_id):
+    candidate = Candidate.objects.select_related("vacancy").filter(pk=candidate_id).first()
+    if not candidate:
+        return {}
+    return {
+        "candidate": candidate,
+        "vacancy_id": candidate.vacancy_id,
+        "client_pays_travel": bool(candidate.vacancy and candidate.vacancy.client_pays_travel),
+        "salary_month": candidate.expected_salary_month,
+        "hours_per_week": candidate.hours_per_week,
+        "home_location": candidate.city,
+        "transport_type": candidate.transport_type,
+        "travel_distance_km": candidate.travel_distance_km,
+        "cost_factor": candidate.cost_factor,
+        "margin": candidate.margin_per_hour,
+    }
+
+
 def calculator(request):
-    # TODO(Teun): polish the UI (proposed vs. max rate bar with the −10% band, prefill from ?candidate=<id>)
+    # TODO(Teun): proposed vs. max tariff bar with the −10% band
     vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
-    return render(request, "pricing/calculator.html", {"vacancies": vacancies, "defaults": C})
+    initial = _initial_from_candidate(request.GET.get("candidate")) if request.GET.get("candidate") else {}
+    i18n = {
+        "status": {
+            "ok": _("Within the client's budget"),
+            "too_low": _("More than 10% below the client's maximum: too cheap?"),
+            "over": _("Over the client's budget"),
+            "unknown": _("Choose a vacancy to compare with the client's budget"),
+        },
+        "room": _("Room: %(amount)s / hour"),
+        "distance_loading": _("Calculating distance…"),
+        "distance_route": _("Route distance from %(from)s to %(to)s."),
+        "distance_estimate": _("Estimated distance (route service unavailable)."),
+        "distance_failed": _("Location not found: enter the distance yourself."),
+        "distance_needed": _("Choose a vacancy and enter the home location to calculate the distance."),
+        "paid_by_client": _("paid by client"),
+        "unknown": _("unknown"),
+    }
+    return render(request, "pricing/calculator.html", {"vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial})
 
 
 def _payload(request):
@@ -27,7 +65,7 @@ def _payload(request):
 
 @require_POST
 def calculate_api(request):
-    """POST JSON with PricingInput fields -> PricingResult as JSON."""
+    """POST JSON with PricingInput fields (+ optional vacancy_id) -> PricingResult as JSON."""
     data = _payload(request)
     if data is None:
         return JsonResponse({"ok": False, "message": "Invalid JSON"}, status=400)
@@ -56,6 +94,16 @@ def reverse_api(request):
         )
     except (TypeError, ValueError, ArithmeticError) as exc:
         return JsonResponse({"ok": False, "message": str(exc)}, status=400)
-    result = {k: (v if k == "breakdown" else str(v)) for k, v in result.items()}
-    result["breakdown"] = [{**row, "value": str(row["value"])} for row in result["breakdown"]]
-    return JsonResponse({"ok": True, "result": result})
+    return JsonResponse({"ok": True, "result": {k: (v if k == "breakdown" else str(v)) for k, v in result.items()}})
+
+
+@require_GET
+def distance_api(request):
+    """GET ?origin=<candidate home>&destination=<work location> -> one-way distance in km."""
+    origin, destination = request.GET.get("origin", ""), request.GET.get("destination", "")
+    if not origin.strip() or not destination.strip():
+        return JsonResponse({"ok": False, "message": _("Enter both locations.")}, status=400)
+    result = route_distance_km(origin, destination)
+    if result is None:
+        return JsonResponse({"ok": False, "message": _("Location not found.")}, status=404)
+    return JsonResponse({"ok": True, "km": str(result["km"]), "source": result["source"]})

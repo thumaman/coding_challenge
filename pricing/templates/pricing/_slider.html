@@ -1,4 +1,16 @@
+{% load l10n %}
+{# Slider with a number box next to it. The number box carries the name (source of truth); the slider mirrors it. #}
+{# Values are unlocalized: number inputs need "1.5", not the Dutch "1,5". #}
+{% localize off %}
 <div class="field slider-field">
-    <label for="id_{{ name }}">{{ label }} <output class="slider-value" for="id_{{ name }}">{{ value }}</output></label>
-    <input type="range" id="id_{{ name }}" name="{{ name }}" min="{{ min }}" max="{{ max }}" step="{{ step }}" value="{{ value }}">
+    <label for="id_{{ prefix }}{{ name }}">{{ label }}</label>
+    <div class="slider-row">
+        <input type="range" min="{{ min }}" max="{{ max }}" step="{{ step }}" value="{{ value }}" data-sync="id_{{ prefix }}{{ name }}" aria-hidden="true" tabindex="-1">
+        <div class="number-input">
+            {% if unit_before %}<span class="unit">{{ unit_before }}</span>{% endif %}
+            <input type="number" id="id_{{ prefix }}{{ name }}" name="{{ name }}" min="{{ min }}" max="{{ hard_max|default:'' }}" step="{{ step }}" value="{{ value }}" inputmode="decimal">
+            {% if unit_after %}<span class="unit">{{ unit_after }}</span>{% endif %}
+        </div>
+    </div>
 </div>
+{% endlocalize %}

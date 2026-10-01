@@ -19,9 +19,9 @@ class AdvisorTests(TestCase):
         self.client.force_login(User.objects.create_user("recruiter"))
         company = Client.objects.create(name="ACME")
         self.vacancy = Vacancy.objects.create(client=company, title="Data Engineer", max_rate_per_hour=80)
-        # €6000 -> advised €79.23 without travel; with 50km by car it goes over €80
+        # €6000 -> advised €79.23 without travel; with 50 km by car it goes over €80
         self.candidate = Candidate.objects.create(
-            first_name="A", last_name="B", expected_salary_month=6000, travel_known=True,
+            first_name="A", last_name="B", expected_salary_month=6000,
             travel_distance_km=50, transport_type="car", vacancy=self.vacancy,
         )
 
@@ -41,6 +41,13 @@ class AdvisorTests(TestCase):
         self.assertTrue(response.json()["ok"])
         self.candidate.refresh_from_db()
         self.assertNotEqual(self.candidate.pricing.budget_status, "over")
+
+    @mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""})
+    def test_client_pays_travel_option_updates_vacancy(self):
+        option = next(o for o in suggest_tweaks(self.candidate) if o["key"] == "client_travel")
+        self.client.post(reverse("clients:apply_tweak", args=[self.candidate.pk]), {"changes": option["changes_json"]})
+        self.vacancy.refresh_from_db()
+        self.assertTrue(self.vacancy.client_pays_travel)
 
     def test_apply_tweak_rejects_unknown_fields(self):
         response = self.client.post(reverse("clients:apply_tweak", args=[self.candidate.pk]),

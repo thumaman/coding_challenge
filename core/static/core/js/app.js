@@ -11,6 +11,11 @@
 (function () {
     "use strict";
 
+    const I18N = Object.assign({
+        actions: "Actions",
+        load_failed: "Could not load the form.",
+        error: "Something went wrong. Please try again.",
+    }, window.APP_I18N || {});
     const modal = document.getElementById("modal");
     const modalBody = document.getElementById("modal-body");
     let context = {}; // {table, reload} of the button that opened the current modal
@@ -43,7 +48,7 @@
         context = options;
         const response = await fetch(url, {headers: {"X-Requested-With": "XMLHttpRequest"}});
         if (!response.ok) {
-            toast("Could not load the form.", "error");
+            toast(I18N.load_failed, "error");
             return;
         }
         modalBody.innerHTML = await response.text();
@@ -91,7 +96,34 @@
 
     // ---- Event delegation ----
 
+    function closeMenus(except) {
+        document.querySelectorAll(".row-menu.open").forEach((menu) => {
+            if (menu !== except) menu.classList.remove("open");
+        });
+    }
+
+    // Row action menu (3 dots): App.rowMenu([{label, url, table, danger}])
+    function rowMenu(items) {
+        const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+        return `<div class="row-menu">
+            <button type="button" class="row-menu-toggle" data-menu-toggle aria-haspopup="true" aria-label="${esc(I18N.actions)}">&#8942;</button>
+            <div class="row-menu-items" role="menu">
+                ${items.map((i) => `<button type="button" role="menuitem" class="${i.danger ? "danger" : ""}"
+                    data-modal-url="${esc(i.url)}" ${i.table ? `data-table="${esc(i.table)}"` : ""}>${esc(i.label)}</button>`).join("")}
+            </div>
+        </div>`;
+    }
+
     document.addEventListener("click", (event) => {
+        const toggle = event.target.closest("[data-menu-toggle]");
+        if (toggle) {
+            const menu = toggle.closest(".row-menu");
+            closeMenus(menu);
+            menu.classList.toggle("open");
+            return;
+        }
+        closeMenus();
+
         const opener = event.target.closest("[data-modal-url]");
         if (opener) {
             event.preventDefault();
@@ -131,10 +163,10 @@
                 modalBody.innerHTML = data.html; // form re-rendered with errors
                 document.dispatchEvent(new CustomEvent("app:modal-opened", {detail: {body: modalBody}}));
             } else {
-                toast(data.message || "Something went wrong.", "error");
+                toast(data.message || I18N.error, "error");
             }
         } catch (err) {
-            toast("Something went wrong. Please try again.", "error");
+            toast(I18N.error, "error");
         } finally {
             if (submit) submit.disabled = false;
         }
@@ -155,5 +187,9 @@
     // Formatting helper shared by tables/calculator
     const eur = new Intl.NumberFormat("nl-NL", {style: "currency", currency: "EUR"});
 
-    window.App = {csrfToken, toast, reloadTable, openModal, closeModal, post, formatEuro: (v) => eur.format(Number(v))};
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenus();
+    });
+
+    window.App = {csrfToken, toast, reloadTable, openModal, closeModal, post, rowMenu, formatEuro: (v) => eur.format(Number(v))};
 })();

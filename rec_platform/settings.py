@@ -140,6 +140,9 @@ LOGOUT_REDIRECT_URL = "login"
 # AI advisor (Ivan): optional, falls back to rule-based ranking when unset
 ANTHROPIC_MODEL = "claude-opus-5"
 
+# Travel distance (Teun): OpenStreetMap Nominatim + OSRM require an identifying User-Agent
+TRAVEL_API_USER_AGENT = "TalentRate-hackathon/0.1 (+https://github.com/thumaman/coding_challenge)"
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

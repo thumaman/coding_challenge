@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from pricing.engine import PricingInput, calculate
+from pricing.travel import route_distance_km
 
 _UNSET = object()
 
@@ -20,48 +21,44 @@ class Candidate(models.Model):
     class Transport(models.TextChoices):
         CAR = "car", _("Car")
         OV = "ov", _("Public transport")
-        BIKE = "bike", _("Bike")
-        NONE = "none", _("None / unknown")
 
     # Personal
     first_name = models.CharField(_("first name"), max_length=100)
     last_name = models.CharField(_("last name"), max_length=100)
     email = models.EmailField(_("email"), blank=True)
     phone = models.CharField(_("phone"), max_length=30, blank=True)
-    city = models.CharField(_("city"), max_length=100, blank=True)
+    city = models.CharField(_("home location"), max_length=150, blank=True,
+                            help_text=_("City, postcode or address, used to calculate travel distance"))
     desired_role = models.CharField(_("desired role"), max_length=150, blank=True)
     status = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.INTAKE)
 
     # Salary & hours
-    expected_salary_month = models.DecimalField(_("expected gross salary / month (€)"), max_digits=8, decimal_places=2)
+    expected_salary_month = models.DecimalField(_("desired gross salary / month (€)"), max_digits=8, decimal_places=2)
     hours_per_week = models.PositiveSmallIntegerField(
-        _("hours per week"), default=40, validators=[MinValueValidator(1), MaxValueValidator(60)]
+        _("desired hours per week"), default=40, validators=[MinValueValidator(1), MaxValueValidator(60)]
     )
 
-    # Travel & remote: travel only counts in the price when travel_known is True (business rule)
-    travel_known = models.BooleanField(_("travel details known"), default=False)
+    # Travel: the distance is calculated automatically from home location → vacancy location.
+    # Travel only counts in the price when the distance is known (business rule).
     travel_distance_km = models.DecimalField(
-        _("distance one way (km)"), max_digits=6, decimal_places=1, null=True, blank=True
+        _("travel distance one way (km)"), max_digits=6, decimal_places=1, null=True, blank=True,
+        help_text=_("Calculated automatically from the home location and the vacancy location"),
     )
-    transport_type = models.CharField(_("transport"), max_length=10, choices=Transport.choices, default=Transport.NONE)
+    transport_type = models.CharField(_("travel means"), max_length=10, choices=Transport.choices, default=Transport.CAR)
     remote_days_per_week = models.PositiveSmallIntegerField(
-        _("remote days / week"), default=0, validators=[MaxValueValidator(5)]
+        _("remote days / week"), default=0, validators=[MaxValueValidator(5)],
+        help_text=_("Used for matching only"),
     )
 
-    # Days off & benefits
-    vacation_days = models.PositiveSmallIntegerField(_("vacation days / year"), default=25)
-    sick_days_estimate = models.PositiveSmallIntegerField(_("expected sick days / year"), default=8)
-    secondary_benefits_month = models.DecimalField(
-        _("secondary benefits / month (€)"), max_digits=8, decimal_places=2, default=Decimal("0")
+    # Pricing (vacation days and other employment conditions are included in the cost price factor)
+    cost_factor = models.DecimalField(_("cost price factor"), max_digits=4, decimal_places=2, default=Decimal("2.00"))
+    margin_per_hour = models.DecimalField(
+        _("margin / hour (€)"), max_digits=6, decimal_places=2, default=Decimal("10.00"),
+        validators=[MinValueValidator(Decimal("5")), MaxValueValidator(Decimal("15"))],
     )
-    benefits_description = models.CharField(_("benefits description"), max_length=255, blank=True)
-
-    # Pricing overrides
-    cost_factor = models.DecimalField(_("cost factor"), max_digits=4, decimal_places=2, default=Decimal("2.00"))
-    margin_per_hour = models.DecimalField(_("margin / hour (€)"), max_digits=6, decimal_places=2, default=Decimal("10.00"))
     proposed_rate = models.DecimalField(
-        _("proposed rate / hour (€)"), max_digits=7, decimal_places=2, null=True, blank=True,
-        help_text=_("Leave empty to use the advised rate."),
+        _("proposed tariff / hour (€)"), max_digits=7, decimal_places=2, null=True, blank=True,
+        help_text=_("Leave empty to use the advised tariff."),
     )
 
     vacancy = models.ForeignKey(
@@ -78,14 +75,14 @@ class Candidate(models.Model):
         "hours_per_week": "hours_per_week",
         "cost_factor": "cost_factor",
         "margin": "margin_per_hour",
-        "remote_days": "remote_days_per_week",
-        "vacation_days": "vacation_days",
-        "sick_days": "sick_days_estimate",
-        "benefits_month": "secondary_benefits_month",
+        "travel_distance_km": "travel_distance_km",
+        "transport_type": "transport_type",
     }
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = _("candidate")
+        verbose_name_plural = _("candidates")
 
     def __str__(self):
         return self.full_name
@@ -99,14 +96,20 @@ class Candidate(models.Model):
         vacancy = self.vacancy if vacancy is _UNSET else vacancy
         data = {engine: getattr(self, model) for engine, model in self.PRICING_FIELD_MAP.items()}
         data.update(
-            travel_known=self.travel_known,
-            travel_distance_km=self.travel_distance_km,
-            transport_type=self.transport_type,
+            client_pays_travel=vacancy.client_pays_travel if vacancy else False,
             max_rate=vacancy.max_rate_per_hour if vacancy else None,
             proposed_rate=self.proposed_rate,
         )
         data.update(overrides)
         return PricingInput(**data)
+
+    def refresh_travel_distance(self):
+        """Recalculate the one-way distance home → vacancy location (keeps the old value if lookup fails)."""
+        if not (self.city and self.vacancy and self.vacancy.location):
+            return
+        result = route_distance_km(self.city, self.vacancy.location)
+        if result:
+            self.travel_distance_km = result["km"]
 
     def pricing_for(self, vacancy):
         return calculate(self.pricing_input(vacancy=vacancy))

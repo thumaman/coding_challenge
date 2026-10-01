@@ -8,4 +8,5 @@ urlpatterns = [
     path("calculator/", views.calculator, name="calculator"),
     path("api/pricing/calculate/", views.calculate_api, name="calculate"),
     path("api/pricing/reverse/", views.reverse_api, name="reverse"),
+    path("api/pricing/distance/", views.distance_api, name="distance"),
 ]

@@ -39,7 +39,7 @@
                 <th>{% trans "Remote days" %}</th>
                 <th>{% trans "Vacancy" %}</th>
                 <th>{% trans "Advised rate" %}</th>
-                <th>{% trans "Actions" %}</th>
+                <th></th>
             </tr>
         </thead>
     </table>
@@ -47,7 +47,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'candidates/js/candidates.js' %}"></script>
 <script>
 const esc = DataTable.util.escapeHtml;
 const filters = document.getElementById("candidate-filters");
@@ -68,11 +67,10 @@ const table = new DataTable("#candidates", {
         {data: "vacancy", render: (d) => esc(d) || "—"},
         {data: "rate", render: (d, t, row) => t !== "display" ? Number(d) :
             `<span class="badge badge-${row.budget_status}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
-        {data: null, orderable: false, searchable: false, render: (d, t, row) => `
-            <div class="action-buttons">
-                <button class="btn btn-sm btn-edit" data-modal-url="${row.urls.update}" data-table="#candidates">{% trans "Edit" %}</button>
-                <button class="btn btn-sm btn-danger" data-modal-url="${row.urls.delete}" data-table="#candidates">{% trans "Delete" %}</button>
-            </div>`},
+        {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
+            {label: "{% trans "Edit" %}", url: row.urls.update, table: "#candidates"},
+            {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},
+        ])},
     ],
 });
 
