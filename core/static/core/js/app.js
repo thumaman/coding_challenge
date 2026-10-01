@@ -182,7 +182,11 @@
     });
 
     // Sidebar toggle (collapse on desktop, slide-in on mobile); the sidebar's Tailwind variants react to these attributes
-    const toggle = document.getElementById("sidebar-toggle");
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+    const sidebar = document.getElementById('sidebar');
+    const isCollapsed = sidebar.toggleAttribute('data-collapsed');
+    localStorage.setItem('sidebar-collapsed', isCollapsed);
+});
     const sidebar = document.getElementById("sidebar");
     if (toggle && sidebar) {
         toggle.addEventListener("click", () => {
