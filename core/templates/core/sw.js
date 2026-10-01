@@ -1,5 +1,9 @@
-{% load static %}// Service worker (owner: Joseph). Network-first for pages, cache-first for static/CDN assets.
-const CACHE = "talentrate-v1";
+{% load static %}// Service worker (owner: Joseph).
+// - Our own pages and /static/ files: network-first, so code changes show up immediately;
+//   the cache is only a fallback when offline.
+// - CDN libraries and fonts (versioned URLs that never change): cache-first.
+// Bump CACHE when changing this file, so old caches are deleted on activate.
+const CACHE = "talentrate-v2";
 const SHELL = [
     "{% static 'core/css/app.css' %}",
     "{% static 'core/js/app.js' %}",
@@ -18,21 +22,35 @@ self.addEventListener("activate", (event) => {
     self.clients.claim();
 });
 
+function networkFirst(request) {
+    return fetch(request)
+        .then((response) => {
+            if (response.ok) {
+                const copy = response.clone();
+                caches.open(CACHE).then((cache) => cache.put(request, copy));
+            }
+            return response;
+        })
+        .catch(() => caches.match(request));
+}
+
+function cacheFirst(request) {
+    return caches.match(request).then((hit) => hit || fetch(request).then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE).then((cache) => cache.put(request, copy));
+        return response;
+    }));
+}
+
 self.addEventListener("fetch", (event) => {
     const request = event.request;
     if (request.method !== "GET") return;
     const url = new URL(request.url);
-    const isAsset = url.pathname.startsWith("/static/") || url.host.includes("cdn") || url.host.includes("fonts");
 
-    if (isAsset) {
-        event.respondWith(
-            caches.match(request).then((hit) => hit || fetch(request).then((res) => {
-                const copy = res.clone();
-                caches.open(CACHE).then((cache) => cache.put(request, copy));
-                return res;
-            }))
-        );
-    } else if (request.mode === "navigate") {
-        event.respondWith(fetch(request).catch(() => caches.match(request)));
+    if (url.origin !== self.location.origin) {
+        event.respondWith(cacheFirst(request)); // CDN / fonts
+    } else if (url.pathname.startsWith("/static/") || request.mode === "navigate") {
+        event.respondWith(networkFirst(request));
     }
+    // Everything else (JSON APIs, modal partials) goes straight to the network.
 });
