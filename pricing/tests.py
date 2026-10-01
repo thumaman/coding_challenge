@@ -51,6 +51,11 @@ class SalaryToTariffTests(SimpleTestCase):
         self.assertEqual([r["op"] for r in groups[-1]["rows"]], ["", "+", "+", "="])
         self.assertTrue(all(g["rows"][-1]["op"] == "=" for g in groups))
 
+    def test_cost_steps_end_in_cost_price(self):
+        result = calculate(PricingInput(salary_month=6000, hours_per_week=40, cost_factor=2))
+        self.assertEqual([r["op"] for r in result.cost_steps], ["", "=", "×", "="])
+        self.assertEqual(result.cost_steps[-1]["value"], str(result.cost_price))
+
     def test_travel_left_out_of_breakdown_when_unknown_or_paid_by_client(self):
         for inp in (PricingInput(salary_month=6000),
                     PricingInput(salary_month=6000, travel_distance_km=25, client_pays_travel=True)):

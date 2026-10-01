@@ -76,8 +76,20 @@ UI = {
     "sum_total_value": "text-[26px] font-bold tabular-nums",
     "sum_op": "self-center text-xl font-bold text-gray-500",
 
+    # Cost price tile that opens a dropdown with the salary → cost price steps
+    # (pricing/_cost_tile.html and renderCostSteps() in calculator.js)
+    "cost_tile": ("flex h-full cursor-pointer list-none flex-col gap-1 rounded-lg bg-slate-100 px-3.5 py-3 "
+                  "hover:bg-slate-200 group-open/cost:bg-slate-200 [&::-webkit-details-marker]:hidden"),
+    "cost_dropdown": ("absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
+                      "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] shadow-lg"),
+    "step_row": "flex items-baseline gap-2 py-1",
+    "step_result_row": "flex items-baseline gap-2 py-1 font-semibold last:mt-1 last:border-t last:border-slate-200 last:pt-2",
+    "step_op": "w-3 shrink-0 text-center text-gray-400",
+    "step_detail": "ml-1 text-xs font-normal text-gray-400",
+    "step_value": "ml-auto whitespace-nowrap tabular-nums",
+
     # Pricing breakdown: each group is a chain of operations in its own bordered table
-    # (pricing/_breakdown.html and renderBreakdown() in calculator.js)
+    # (renderBreakdown() in calculator.js, tariff → salary tab)
     "calc_table": "mb-3.5 w-full border-collapse border-2 border-slate-900",
     "calc_caption": "pb-1.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500",
     "calc_result_row": ("bg-slate-100 font-bold [&>td]:border-b-0 [&>td]:border-t-2 [&>td]:border-t-slate-900 "

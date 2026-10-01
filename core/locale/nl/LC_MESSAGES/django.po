@@ -982,3 +982,16 @@ msgstr "Locatie niet gevonden."
 
 #~ msgid "paid by client"
 #~ msgstr "betaald door opdrachtgever"
+
+#: pricing/engine.py
+msgid "Hourly wage"
+msgstr "Uurloon"
+
+#: pricing/engine.py
+#, python-format
+msgid "× 3 ÷ 13 ÷ %(hours)s h"
+msgstr "× 3 ÷ 13 ÷ %(hours)s u"
+
+#: pricing/templates/pricing/_cost_tile.html
+msgid "How is the cost price calculated?"
+msgstr "Hoe wordt de kostprijs berekend?"

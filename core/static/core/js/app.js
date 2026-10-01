@@ -103,6 +103,10 @@
         document.querySelectorAll("[data-row-menu][data-open]").forEach((menu) => {
             if (menu !== except) menu.removeAttribute("data-open");
         });
+        // <details data-dropdown> (e.g. the cost price breakdown) close like menus
+        document.querySelectorAll("details[data-dropdown][open]").forEach((d) => {
+            if (!except || !d.contains(except)) d.open = false;
+        });
     }
 
     // Row action menu (3 dots): App.rowMenu([{label, url, table, danger}])
@@ -127,7 +131,7 @@
             menu.toggleAttribute("data-open");
             return;
         }
-        closeMenus();
+        closeMenus(event.target);
 
         const opener = event.target.closest("[data-modal-url]");
         if (opener) {

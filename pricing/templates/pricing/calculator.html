@@ -65,8 +65,9 @@
 
     <div class="flex flex-col gap-5">
         <div class="{{ ui.card }}">
+            <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
             <div class="{{ ui.sum_grid }}">
-                <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Cost price" %}</span><strong class="{{ ui.sum_value }}" id="sum-cost">–</strong></div>
+                {% include "pricing/_cost_tile.html" with value_id="sum-cost" steps_id="cost-steps" %}
                 {# Hidden by calculator.js when travel is unknown or paid by the client #}
                 <div class="contents" id="sum-travel-part" hidden>
                     <div class="{{ ui.sum_op }}">+</div>
@@ -77,11 +78,6 @@
                 <div class="{{ ui.sum_op }}">=</div>
                 <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}" id="sum-tariff">–</strong></div>
             </div>
-            <p class="mt-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
-        </div>
-        <div class="{{ ui.card }}">
-            <h2 class="{{ ui.h2 }}">{% trans "How it is calculated" %}</h2>
-            <div id="forward-breakdown"></div>
         </div>
     </div>
 </section>

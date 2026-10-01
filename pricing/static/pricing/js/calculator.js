@@ -54,6 +54,16 @@
             </table>`).join("");
     }
 
+    // Salary -> cost price steps in the cost price dropdown (twin of pricing/_cost_steps.html)
+    function renderCostSteps(container, steps) {
+        container.innerHTML = steps.map((r) => `
+            <div class="${r.op === "=" ? UI.step_result_row : UI.step_row}">
+                <span class="${UI.step_op}">${escapeHtml(r.op)}</span>
+                <span>${escapeHtml(r.label)}${r.detail ? `<span class="${UI.step_detail}">${escapeHtml(r.detail)}</span>` : ""}</span>
+                <span class="${UI.step_value}">${escapeHtml(formatValue(r))}</span>
+            </div>`).join("");
+    }
+
     // ---- Salary -> tariff ----
     const forward = document.getElementById("forward-form");
     const vacancySelect = forward.querySelector("[name=vacancy_id]");
@@ -83,7 +93,7 @@
         badge.textContent = T.status[result.budget_status];
         document.getElementById("room").textContent =
             result.room_per_hour !== null ? fmt(T.room, {amount: App.formatEuro(result.room_per_hour)}) : "";
-        renderBreakdown(document.getElementById("forward-breakdown"), result.breakdown);
+        renderCostSteps(document.getElementById("cost-steps"), result.cost_steps);
     }
 
     async function updateDistance() {

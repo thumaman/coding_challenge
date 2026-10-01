@@ -116,6 +116,7 @@ class PricingResult:
     budget_status: str  # ok | too_low | over | unknown
     room_per_hour: Decimal | None  # max_rate − final_rate
     breakdown: list[dict] = field(default_factory=list)
+    cost_steps: list[dict] = field(default_factory=list)  # compact salary → cost price chain (cost price dropdown)
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
@@ -242,6 +243,14 @@ def calculate(inp: PricingInput) -> PricingResult:
         {"title": _("Advised tariff"), "rows": tariff_rows},
     ]
 
+    cost_steps = [
+        row("", _("Gross salary / month"), inp.salary_month),
+        row("=", _("Hourly wage"), hourly,
+            detail=_("× 3 ÷ 13 ÷ %(hours)s h") % {"hours": num(inp.hours_per_week)}),
+        row("×", _("Cost price factor"), inp.cost_factor, kind="factor"),
+        row("=", _("Cost price / hour"), cost),
+    ]
+
     return PricingResult(
         hourly_wage=money(hourly),
         cost_price=money(cost),
@@ -256,6 +265,7 @@ def calculate(inp: PricingInput) -> PricingResult:
         budget_status=status,
         room_per_hour=money(inp.max_rate - final) if inp.max_rate is not None else None,
         breakdown=breakdown,
+        cost_steps=cost_steps,
     )
 
 
