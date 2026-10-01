@@ -24,7 +24,7 @@
             <tr>
                 <th>{% trans "Name" %}</th>
                 <th>{% trans "Role" %}</th>
-                <th>{% trans "Score" %}</th>
+                <th>{% trans "Score" %} /{{ max_score }}</th>
                 <th>{% trans "Remote days" %}</th>
                 <th>{% trans "Advised rate" %}</th>
             </tr>
@@ -34,10 +34,8 @@
                 <tr>
                     <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
                     <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
-                    <td data-order="{{ row.score.total|stringformat:'s' }}">{{ row.score.total|floatformat:"-1" }} / {{ max_score }}</td>
-                    <td data-order="{{ row.candidate.remote_days_per_week }}">
-                        <span class="{{ row.remote_status|badge }}" title="{% blocktrans with days=vacancy.remote_days_allowed %}Vacancy allows {{ days }} remote days{% endblocktrans %}">{{ row.candidate.remote_days_per_week }}</span>
-                    </td>
+                    <td data-order="{{ row.score.total|stringformat:'s' }}">{{ row.score.total|floatformat:"-1" }}</td>
+                    <td>{{ row.candidate.remote_days_per_week }}</td>
                     <td data-order="{{ row.pricing.final_rate|stringformat:'s' }}"><span class="{{ row.pricing.budget_status|badge }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
                 </tr>
             {% endfor %}

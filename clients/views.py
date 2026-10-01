@@ -70,20 +70,12 @@ def vacancy_detail(request, pk):
     vacancy = get_object_or_404(Vacancy.objects.select_related("client"), pk=pk)
     candidates = Candidate.objects.exclude(status__in=[Candidate.Status.INACTIVE, Candidate.Status.PLACED])
     ranked = [
-        {"candidate": c, "score": s, "pricing": c.pricing_for(vacancy), "remote_status": _remote_status(c, vacancy)}
+        {"candidate": c, "score": s, "pricing": c.pricing_for(vacancy)}
         for c, s in matching.rank_candidates(vacancy, candidates)
     ]
     return render(request, "clients/vacancy_detail.html", {
         "vacancy": vacancy, "ranked": ranked, "max_score": matching.MAX_SCORE,
     })
-
-
-def _remote_status(candidate, vacancy):
-    """Candidate's remote wish vs the vacancy, as a badge key: fewer = too_low, equal = ok, more = over."""
-    wish, allowed = candidate.remote_days_per_week, vacancy.remote_days_allowed
-    if wish < allowed:
-        return "too_low"
-    return "ok" if wish == allowed else "over"
 
 
 # ---------- Clients (companies) ----------

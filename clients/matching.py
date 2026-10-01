@@ -2,6 +2,9 @@ from decimal import Decimal
 
 from django.utils.translation import gettext_lazy as _
 
+# Maximum distance that is considered close to the job location
+CLOSE_KM = 25
+
 
 def _budget_points(candidate, vacancy):
     rate = candidate.pricing_for(vacancy).final_rate
@@ -39,7 +42,7 @@ def _location_points(candidate, vacancy):
             type(candidate).objects.filter(pk=candidate.pk).update(travel_distance_km=candidate.travel_distance_km)
 
     if candidate.travel_distance_km is not None:
-        return 1 if candidate.travel_distance_km <= 25 else 0
+        return 1 if candidate.travel_distance_km <= CLOSE_KM else 0
 
     return 0
 
