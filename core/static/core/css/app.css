@@ -1,0 +1,7 @@
+#candidates th,
+#candidates td,
+#vacancies th,
+#vacancies td {
+    text-align: center;
+    vertical-align: middle;
+}

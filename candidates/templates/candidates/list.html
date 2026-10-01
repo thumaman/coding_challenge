@@ -66,7 +66,7 @@ const table = new DataTable("#candidates", {
         {data: "vacancy", render: (d) => esc(d) || "—"},
         {data: "rate", render: (d, t, row) => t !== "display" ? Number(d) :
             `<span class="${App.badgeClass(row.budget_status)}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
-        {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
+      {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", url: row.urls.update, table: "#candidates"},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},
         ])},
