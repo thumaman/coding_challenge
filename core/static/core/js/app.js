@@ -181,17 +181,19 @@
         }
     });
 
-    // Sidebar toggle (collapse on desktop, slide-in on mobile); the sidebar's Tailwind variants react to these attributes
-    document.getElementById('sidebar-toggle').addEventListener('click', () => {
-    const sidebar = document.getElementById('sidebar');
-    const isCollapsed = sidebar.toggleAttribute('data-collapsed');
-    localStorage.setItem('sidebar-collapsed', isCollapsed);
-});
+    // Sidebar toggle (collapse on desktop, slide-in on mobile); the sidebar's Tailwind variants react to these attributes.
+    // The desktop collapsed state is remembered (restored by the inline script in base.html).
+    const toggle = document.getElementById("sidebar-toggle");
     const sidebar = document.getElementById("sidebar");
     if (toggle && sidebar) {
         toggle.addEventListener("click", () => {
             const mobile = window.matchMedia("(width < 64rem)").matches; // Tailwind's lg breakpoint
-            sidebar.toggleAttribute(mobile ? "data-open" : "data-collapsed");
+            if (mobile) {
+                sidebar.toggleAttribute("data-open");
+                return;
+            }
+            const collapsed = sidebar.toggleAttribute("data-collapsed");
+            try { localStorage.setItem("sidebar-collapsed", collapsed); } catch (err) { /* storage unavailable */ }
         });
     }
 

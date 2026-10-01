@@ -7,8 +7,8 @@
 {% block content %}
 {# Owner: Teun. All maths happens server-side in pricing/engine.py via the JSON API. #}
 <div class="flex gap-2" role="tablist">
-    <button class="inline-flex cursor-pointer items-center rounded-md border border-slate-200 bg-white px-3.5 py-2 font-medium text-gray-800 not-aria-selected:hover:bg-slate-100 aria-selected:border-slate-900 aria-selected:bg-slate-900 aria-selected:text-white" role="tab" aria-selected="true" data-tab="forward">{% trans "Salary → tariff" %}</button>
-    <button class="inline-flex cursor-pointer items-center rounded-md border border-slate-200 bg-white px-3.5 py-2 font-medium text-gray-800 not-aria-selected:hover:bg-slate-100 aria-selected:border-slate-900 aria-selected:bg-slate-900 aria-selected:text-white" role="tab" aria-selected="false" data-tab="reverse">{% trans "Tariff → salary" %}</button>
+    <button class="inline-flex cursor-pointer items-center rounded-md border border-slate-200 bg-white px-3.5 py-2 font-medium text-gray-800 not-aria-selected:hover:bg-slate-100 aria-selected:border-slate-900 aria-selected:bg-slate-900 aria-selected:text-white" role="tab" aria-selected="true" data-tab="forward">{% trans "Calculate tariff" %}</button>
+    <button class="inline-flex cursor-pointer items-center rounded-md border border-slate-200 bg-white px-3.5 py-2 font-medium text-gray-800 not-aria-selected:hover:bg-slate-100 aria-selected:border-slate-900 aria-selected:bg-slate-900 aria-selected:text-white" role="tab" aria-selected="false" data-tab="reverse">{% trans "Calculate max salary" %}</button>
 </div>
 
 {# Results on top (full width), inputs below in cards; both columns stretch to the same height. #}
@@ -93,9 +93,7 @@
         <p class="mb-3.5 text-gray-500">{% trans "Indicative. Travel costs are excluded until a concrete candidate is known." %}</p>
         <div class="{{ ui.sum_grid }}">
             <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Cost price / hour" %}</span><strong class="{{ ui.sum_value }}" id="reverse-cost">–</strong></div>
-            <div class="{{ ui.sum_op }}">→</div>
             <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Gross hourly wage" %}</span><strong class="{{ ui.sum_value }}" id="reverse-hourly">–</strong></div>
-            <div class="{{ ui.sum_op }}">→</div>
             {% trans "Max gross salary / month" as label %}{% trans "How is the salary calculated?" as hint %}
             {% include "pricing/_steps_tile.html" with value_id="reverse-salary" steps_id="reverse-steps" dark=True %}
         </div>

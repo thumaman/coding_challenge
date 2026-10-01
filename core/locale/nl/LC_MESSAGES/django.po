@@ -860,12 +860,12 @@ msgid "Tariff calculator"
 msgstr "Tariefcalculator"
 
 #: pricing/templates/pricing/calculator.html:10
-msgid "Salary → tariff"
-msgstr "Salaris → tarief"
+msgid "Calculate tariff"
+msgstr "Tarief berekenen"
 
 #: pricing/templates/pricing/calculator.html:11
-msgid "Tariff → salary"
-msgstr "Tarief → salaris"
+msgid "Calculate max salary"
+msgstr "Maximumsalaris berekenen"
 
 #: pricing/templates/pricing/calculator.html:16
 msgid "Employer"
