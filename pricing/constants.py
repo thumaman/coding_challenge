@@ -11,8 +11,8 @@ DEFAULT_COST_FACTOR = Decimal("2.0")
 
 # Recruiter margin in € per hour on top of the all-in cost price
 DEFAULT_MARGIN = Decimal("10.00")
-MIN_MARGIN = Decimal("5.00")
-MAX_MARGIN = Decimal("15.00")
+MIN_MARGIN = Decimal("0.00")
+MAX_MARGIN = Decimal("25.00")
 
 DEFAULT_HOURS_PER_WEEK = Decimal("40")
 

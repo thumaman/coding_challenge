@@ -32,7 +32,7 @@
 <script>
 new DataTable("#vacancies", {
     ajax: "{% url 'clients:data' %}",
-  layout: {topStart: {pageLength: true}, topEnd: "search", bottomStart: "info", bottomEnd: {paging: {firstLast: false}}},
+  layout: {topStart: {}, topEnd: "search", bottomStart: {info: true, pageLength: true}, bottomEnd: {paging: {firstLast: false}}},
     columns: [
         {data: "title", render: (d, t, row) => `<a href="${row.urls.detail}">${DataTable.util.escapeHtml(d)}</a>`},
         {data: "client"},
