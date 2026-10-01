@@ -158,8 +158,8 @@ def estimate_monthly_travel_cost(
             return Decimal(str(ov_subscription_cost)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         
         # Hackathon Heuristic: ~€8.50 per km, maxing out at €353 (NS Altijd Vrij price)
-        mock_ov_cost = distance * Decimal("8.50")
-        final_ov_cost = min(Decimal("353.00"), mock_ov_cost)
+        mock_ov_cost = distance * Decimal("10.00")
+        final_ov_cost = min(Decimal("399.95"), mock_ov_cost)
         return final_ov_cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     if transport_method in ("car", "bicycle"):
