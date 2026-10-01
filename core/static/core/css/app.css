@@ -1,3 +1,5 @@
+#matches th, 
+#matches td,
 #candidates th,
 #candidates td,
 #vacancies th,
@@ -5,23 +7,29 @@
     text-align: center;
     vertical-align: middle;
 }
+
+#matches thead th,
+#matches thead th,
 #candidates thead th,
 #vacancies thead th {
     text-align: center;
     vertical-align: middle;
 }
 
+#matches thead th .dt-column-title,
 #candidates thead th .dt-column-title,
 #vacancies thead th .dt-column-title {
     display: inline-block;
 }
 
+#matches thead th .dt-column-order,
 #candidates thead th .dt-column-order,
 #vacancies thead th .dt-column-order {
     position: absolute;
     right: 4px;
 }
 
+#matches thead th,
 #candidates thead th,
 #vacancies thead th {
     position: relative;
