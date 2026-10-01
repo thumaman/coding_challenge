@@ -205,4 +205,15 @@
 
     window.UI = UI;
     window.App = {csrfToken, toast, reloadTable, openModal, closeModal, post, rowMenu, badgeClass, formatEuro: (v) => eur.format(Number(v))};
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener("blur", () => {
+            const min = Number(input.min);
+            const max = Number(input.max);
+            const value = Number(input.value);
+
+            if (value < min) input.value = min;
+            if (value > max) input.value = max;
+        });
+    });
 })();
