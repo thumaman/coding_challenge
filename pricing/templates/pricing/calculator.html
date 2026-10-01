@@ -75,12 +75,12 @@
         <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-3 {{ ui.card }}">
                 <h2 class="{{ ui.section_label }}">{% trans "Candidate" %}</h2>
-                {% include "pricing/_slider.html" with name="salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=50000 step=50 value=initial.salary_month|default:4500 unit_before="€" %}
-                {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=8 max=40 hard_max=60 step=1 value=initial.hours_per_week|default:40 unit_after="h" %}
+                {% include "pricing/_slider.html" with name="salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=12000 step=50 value=initial.salary_month|default:4500 unit_before="€" %}
+                {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=8 max=40 hard_max=40 step=1 value=initial.hours_per_week|default:40 unit_after="h" %}
             </div>
             <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
                 <h2 class="{{ ui.section_label }}">{% trans "Pricing" %}</h2>
-                {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=5 step=0.05 value=initial.cost_factor|default:"2.0" %}
+                {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=initial.cost_factor|default:"2.0" %}
                 <small class="-mt-2 text-gray-500">{% trans "Includes vacation days and other secondary employment conditions." %}</small>
                 {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=initial.margin|default:C.DEFAULT_MARGIN unit_before="€" %}
             </div>
@@ -104,7 +104,7 @@
         <h2 class="sm:col-span-2 {{ ui.section_label }}">{% trans "What the client pays" %}</h2>
         {% include "pricing/_slider.html" with prefix="r_" name="max_rate" label=_("Client tariff / hour") min=30 max=200 hard_max=1000 step=1 value=120 unit_before="€" %}
         {% include "pricing/_slider.html" with prefix="r_" name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=C.DEFAULT_MARGIN unit_before="€" %}
-        {% include "pricing/_slider.html" with prefix="r_" name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=5 step=0.05 value=2.0 %}
+        {% include "pricing/_slider.html" with prefix="r_" name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=2.0 %}
         {% include "pricing/_slider.html" with prefix="r_" name="hours_per_week" label=_("Working hours / week") min=8 max=40 hard_max=60 step=1 value=40 unit_after="h" %}
     </form>
 </section>

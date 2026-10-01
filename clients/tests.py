@@ -9,7 +9,7 @@ from django.urls import reverse
 from candidates.models import Candidate
 
 from .advisor import suggest_tweaks
-from .matching import score
+from .matching import MAX_SCORE, score
 from .models import Client, Vacancy
 
 
@@ -56,4 +56,4 @@ class AdvisorTests(TestCase):
 
     def test_match_score_range(self):
         result = score(self.candidate, self.vacancy)
-        self.assertTrue(0 <= result["total"] <= 100)
+        self.assertTrue(0 <= result["total"] <= MAX_SCORE)

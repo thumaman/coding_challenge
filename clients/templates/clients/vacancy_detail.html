@@ -16,21 +16,41 @@
     <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Salary range" %}</div><div class="mt-1.5 text-xl font-bold">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
 </div>
 
-<div class="mt-5 {{ ui.card }}">
+<div class="mt-5 {{ ui.dt_card }}">
     <h2 class="{{ ui.h2 }}">{% trans "Best matching candidates" %}</h2>
     {# TODO(Ivan): show score breakdown on hover, "link candidate to vacancy" action #}
-    <table class="{{ ui.kv_table }}">
-        {% for row in ranked %}
+    <table id="matches" class="display w-full">
+        <thead>
             <tr>
-                <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
-                <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
-                <td class="w-[30%]"><progress max="100" value="{{ row.score.total }}" class="w-full accent-blue-600"></progress></td>
-                <td>{{ row.score.total }}%</td>
-                <td class="{{ ui.kv_value }}"><span class="{{ row.pricing.budget_status|badge }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Role" %}</th>
+                <th>{% trans "Score" %}</th>
+                <th>{% trans "Remote days" %}</th>
+                <th>{% trans "Advised rate" %}</th>
             </tr>
-        {% empty %}
-            <tr><td class="text-gray-500">{% trans "No candidates yet." %}</td></tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for row in ranked %}
+                <tr>
+                    <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
+                    <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
+                    <td data-order="{{ row.score.total|stringformat:'s' }}">{{ row.score.total|floatformat:"-1" }} / {{ max_score }}</td>
+                    <td data-order="{{ row.candidate.remote_days_per_week }}">
+                        <span class="{{ row.remote_status|badge }}" title="{% blocktrans with days=vacancy.remote_days_allowed %}Vacancy allows {{ days }} remote days{% endblocktrans %}">{{ row.candidate.remote_days_per_week }}</span>
+                    </td>
+                    <td data-order="{{ row.pricing.final_rate|stringformat:'s' }}"><span class="{{ row.pricing.budget_status|badge }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+new DataTable("#matches", {
+  layout: {topStart: "search", topEnd: {}, bottomStart: {info: true, pageLength: true}, bottomEnd: {paging: {firstLast: false}}},
+    order: [[2, "desc"]],  // best score first
+});
+</script>
 {% endblock %}
