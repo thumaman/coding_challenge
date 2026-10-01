@@ -212,14 +212,14 @@
     window.UI = UI;
     window.App = {csrfToken, toast, reloadTable, openModal, closeModal, post, rowMenu, badgeClass, formatEuro: (v) => eur.format(Number(v))};
 
-    document.querySelectorAll('input[type="number"]').forEach(input => {
+    // Keep number inputs within their min/max when leaving the field. Only limits that are actually set count:
+    // an absent max (e.g. travel distance) would otherwise read as 0 and wipe the value.
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
         input.addEventListener("blur", () => {
-            const min = Number(input.min);
-            const max = Number(input.max);
+            if (input.value === "") return;
             const value = Number(input.value);
-
-            if (value < min) input.value = min;
-            if (value > max) input.value = max;
+            if (input.min !== "" && value < Number(input.min)) input.value = input.min;
+            if (input.max !== "" && value > Number(input.max)) input.value = input.max;
         });
     });
 })();

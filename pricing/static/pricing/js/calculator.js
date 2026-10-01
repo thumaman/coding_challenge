@@ -50,6 +50,99 @@
             </div>`).join("");
     }
 
+    // ---- Searchable vacancy picker over the hidden <select> ----
+    // The <select> stays the source of truth: picking an option sets its value and fires "change".
+    function vacancyPicker(select) {
+        const combo = document.getElementById("vacancy-combo");
+        const valueBox = document.getElementById("vacancy-combo-value");
+        const search = document.getElementById("vacancy-combo-search");
+        const list = document.getElementById("vacancy-combo-list");
+        const options = [...select.options];
+        let active = -1;
+
+        const pill = (o) => `<span class="${UI.combo_pill}">${escapeHtml(T.max)} ${escapeHtml(App.formatEuro(o.dataset.max))}</span>`;
+
+        function renderValue() {
+            const o = select.selectedOptions[0];
+            valueBox.innerHTML = o && o.value
+                ? `<span class="flex min-w-0 flex-col">
+                       <span class="truncate font-medium">${escapeHtml(o.dataset.title)}</span>
+                       <span class="truncate text-xs text-gray-500">${escapeHtml(o.dataset.client)} · ${escapeHtml(o.dataset.location)}</span>
+                   </span>${pill(o)}`
+                : `<span class="text-gray-400">${escapeHtml(T.vacancy_placeholder)}</span>`;
+        }
+
+        const rows = () => [...list.querySelectorAll("[role=option]")];
+        function setActive(index) {
+            const all = rows();
+            active = Math.max(0, Math.min(index, all.length - 1));
+            all.forEach((row, i) => row.toggleAttribute("data-active", i === active));
+            if (all[active]) all[active].scrollIntoView({block: "nearest"});
+        }
+
+        function renderList() {
+            const q = search.value.trim().toLowerCase();
+            const matches = options.filter((o) => o.value
+                && `${o.dataset.title} ${o.dataset.client} ${o.dataset.location}`.toLowerCase().includes(q));
+            const row = (o, inner) => `<button type="button" role="option" class="${UI.combo_option}" data-value="${escapeHtml(o.value)}"
+                aria-selected="${o.selected}">${inner}</button>`;
+            let html = q ? "" : row(options[0], `<span class="text-gray-500">${escapeHtml(T.no_vacancy)}</span>`);
+            let client = null;
+            matches.forEach((o) => {
+                if (o.dataset.client !== client) {
+                    client = o.dataset.client;
+                    html += `<div class="${UI.combo_group}" role="presentation">${escapeHtml(client)}</div>`;
+                }
+                html += row(o, `<span class="flex min-w-0 flex-col">
+                        <span class="truncate">${escapeHtml(o.dataset.title)}</span>
+                        <span class="truncate text-xs text-gray-500">${escapeHtml(o.dataset.location)}</span>
+                    </span>${pill(o)}`);
+            });
+            list.innerHTML = html || `<div class="${UI.combo_empty}">${escapeHtml(T.no_results)}</div>`;
+            const selected = rows().findIndex((r) => r.getAttribute("aria-selected") === "true");
+            setActive(q || selected < 0 ? 0 : selected);
+        }
+
+        function pick(value) {
+            select.value = value;
+            select.dispatchEvent(new Event("change", {bubbles: true}));
+            combo.open = false;
+            renderValue();
+            combo.querySelector("summary").focus();
+        }
+
+        combo.addEventListener("toggle", () => {
+            if (!combo.open) return;
+            search.value = "";
+            renderList();
+            search.focus();
+        });
+        search.addEventListener("input", (event) => {
+            event.stopPropagation(); // typing in the search box is not a calculator input
+            renderList();
+        });
+        search.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                setActive(active + (event.key === "ArrowDown" ? 1 : -1));
+            } else if (event.key === "Enter") {
+                event.preventDefault();
+                const row = rows()[active];
+                if (row) pick(row.dataset.value);
+            }
+        });
+        list.addEventListener("mousemove", (event) => {
+            const row = event.target.closest("[role=option]");
+            if (row) setActive(rows().indexOf(row));
+        });
+        list.addEventListener("click", (event) => {
+            const row = event.target.closest("[role=option]");
+            if (row) pick(row.dataset.value);
+        });
+
+        renderValue();
+    }
+
     // ---- Salary -> tariff ----
     const forward = document.getElementById("forward-form");
     const vacancySelect = forward.querySelector("[name=vacancy_id]");
@@ -57,6 +150,12 @@
     const distanceInput = forward.querySelector("[name=travel_distance_km]");
     const distanceStatus = document.getElementById("distance-status");
     const paysTravel = forward.querySelector("[name=client_pays_travel]");
+    const travelFields = document.getElementById("travel-fields");
+    vacancyPicker(vacancySelect);
+
+    // Home location, travel means and distance don't apply when the client pays the travel costs
+    const syncTravelFields = () => { travelFields.disabled = paysTravel.checked; };
+    paysTravel.addEventListener("change", syncTravelFields);
 
     async function updateForward() {
         const data = formData(forward);
@@ -113,6 +212,7 @@
     vacancySelect.addEventListener("change", () => {
         const option = vacancySelect.selectedOptions[0];
         paysTravel.checked = option && option.dataset.paysTravel === "1";
+        syncTravelFields();
         runDistance();
     });
     homeInput.addEventListener("input", runDistance);

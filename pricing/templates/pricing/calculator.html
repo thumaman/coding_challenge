@@ -35,15 +35,29 @@
         <div class="flex flex-col gap-3 {{ ui.card }}">
             <h2 class="{{ ui.section_label }}">{% trans "Employer & travel" %}</h2>
             <div class="flex flex-col gap-1">
-                <label for="id_vacancy" class="font-medium">{% trans "Employer / vacancy" %}</label>
-                <select name="vacancy_id" id="id_vacancy" class="{{ ui.input }}">
-                    <option value="">{% trans "— choose a vacancy —" %}</option>
-                    {% for v in vacancies %}
-                        <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
-                            {{ v.client.name }} · {{ v.title }} ({{ v.location }}, max €{{ v.max_rate_per_hour }})
-                        </option>
+                <span class="font-medium" id="vacancy-label">{% trans "Employer / vacancy" %}</span>
+                {# The hidden <select> holds the value; calculator.js draws the searchable picker on top of it #}
+                <select name="vacancy_id" id="id_vacancy" class="sr-only" tabindex="-1" aria-hidden="true">
+                    <option value="">{% trans "No vacancy" %}</option>
+                    {% regroup vacancies by client as by_client %}
+                    {% for group in by_client %}
+                        <optgroup label="{{ group.grouper.name }}">
+                            {% for v in group.list %}
+                                <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-title="{{ v.title }}" data-client="{{ v.client.name }}" data-location="{{ v.location }}" data-max="{{ v.max_rate_per_hour|unlocalize }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">{{ v.client.name }} · {{ v.title }}</option>
+                            {% endfor %}
+                        </optgroup>
                     {% endfor %}
                 </select>
+                <details class="group/combo relative" id="vacancy-combo" data-dropdown>
+                    <summary class="{{ ui.combo_trigger }}" aria-labelledby="vacancy-label" aria-haspopup="listbox">
+                        <span class="flex min-w-0 flex-1 items-center gap-3" id="vacancy-combo-value"></span>
+                        <svg class="size-4 shrink-0 text-gray-400 transition group-open/combo:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </summary>
+                    <div class="{{ ui.combo_panel }}">
+                        <input type="search" class="{{ ui.combo_search }}" id="vacancy-combo-search" placeholder="{% trans 'Search vacancy, client or city' %}" autocomplete="off" aria-controls="vacancy-combo-list">
+                        <div class="{{ ui.combo_list }}" id="vacancy-combo-list" role="listbox" aria-labelledby="vacancy-label"></div>
+                    </div>
+                </details>
             </div>
             <div class="flex items-center gap-2">
                 <label class="relative inline-flex cursor-pointer">
@@ -52,25 +66,28 @@
                 </label>
                 <label for="id_client_pays_travel" class="font-medium">{% trans "Client pays the travel costs" %}</label>
             </div>
-            <div class="flex flex-col gap-1">
-                <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
-                <input type="text" id="id_home" name="home_location" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
-            </div>
-            <div class="flex flex-col items-start gap-1">
-                <span class="font-medium">{% trans "Travel means" %}</span>
-                <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
-                    <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
-                    <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
+            {# Not applicable when the client pays the travel costs: disabled (and greyed out) by calculator.js #}
+            <fieldset class="flex min-w-0 flex-col gap-3 transition-opacity disabled:cursor-not-allowed disabled:opacity-40 disabled:[&_*]:pointer-events-none" id="travel-fields"{% if initial.client_pays_travel %} disabled{% endif %}>
+                <div class="flex flex-col gap-1">
+                    <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
+                    <input type="text" id="id_home" name="home_location" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
                 </div>
-            </div>
-            <div class="flex flex-col gap-1">
-                <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
-                <div class="{{ ui.number_box }}">
-                    <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
-                    <span class="{{ ui.number_box_unit }}">km</span>
+                <div class="flex flex-col items-start gap-1">
+                    <span class="font-medium">{% trans "Travel means" %}</span>
+                    <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
+                        <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
+                        <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
+                    </div>
                 </div>
-                <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
-            </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
+                    <div class="{{ ui.number_box }}">
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                        <span class="{{ ui.number_box_unit }}">km</span>
+                    </div>
+                    <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
+                </div>
+            </fieldset>
         </div>
         <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-3 {{ ui.card }}">

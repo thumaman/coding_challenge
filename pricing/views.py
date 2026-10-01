@@ -49,6 +49,10 @@ def calculator(request):
         "distance_route": _("Route distance from %(from)s to %(to)s."),
         "distance_estimate": _("Estimated distance (route service unavailable)."),
         "distance_failed": _("Location not found: enter the distance yourself."),
+        "vacancy_placeholder": _("Choose a vacancy"),
+        "no_vacancy": _("No vacancy"),
+        "no_results": _("No vacancies found"),
+        "max": _("max"),
         "distance_needed": _("Choose a vacancy and enter the home location to calculate the distance."),
     }
     return render(request, "pricing/calculator.html", {"vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial})

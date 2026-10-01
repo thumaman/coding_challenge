@@ -76,6 +76,24 @@ UI = {
     "sum_total_value": "text-[26px] font-bold tabular-nums",
     "sum_op": "self-center text-xl font-bold text-gray-500",
 
+    # Searchable picker (combobox) on top of a hidden <select>: vacancy picker in the calculator (calculator.js)
+    "combo_trigger": ("flex min-h-12 w-full cursor-pointer list-none items-center gap-3 rounded-md border border-slate-200 "
+                      "bg-white px-3 py-1.5 text-left text-gray-800 hover:border-slate-300 focus-visible:border-blue-600 "
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/25 "
+                      "group-open/combo:border-blue-600 group-open/combo:ring-2 group-open/combo:ring-blue-600/25 "
+                      "[&::-webkit-details-marker]:hidden"),
+    "combo_panel": ("absolute inset-x-0 top-full z-30 mt-1.5 overflow-hidden rounded-lg border border-slate-200 "
+                    "bg-white shadow-xl"),
+    "combo_search": ("w-full border-b border-slate-200 bg-transparent px-3.5 py-2.5 text-gray-800 outline-none "
+                     "placeholder:text-gray-400 [&::-webkit-search-cancel-button]:hidden"),
+    "combo_list": "max-h-72 overflow-y-auto py-1",
+    "combo_group": "px-3.5 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400",
+    "combo_option": ("flex w-full cursor-pointer items-center gap-3 px-3.5 py-2 text-left data-active:bg-slate-100 "
+                     "aria-selected:bg-blue-50 aria-selected:data-active:bg-blue-100"),
+    "combo_pill": ("ml-auto shrink-0 whitespace-nowrap rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium "
+                   "tabular-nums text-gray-600"),
+    "combo_empty": "px-3.5 py-3 text-gray-500",
+
     # Result tile that opens a dropdown with the calculation steps
     # (pricing/_steps_tile.html, pricing/_steps.html and renderSteps() in calculator.js)
     "steps_tile": ("flex h-full cursor-pointer list-none flex-col gap-1 rounded-lg bg-slate-100 px-3.5 py-3 "

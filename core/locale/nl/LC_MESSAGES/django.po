@@ -1070,3 +1070,23 @@ msgstr "%(hours)s u × 13 ÷ 3"
 #: clients/templates/clients/vacancy_detail.html
 msgid "Score"
 msgstr "Score"
+
+#: pricing/templates/pricing/calculator.html pricing/views.py
+msgid "No vacancy"
+msgstr "Geen vacature"
+
+#: pricing/templates/pricing/calculator.html pricing/views.py
+msgid "Search vacancy, client or city"
+msgstr "Zoek op vacature, klant of plaats"
+
+#: pricing/templates/pricing/calculator.html pricing/views.py
+msgid "Choose a vacancy"
+msgstr "Kies een vacature"
+
+#: pricing/templates/pricing/calculator.html pricing/views.py
+msgid "No vacancies found"
+msgstr "Geen vacatures gevonden"
+
+#: pricing/templates/pricing/calculator.html pricing/views.py
+msgid "max"
+msgstr "max"
