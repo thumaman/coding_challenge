@@ -41,7 +41,7 @@ new DataTable("#vacancies", {
         {data: "hours"},
         {data: "remote"},
         {data: "is_open", render: (d) => d ? `<span class="${App.badgeClass("ok")}">{% trans "Open" %}</span>` : `<span class="${App.badgeClass("unknown")}">{% trans "Closed" %}</span>`},
-        {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
+      {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", url: row.urls.update, table: "#vacancies"},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#vacancies", danger: true},
         ])},
