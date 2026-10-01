@@ -1,0 +1,81 @@
+{% extends "core/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Candidates" %}{% endblock %}
+{% block heading %}{% trans "Candidates" %}{% endblock %}
+
+{% block page_actions %}
+    <button class="btn btn-primary" data-modal-url="{% url 'candidates:create' %}" data-table="#candidates">+ {% trans "Add candidate" %}</button>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form class="filters" id="candidate-filters">
+        <label>{% trans "Status" %}
+            <select name="status">
+                <option value="">{% trans "All" %}</option>
+                {% for value, label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+            </select>
+        </label>
+        <label>{% trans "Vacancy" %}
+            <select name="vacancy">
+                <option value="">{% trans "All" %}</option>
+                {% for v in vacancies %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
+            </select>
+        </label>
+        <label class="field-check" style="flex-direction:row; align-items:center">
+            <input type="checkbox" name="over" value="1"> {% trans "Over budget only" %}
+        </label>
+    </form>
+
+    <table id="candidates" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Role" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Salary / month" %}</th>
+                <th>{% trans "Hours" %}</th>
+                <th>{% trans "Remote days" %}</th>
+                <th>{% trans "Vacancy" %}</th>
+                <th>{% trans "Advised rate" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'candidates/js/candidates.js' %}"></script>
+<script>
+const esc = DataTable.util.escapeHtml;
+const filters = document.getElementById("candidate-filters");
+const dataUrl = () => "{% url 'candidates:data' %}?" + new URLSearchParams(new FormData(filters));
+
+const table = new DataTable("#candidates", {
+    ajax: dataUrl(),
+    cardView: true,
+    layout: {topStart: {pageLength: true}, topEnd: "search", bottomStart: "info", bottomEnd: "paging"},
+    order: [],
+    columns: [
+        {data: "name", render: (d, t, row) => `<a href="${row.urls.detail}">${esc(d)}</a>`},
+        {data: "role", render: (d) => esc(d)},
+        {data: "status"},
+        {data: "salary", render: (d, t) => t === "display" ? App.formatEuro(d) : Number(d)},
+        {data: "hours"},
+        {data: "remote"},
+        {data: "vacancy", render: (d) => esc(d) || "—"},
+        {data: "rate", render: (d, t, row) => t !== "display" ? Number(d) :
+            `<span class="badge badge-${row.budget_status}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
+        {data: null, orderable: false, searchable: false, render: (d, t, row) => `
+            <div class="action-buttons">
+                <button class="btn btn-sm btn-edit" data-modal-url="${row.urls.update}" data-table="#candidates">{% trans "Edit" %}</button>
+                <button class="btn btn-sm btn-danger" data-modal-url="${row.urls.delete}" data-table="#candidates">{% trans "Delete" %}</button>
+            </div>`},
+    ],
+});
+
+filters.addEventListener("change", () => table.ajax.url(dataUrl()).load());
+</script>
+{% endblock %}

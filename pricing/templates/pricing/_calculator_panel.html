@@ -1,0 +1,19 @@
+{% load i18n %}
+{# Reusable pricing panel for a candidate (included on candidates/detail.html). Owner: Teun. #}
+{# TODO(Teun): make this interactive (sliders + "Save to candidate" that POSTs and calls App.toast). #}
+{% with p=candidate.pricing %}
+<div class="card">
+    <h2>{% trans "Pricing" %}</h2>
+    <div class="big-number">€{{ p.final_rate|floatformat:2 }}</div>
+    <p>
+        <span class="badge badge-{{ p.budget_status }}">{{ p.budget_status }}</span>
+        {% if p.max_rate %}<span class="muted">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
+    </p>
+    <table class="breakdown">
+        {% for row in p.breakdown %}
+            <tr><td>{{ row.label }}</td><td class="formula">{{ row.formula }}</td><td class="value">€{{ row.value }}</td></tr>
+        {% endfor %}
+    </table>
+    <p style="margin-top: 14px"><a class="btn btn-secondary" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a></p>
+</div>
+{% endwith %}

@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ candidate.full_name }}{% endblock %}
+{% block heading %}{{ candidate.full_name }} <span class="muted">· {{ candidate.desired_role }}</span>{% endblock %}
+
+{% block page_actions %}
+    <button class="btn btn-edit" data-modal-url="{% url 'candidates:update' candidate.pk %}" data-reload>{% trans "Edit" %}</button>
+{% endblock %}
+
+{% block content %}
+{# TODO(Vidic): nicer profile layout. Pricing panel = Teun, advisor panel = Ivan. #}
+<div class="grid grid-2">
+    <div>
+        <div class="card">
+            <h2>{% trans "Profile" %}</h2>
+            <table class="breakdown">
+                <tr><td>{% trans "Status" %}</td><td class="value">{{ candidate.get_status_display }}</td></tr>
+                <tr><td>{% trans "Email" %}</td><td class="value">{{ candidate.email|default:"—" }}</td></tr>
+                <tr><td>{% trans "Phone" %}</td><td class="value">{{ candidate.phone|default:"—" }}</td></tr>
+                <tr><td>{% trans "City" %}</td><td class="value">{{ candidate.city|default:"—" }}</td></tr>
+                <tr><td>{% trans "Vacancy" %}</td><td class="value">{% if candidate.vacancy %}<a href="{% url 'clients:detail' candidate.vacancy.pk %}">{{ candidate.vacancy }}</a>{% else %}—{% endif %}</td></tr>
+                <tr><td>{% trans "Salary / month" %}</td><td class="value">€{{ candidate.expected_salary_month }}</td></tr>
+                <tr><td>{% trans "Hours / week" %}</td><td class="value">{{ candidate.hours_per_week }}</td></tr>
+                <tr><td>{% trans "Remote days" %}</td><td class="value">{{ candidate.remote_days_per_week }}</td></tr>
+                <tr><td>{% trans "Travel" %}</td><td class="value">{% if candidate.travel_known %}{{ candidate.travel_distance_km }} km · {{ candidate.get_transport_type_display }}{% else %}{% trans "unknown" %}{% endif %}</td></tr>
+                <tr><td>{% trans "Vacation / sick days" %}</td><td class="value">{{ candidate.vacation_days }} / {{ candidate.sick_days_estimate }}</td></tr>
+                <tr><td>{% trans "Benefits" %}</td><td class="value">€{{ candidate.secondary_benefits_month }} {{ candidate.benefits_description }}</td></tr>
+            </table>
+            {% if candidate.notes %}<p class="muted">{{ candidate.notes|linebreaksbr }}</p>{% endif %}
+        </div>
+        {% if candidate.vacancy %}{% include "clients/_advisor_panel.html" %}{% endif %}
+    </div>
+    <div>
+        {% include "pricing/_calculator_panel.html" %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'candidates/js/candidates.js' %}"></script>
+{% endblock %}

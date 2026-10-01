@@ -1,0 +1,28 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Log in" %} · TalentRate</title>
+    <link rel="manifest" href="{% url 'core:manifest' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
+</head>
+<body class="login-page">
+    <form method="post" class="card login-card">
+        {% csrf_token %}
+        <h1>TalentRate · {% trans "Recruiter login" %}</h1>
+        {% if form.errors %}<p class="form-error">{% trans "Invalid username or password." %}</p>{% endif %}
+        <div class="field">
+            <label for="id_username">{% trans "Username" %}</label>
+            <input type="text" name="username" id="id_username" autofocus required>
+        </div>
+        <div class="field">
+            <label for="id_password">{% trans "Password" %}</label>
+            <input type="password" name="password" id="id_password" required>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center">{% trans "Log in" %}</button>
+    </form>
+</body>
+</html>

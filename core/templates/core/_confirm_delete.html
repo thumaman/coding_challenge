@@ -1,0 +1,15 @@
+{% load i18n %}
+<form method="post" action="{{ form_action }}" class="modal-form">
+    {% csrf_token %}
+    <div class="modal-header">
+        <h2>{{ modal_title }}</h2>
+        <button type="button" class="icon-button" data-modal-close aria-label="{% trans 'Close' %}">&times;</button>
+    </div>
+    <div class="modal-content">
+        <p>{% blocktrans with name=object %}Are you sure you want to delete <strong>{{ name }}</strong>? This cannot be undone.{% endblocktrans %}</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>{% trans "Cancel" %}</button>
+        <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+    </div>
+</form>

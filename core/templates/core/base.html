@@ -1,0 +1,94 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14213d">
+    <title>{% block title %}{% trans "Dashboard" %}{% endblock %} · TalentRate</title>
+
+    <link rel="manifest" href="{% url 'core:manifest' %}">
+    <link rel="icon" href="{% static 'core/icons/icon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'core/icons/icon.svg' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.5/css/buttons.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/cardview/1.1.2/css/cardView.dataTables.css">
+    <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar" id="sidebar">
+        <a class="brand" href="{% url 'core:dashboard' %}">
+            <span class="brand-mark">TR</span>
+            <span class="brand-name">TalentRate</span>
+        </a>
+        <nav class="nav">
+            {% for item in nav_items %}
+                <a href="{% url item.url_name %}" class="nav-item{% if item.active %} active{% endif %}">
+                    {% include "core/_icon.html" with name=item.icon %}
+                    <span>{{ item.label }}</span>
+                </a>
+            {% endfor %}
+        </nav>
+        <div class="sidebar-footer">
+            <span class="muted">{{ request.user.get_username }}</span>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="link-button">{% trans "Log out" %}</button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <button class="icon-button" id="sidebar-toggle" aria-label="{% trans 'Toggle menu' %}">
+                {% include "core/_icon.html" with name="menu" %}
+            </button>
+            <h1 class="page-title">{% block heading %}{% endblock %}</h1>
+            <div class="topbar-actions">
+                {% block page_actions %}{% endblock %}
+                <form action="{% url 'set_language' %}" method="post" class="lang-switch">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                    {% get_available_languages as LANGUAGES %}
+                    {% for code, name in LANGUAGES %}
+                        <button type="submit" name="language" value="{{ code }}"
+                                class="{% if code == LANGUAGE_CODE %}active{% endif %}">{{ code|upper }}</button>
+                    {% endfor %}
+                </form>
+            </div>
+        </header>
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+{# Shared modal host + toast stack, driven by static/core/js/app.js #}
+<dialog id="modal" class="modal"><div class="modal-body" id="modal-body"></div></dialog>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+{% if messages %}
+    <script>window.__flash = [{% for m in messages %}{msg: "{{ m|escapejs }}", type: "{{ m.tags|default:'success' }}"}{% if not forloop.last %},{% endif %}{% endfor %}];</script>
+{% endif %}
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.2.5/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/cardview/1.1.2/js/dataTables.cardView.js"></script>
+<script src="{% static 'core/js/app.js' %}"></script>
+<script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("{% url 'core:service_worker' %}", {scope: "/"});
+    }
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

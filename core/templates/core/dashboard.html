@@ -1,0 +1,49 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block heading %}{% trans "Dashboard" %}{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'pricing:calculator' %}" class="btn btn-primary">{% trans "Open calculator" %}</a>
+{% endblock %}
+
+{% block content %}
+{# TODO(Joseph): make the KPIs clickable, add charts / notifications for >X% matches #}
+<div class="grid grid-4">
+    <div class="card kpi">
+        <div class="kpi-label">{% trans "Open vacancies" %}</div>
+        <div class="kpi-value">{{ open_vacancies }}</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-label">{% trans "Active candidates" %}</div>
+        <div class="kpi-value">{{ active_candidates }}</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-label">{% trans "Over client budget" %}</div>
+        <div class="kpi-value" style="color: var(--danger)">{{ over_budget }}</div>
+    </div>
+    <div class="card kpi">
+        <div class="kpi-label">{% trans "Average margin / hour" %}</div>
+        <div class="kpi-value">€{{ avg_margin|floatformat:2 }}</div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px">
+    <h2>{% trans "Recently added candidates" %}</h2>
+    <table class="breakdown">
+        {% for c in recent_candidates %}
+            {% with p=c.pricing %}
+            <tr>
+                <td><a href="{% url 'candidates:detail' c.pk %}">{{ c.full_name }}</a></td>
+                <td class="muted">{{ c.desired_role }}</td>
+                <td class="muted">{{ c.vacancy|default:"—" }}</td>
+                <td class="value"><span class="badge badge-{{ p.budget_status }}">€{{ p.final_rate|floatformat:2 }}</span></td>
+            </tr>
+            {% endwith %}
+        {% empty %}
+            <tr><td class="muted">{% trans "No candidates yet. Run `manage.py seed_demo` for demo data." %}</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

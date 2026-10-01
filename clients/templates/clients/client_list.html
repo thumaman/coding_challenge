@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Clients" %}{% endblock %}
+{% block heading %}{% trans "Clients" %}{% endblock %}
+
+{% block content %}
+{# TODO(Ivan): replace with a DataTable + modal CRUD (copy vacancy_list.html) #}
+<div class="grid grid-3">
+    {% for client in clients %}
+        <div class="card">
+            <h2>{{ client.name }}</h2>
+            <p class="muted">{{ client.industry }} · {{ client.city }}</p>
+            <ul>
+                {% for v in client.vacancies.all %}
+                    <li><a href="{% url 'clients:detail' v.pk %}">{{ v.title }}</a> (max €{{ v.max_rate_per_hour }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% empty %}
+        <p class="muted">{% trans "No clients yet." %}</p>
+    {% endfor %}
+</div>
+{% endblock %}

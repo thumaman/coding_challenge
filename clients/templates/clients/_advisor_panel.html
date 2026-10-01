@@ -1,0 +1,26 @@
+{% load i18n %}
+{# AI advisor panel (owner: Ivan). Context: candidate, options (from clients.advisor.suggest_tweaks). #}
+<div class="card advisor">
+    <h2>{% include "core/_icon.html" with name="spark" %} {% trans "Advisor: fit the client budget" %}</h2>
+    {% if options %}
+        <p class="muted">
+            {% blocktrans with rate=candidate.pricing.final_rate max=candidate.vacancy.max_rate_per_hour %}Current rate €{{ rate }} exceeds the client maximum of €{{ max }}. Options:{% endblocktrans %}
+        </p>
+        {% for option in options %}
+            <div class="advisor-option">
+                <div>
+                    <strong>{{ option.title }}</strong> → €{{ option.new_rate }}
+                    <span class="muted">(−€{{ option.savings_per_hour }}/h)</span>
+                    <div class="muted">{{ option.ai_explanation|default:option.reason }}</div>
+                </div>
+                <form method="post" action="{% url 'clients:apply_tweak' candidate.pk %}" data-ajax data-reload>
+                    {% csrf_token %}
+                    <input type="hidden" name="changes" value="{{ option.changes_json }}">
+                    <button type="submit" class="btn btn-sm btn-primary">{% trans "Apply" %}</button>
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="muted">{% trans "Within budget, no tweaks needed." %}</p>
+    {% endif %}
+</div>

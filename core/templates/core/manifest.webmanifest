@@ -1,0 +1,12 @@
+{% load static %}{
+    "name": "TalentRate: Recruiter pricing",
+    "short_name": "TalentRate",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#f4f6fa",
+    "theme_color": "#14213d",
+    "icons": [
+        {"src": "{% static 'core/icons/icon.svg' %}", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+    ]
+}

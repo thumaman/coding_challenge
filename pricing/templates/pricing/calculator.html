@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Calculator" %}{% endblock %}
+{% block heading %}{% trans "Rate calculator" %}{% endblock %}
+
+{% block content %}
+{# Owner: Teun. All maths happens server-side in pricing/engine.py via the JSON API. #}
+<div class="tabs" role="tablist">
+    <button class="btn btn-secondary active" data-tab="forward">{% trans "Salary → rate" %}</button>
+    <button class="btn btn-secondary" data-tab="reverse">{% trans "Rate → salary" %}</button>
+</div>
+
+<section class="grid grid-2" data-panel="forward" style="margin-top: 16px">
+    <form class="card calc-form" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}">
+        <h2>{% trans "Intake" %}</h2>
+        <div class="field">
+            <label>{% trans "Vacancy (client max rate)" %}</label>
+            <select name="vacancy_id">
+                <option value="">{% trans "— none —" %}</option>
+                {% for v in vacancies %}
+                    <option value="{{ v.pk }}">{{ v.client.name }} · {{ v.title }} (max €{{ v.max_rate_per_hour }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% include "pricing/_slider.html" with name="salary_month" label=_("Gross salary / month (€)") min=1500 max=12000 step=50 value=4500 %}
+        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Hours per week") min=8 max=40 step=1 value=40 %}
+        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost factor") min=1.5 max=2.5 step=0.05 value=2.0 %}
+        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour (€)") min=0 max=30 step=0.5 value=10 %}
+        {% include "pricing/_slider.html" with name="vacation_days" label=_("Vacation days") min=20 max=40 step=1 value=25 %}
+        {% include "pricing/_slider.html" with name="sick_days" label=_("Expected sick days") min=0 max=20 step=1 value=8 %}
+        {% include "pricing/_slider.html" with name="benefits_month" label=_("Secondary benefits / month (€)") min=0 max=1500 step=25 value=0 %}
+
+        <div class="field field-check">
+            <label for="travel_known">{% trans "Travel details known" %}</label>
+            <label class="switch"><input type="checkbox" id="travel_known" name="travel_known"><span></span></label>
+        </div>
+        <div class="travel-fields">
+            <div class="field">
+                <label>{% trans "Transport" %}</label>
+                <select name="transport_type">
+                    <option value="car">{% trans "Car" %}</option>
+                    <option value="ov">{% trans "Public transport" %}</option>
+                    <option value="bike">{% trans "Bike" %}</option>
+                </select>
+            </div>
+            {% include "pricing/_slider.html" with name="travel_distance_km" label=_("Distance one way (km)") min=0 max=150 step=1 value=25 %}
+            {% include "pricing/_slider.html" with name="remote_days" label=_("Remote days / week") min=0 max=5 step=1 value=0 %}
+        </div>
+        <div class="field">
+            <label>{% trans "Proposed rate (optional override, €)" %}</label>
+            <input type="number" name="proposed_rate" step="0.01" min="0">
+        </div>
+    </form>
+
+    <div class="card">
+        <h2>{% trans "Advised rate" %}</h2>
+        <div class="big-number" id="advised-rate">–</div>
+        <p><span class="badge" id="budget-badge">{% trans "no vacancy selected" %}</span> <span class="muted" id="room"></span></p>
+        <table class="breakdown" id="forward-breakdown"></table>
+    </div>
+</section>
+
+<section class="grid grid-2" data-panel="reverse" style="margin-top: 16px" hidden>
+    <form class="card calc-form" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}">
+        <h2>{% trans "Client budget" %}</h2>
+        {% include "pricing/_slider.html" with name="max_rate" label=_("Max client rate / hour (€)") min=30 max=200 step=1 value=120 %}
+        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour (€)") min=0 max=30 step=0.5 value=10 %}
+        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost factor") min=1.5 max=2.5 step=0.05 value=2.0 %}
+        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Hours per week") min=8 max=40 step=1 value=40 %}
+    </form>
+    <div class="card">
+        <h2>{% trans "Indicative max salary" %}</h2>
+        <div class="big-number" id="reverse-salary">–</div>
+        <p class="muted">{% trans "Per month, gross. Travel costs are excluded until a concrete candidate is known." %}</p>
+        <table class="breakdown" id="reverse-breakdown"></table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'pricing/js/calculator.js' %}"></script>
+{% endblock %}

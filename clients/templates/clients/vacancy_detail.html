@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ vacancy.title }}{% endblock %}
+{% block heading %}{{ vacancy.title }} <span class="muted">· {{ vacancy.client.name }}</span>{% endblock %}
+
+{% block page_actions %}
+    <button class="btn btn-edit" data-modal-url="{% url 'clients:update' vacancy.pk %}" data-reload>{% trans "Edit" %}</button>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-4">
+    <div class="card kpi"><div class="kpi-label">{% trans "Max client rate" %}</div><div class="kpi-value">€{{ vacancy.max_rate_per_hour }}</div></div>
+    <div class="card kpi"><div class="kpi-label">{% trans "Hours / week" %}</div><div class="kpi-value">{{ vacancy.hours_per_week }}</div></div>
+    <div class="card kpi"><div class="kpi-label">{% trans "Remote days allowed" %}</div><div class="kpi-value">{{ vacancy.remote_days_allowed }}</div></div>
+    <div class="card kpi"><div class="kpi-label">{% trans "Salary range" %}</div><div class="kpi-value" style="font-size:20px">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
+</div>
+
+<div class="card" style="margin-top: 20px">
+    <h2>{% trans "Best matching candidates" %}</h2>
+    {# TODO(Ivan): show score breakdown on hover, "link candidate to vacancy" action #}
+    <table class="breakdown">
+        {% for row in ranked %}
+            <tr>
+                <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
+                <td class="muted">{{ row.candidate.desired_role }}</td>
+                <td style="width: 30%"><progress max="100" value="{{ row.score.total }}" style="width:100%"></progress></td>
+                <td>{{ row.score.total }}%</td>
+                <td class="value"><span class="badge badge-{{ row.pricing.budget_status }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
+            </tr>
+        {% empty %}
+            <tr><td class="muted">{% trans "No candidates yet." %}</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

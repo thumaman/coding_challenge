@@ -1,0 +1,53 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Vacancies" %}{% endblock %}
+{% block heading %}{% trans "Vacancies" %}{% endblock %}
+
+{% block page_actions %}
+    <button class="btn btn-primary" data-modal-url="{% url 'clients:create' %}" data-table="#vacancies">+ {% trans "Add vacancy" %}</button>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    {# TODO(Ivan): filters (client, open/closed, max rate range) #}
+    <table id="vacancies" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Client" %}</th>
+                <th>{% trans "City" %}</th>
+                <th>{% trans "Max rate" %}</th>
+                <th>{% trans "Hours" %}</th>
+                <th>{% trans "Remote days" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+new DataTable("#vacancies", {
+    ajax: "{% url 'clients:data' %}",
+    cardView: true,
+    layout: {topStart: {pageLength: true}, topEnd: "search", bottomStart: "info", bottomEnd: "paging"},
+    columns: [
+        {data: "title", render: (d, t, row) => `<a href="${row.urls.detail}">${DataTable.util.escapeHtml(d)}</a>`},
+        {data: "client"},
+        {data: "city"},
+        {data: "max_rate", render: (d) => App.formatEuro(d)},
+        {data: "hours"},
+        {data: "remote"},
+        {data: "is_open", render: (d) => d ? '<span class="badge badge-ok">{% trans "Open" %}</span>' : '<span class="badge">{% trans "Closed" %}</span>'},
+        {data: null, orderable: false, searchable: false, render: (d, t, row) => `
+            <div class="action-buttons">
+                <button class="btn btn-sm btn-edit" data-modal-url="${row.urls.update}" data-table="#vacancies">{% trans "Edit" %}</button>
+                <button class="btn btn-sm btn-danger" data-modal-url="${row.urls.delete}" data-table="#vacancies">{% trans "Delete" %}</button>
+            </div>`},
+    ],
+});
+</script>
+{% endblock %}

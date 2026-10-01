@@ -37,14 +37,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # Project apps (owner in brackets, see docs/PLAN.md)
+    "core",        # Joseph: shell, layout, PWA, i18n
+    "candidates",  # Vidic: candidate CRUD
+    "pricing",     # Teun: pricing engine + calculator
+    "clients",     # Ivan: clients, vacancies, matching, AI advisor
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -61,6 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.navigation",
             ],
         },
     },
@@ -102,9 +110,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
-TIME_ZONE = "UTC"
+LANGUAGES = [
+    ("en", "English"),
+    ("nl", "Nederlands"),
+]
+
+LOCALE_PATHS = [BASE_DIR / "core" / "locale"]
+
+TIME_ZONE = "Europe/Amsterdam"
 
 USE_I18N = True
 
@@ -115,6 +130,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Auth: the whole platform is recruiter-only (LoginRequiredMiddleware above)
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "core:dashboard"
+LOGOUT_REDIRECT_URL = "login"
+
+# AI advisor (Ivan): optional, falls back to rule-based ranking when unset
+ANTHROPIC_MODEL = "claude-opus-5"
 
 
 # Email

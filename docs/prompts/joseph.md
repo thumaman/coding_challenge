@@ -8,7 +8,7 @@ Apps and owners: core (YOU, Joseph), candidates (Vidic), pricing (Teun), clients
 YOU OWN: core/, rec_platform/, README.md. Don't edit other apps' files; ask the owner.
 
 Shared contracts. The others depend on these, so keep them stable:
-- Every page uses {% extends "core/base.html" %} with blocks: title, page_actions, content, extra_js.
+- Every page uses {% extends "core/base.html" %} with blocks: title, heading, page_actions, content, extra_js.
 - static/core/js/app.js exposes window.App:
   - openModal(url): GETs a partial and injects it into #modal.
   - Submitting a form inside the modal POSTs via fetch with the CSRF header. The server returns JSON: {ok:true, message} on success, or {ok:false, html} with the re-rendered form and its errors.

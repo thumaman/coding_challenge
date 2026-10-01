@@ -1,0 +1,30 @@
+{% load i18n %}
+{# Generic modal form. Apps may override with their own partial (same <form class="modal-form"> contract). #}
+<form method="post" action="{{ form_action }}" class="modal-form" novalidate>
+    {% csrf_token %}
+    <div class="modal-header">
+        <h2>{{ modal_title }}</h2>
+        <button type="button" class="icon-button" data-modal-close aria-label="{% trans 'Close' %}">&times;</button>
+    </div>
+    <div class="modal-content">
+        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+        {% if fieldsets %}
+            {% for legend, fields in fieldsets %}
+                <fieldset>
+                    <legend>{{ legend }}</legend>
+                    <div class="form-grid">
+                        {% for field in fields %}{% include "core/_field.html" %}{% endfor %}
+                    </div>
+                </fieldset>
+            {% endfor %}
+        {% else %}
+            <div class="form-grid">
+                {% for field in form %}{% include "core/_field.html" %}{% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>{% trans "Cancel" %}</button>
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    </div>
+</form>
