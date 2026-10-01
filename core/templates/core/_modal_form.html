@@ -2,29 +2,29 @@
 {# Generic modal form. Apps may override with their own partial (same <form class="modal-form"> contract). #}
 <form method="post" action="{{ form_action }}" class="modal-form" novalidate>
     {% csrf_token %}
-    <div class="modal-header">
-        <h2>{{ modal_title }}</h2>
-        <button type="button" class="icon-button" data-modal-close aria-label="{% trans 'Close' %}">&times;</button>
+    <div class="{{ ui.modal_header }}">
+        <h2 class="{{ ui.modal_title }}">{{ modal_title }}</h2>
+        <button type="button" class="{{ ui.icon_button }}" data-modal-close aria-label="{% trans 'Close' %}">&times;</button>
     </div>
-    <div class="modal-content">
-        {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="{{ ui.modal_content }}">
+        {% if form.non_field_errors %}<div class="mb-3 text-red-700">{{ form.non_field_errors }}</div>{% endif %}
         {% if fieldsets %}
             {% for legend, fields in fieldsets %}
-                <fieldset>
-                    <legend>{{ legend }}</legend>
-                    <div class="form-grid">
+                <fieldset class="mb-4.5">
+                    <legend class="mb-2.5 {{ ui.section_label }}">{{ legend }}</legend>
+                    <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                         {% for field in fields %}{% include "core/_field.html" %}{% endfor %}
                     </div>
                 </fieldset>
             {% endfor %}
         {% else %}
-            <div class="form-grid">
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 {% for field in form %}{% include "core/_field.html" %}{% endfor %}
             </div>
         {% endif %}
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-modal-close>{% trans "Cancel" %}</button>
-        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    <div class="{{ ui.modal_footer }}">
+        <button type="button" class="{{ ui.btn_secondary }}" data-modal-close>{% trans "Cancel" %}</button>
+        <button type="submit" class="{{ ui.btn_primary }}">{% trans "Save" %}</button>
     </div>
 </form>

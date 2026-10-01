@@ -42,6 +42,7 @@ Look for `TODO(<name>)` in the code. Those markers show where each person contin
 - **Other forms** can use `data-ajax` (with `data-reload` or `data-table`) to get the same POST → toast behaviour.
 - **Pricing:** always call `pricing.engine.calculate(PricingInput(...))`, or `candidate.pricing` / `candidate.pricing_for(vacancy)`. Never copy the formulas. JavaScript calls `/api/pricing/calculate/` instead.
 - **Translations:** UI strings go in `{% trans %}` / `gettext`.
+- **Styling:** Tailwind utility classes only, no custom CSS (no stylesheets, `<style>` blocks or `style=` attributes). Tailwind is loaded in `core/base.html`. Shared component classes (cards, buttons, inputs, badges, ...) live in `core/ui.py`: use `{{ ui.card }}` in templates, `{% load ui %}` for `{{ field|as_input }}` / `{{ status|badge }}`, and `UI` / `App.badgeClass()` in JavaScript.
 
 ## Git workflow
 

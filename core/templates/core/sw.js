@@ -1,11 +1,10 @@
 {% load static %}// Service worker (owner: Joseph).
 // - Our own pages and /static/ files: network-first, so code changes show up immediately;
 //   the cache is only a fallback when offline.
-// - CDN libraries and fonts (versioned URLs that never change): cache-first.
+// - CDN libraries (incl. Tailwind) and fonts (versioned URLs that never change): cache-first.
 // Bump CACHE when changing this file, so old caches are deleted on activate.
-const CACHE = "talentrate-v2";
+const CACHE = "talentrate-v3";
 const SHELL = [
-    "{% static 'core/css/app.css' %}",
     "{% static 'core/js/app.js' %}",
     "{% static 'core/icons/icon.svg' %}",
 ];

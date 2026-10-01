@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#14213d">
+    <meta name="theme-color" content="#0f172a">
     <title>{% block title %}{% trans "Dashboard" %}{% endblock %} · TalentRate</title>
 
     <link rel="manifest" href="{% url 'core:manifest' %}">
@@ -15,64 +15,66 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.5/css/buttons.dataTables.css">
-    <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
-    {% block extra_css %}{% endblock %}
+    {# Styling is Tailwind utility classes only (no custom CSS); shared component classes live in core/ui.py #}
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
 </head>
-<body>
+<body class="bg-slate-100 font-[Inter,system-ui,sans-serif] text-sm text-gray-800 [&_a:not([class])]:text-blue-600 [&_a:not([class])]:underline">
 
-<div class="app">
+<div class="flex min-h-screen">
 
-    <aside class="sidebar" id="sidebar">
-        <a class="brand" href="{% url 'core:dashboard' %}">
-            <span class="brand-mark">TR</span>
-            <span class="brand-name">TalentRate</span>
+    {# Desktop: data-collapsed shrinks it to icons. Mobile (< lg): off-canvas, data-open slides it in. Toggled in app.js #}
+    <aside id="sidebar" class="group/sidebar sticky top-0 flex h-screen w-58 shrink-0 flex-col bg-slate-900 text-slate-300 transition-[width,translate] duration-200 lg:data-collapsed:w-16 max-lg:fixed max-lg:z-20 max-lg:-translate-x-full max-lg:data-open:translate-x-0">
+        <a class="flex items-center gap-2.5 px-4.5 py-5 text-base font-bold text-white" href="{% url 'core:dashboard' %}">
+            <span class="grid size-8 shrink-0 place-items-center rounded-lg bg-blue-600 text-[13px]">TR</span>
+            <span class="lg:group-data-collapsed/sidebar:hidden">TalentRate</span>
         </a>
-        <nav class="nav">
+        <nav class="flex flex-1 flex-col gap-0.5 p-2">
             {% for item in nav_items %}
-                <a href="{% url item.url_name %}" class="nav-item{% if item.active %} active{% endif %}">
+                <a href="{% url item.url_name %}" class="flex items-center gap-3 rounded-md px-3 py-2.5 font-medium [&>svg]:shrink-0 {% if item.active %}bg-blue-600 text-white{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
                     {% include "core/_icon.html" with name=item.icon %}
-                    <span>{{ item.label }}</span>
+                    <span class="lg:group-data-collapsed/sidebar:hidden">{{ item.label }}</span>
                 </a>
             {% endfor %}
         </nav>
-        <div class="sidebar-footer">
-            <span class="muted">{{ request.user.get_username }}</span>
+        <div class="flex items-center justify-between border-t border-white/10 px-4.5 py-4 lg:group-data-collapsed/sidebar:hidden">
+            <span class="text-slate-400">{{ request.user.get_username }}</span>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="link-button">{% trans "Log out" %}</button>
+                <button type="submit" class="cursor-pointer text-slate-300 underline hover:text-white">{% trans "Log out" %}</button>
             </form>
         </div>
     </aside>
 
-    <div class="main">
-        <header class="topbar">
-            <button class="icon-button" id="sidebar-toggle" aria-label="{% trans 'Toggle menu' %}">
+    <div class="flex min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-10 flex items-center gap-4 border-b border-slate-200 bg-white px-4 py-3.5 lg:px-7">
+            <button class="{{ ui.icon_button }}" id="sidebar-toggle" aria-label="{% trans 'Toggle menu' %}">
                 {% include "core/_icon.html" with name="menu" %}
             </button>
-            <h1 class="page-title">{% block heading %}{% endblock %}</h1>
-            <div class="topbar-actions">
+            <h1 class="flex-1 text-xl font-semibold">{% block heading %}{% endblock %}</h1>
+            <div class="flex items-center gap-3">
                 {% block page_actions %}{% endblock %}
-                <form action="{% url 'set_language' %}" method="post" class="lang-switch">
+                <form action="{% url 'set_language' %}" method="post" class="flex overflow-hidden rounded-md border border-slate-200">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ request.get_full_path }}">
                     {% get_available_languages as LANGUAGES %}
                     {% for code, name in LANGUAGES %}
                         <button type="submit" name="language" value="{{ code }}"
-                                class="{% if code == LANGUAGE_CODE %}active{% endif %}">{{ code|upper }}</button>
+                                class="cursor-pointer px-2.5 py-1.5 text-xs font-semibold {% if code == LANGUAGE_CODE %}bg-slate-900 text-white{% else %}bg-white text-gray-500 hover:bg-slate-100{% endif %}">{{ code|upper }}</button>
                     {% endfor %}
                 </form>
             </div>
         </header>
 
-        <main class="content">
+        <main class="w-full max-w-360 p-4 lg:p-7">
             {% block content %}{% endblock %}
         </main>
     </div>
 </div>
 
 {# Shared modal host + toast stack, driven by static/core/js/app.js #}
-<dialog id="modal" class="modal"><div class="modal-body" id="modal-body"></div></dialog>
-<div id="toasts" class="toasts" aria-live="polite"></div>
+<dialog id="modal" class="m-auto max-h-[90vh] w-[min(720px,94vw)] rounded-xl p-0 shadow-2xl backdrop:bg-slate-900/45"><div id="modal-body"></div></dialog>
+<div id="toasts" class="fixed left-4 top-4 z-1000 flex flex-col gap-2.5" aria-live="polite"></div>
+{{ ui|json_script:"ui-classes" }}
 
 {% if messages %}
     <script>window.__flash = [{% for m in messages %}{msg: "{{ m|escapejs }}", type: "{{ m.tags|default:'success' }}"}{% if not forloop.last %},{% endif %}{% endfor %}];</script>

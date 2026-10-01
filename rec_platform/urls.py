@@ -11,6 +11,7 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("candidates/", include("candidates.urls")),
     path("clients/", include("clients.urls")),
+    path("employees/", include("admin_page.urls")),
     path("", include("pricing.urls")),
     path("", include("core.urls")),
 ]

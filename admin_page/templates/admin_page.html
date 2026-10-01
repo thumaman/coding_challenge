@@ -1,150 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin Page</title>
-    
-    <!-- DataTables Core CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.css">
-    <!-- DataTables Responsive CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.0/css/responsive.dataTables.css">
-    
-    <style>
-        body { 
-            font-family: sans-serif; 
-            padding: 20px; 
-            background-color: #f8f9fa;
-        }
-        
-        /* Layout for the top controls */
-        .controls-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
+{% extends "core/base.html" %}
+{% load i18n %}
+{# Prototype: employee table with a table/card view toggle. Not routed yet (see admin_page/urls.py). #}
 
-        /* Basic Button Styling */
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-        }
-        .btn-add { background-color: #28a745; }
-        .btn-toggle { background-color: #007bff; }
-        .btn-edit { background-color: #ffc107; color: black; padding: 4px 8px; }
-        .btn-delete { background-color: #dc3545; padding: 4px 8px; }
+{% block title %}{% trans "Employees" %}{% endblock %}
+{% block heading %}{% trans "Employees" %}{% endblock %}
 
-        /* =========================================
-           CUSTOM CARD VIEW CSS
-           ========================================= */
-        /* When the 'cards-active' class is applied to the table, we reshape it */
-        table.cards-active thead {
-            display: none; /* Hide standard headers in card view */
-        }
-        table.cards-active tbody {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        table.cards-active tbody tr {
-            display: block;
-            width: calc(33.333% - 15px); /* 3 cards per row */
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        table.cards-active tbody td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: none;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        table.cards-active tbody td:last-child {
-            border-bottom: none;
-        }
-        /* Inject the header labels dynamically in card view using data-label attributes */
-        table.cards-active tbody td::before {
-            content: attr(data-label);
-            font-weight: bold;
-            color: #555;
-            margin-right: 15px;
-        }
-        
-        /* Make cards full width on smaller screens */
-        @media (max-width: 768px) {
-            table.cards-active tbody tr { width: 100%; }
-        }
-    </style>
-</head>
-<body>
-    <h1>Admin Page Data</h1>
-    
-    <!-- Top Controls: Add Button & View Toggle -->
-    <div class="controls-container">
-        <!-- In the future, change this href to your Django add_employee URL -->
-        <a href="#" class="btn btn-add">+ Add New Employee</a>
-        <button id="toggleViewBtn" class="btn btn-toggle">Switch to Card View</button>
-    </div>
-    
-    <!-- Added data-label to all tds to support the Card View labels -->
-    <table id="myTable" class="display nowrap" style="width:100%">
+{% block page_actions %}
+    <a href="{% url 'admin_page:employee_create' %}" class="{{ ui.btn_primary }}">+ {% trans "Add employee" %}</a>
+    <button type="button" id="toggle-view" class="{{ ui.btn_secondary }}">{% trans "Switch to card view" %}</button>
+{% endblock %}
+
+{% block content %}
+<div class="{{ ui.dt_card }}">
+    {# Card view: data-cards on the table hides the header and turns each row into a card; each cell shows its data-label #}
+    <table id="employees" class="display w-full
+        data-cards:[&_thead]:hidden data-cards:[&_tbody]:flex data-cards:[&_tbody]:flex-wrap data-cards:[&_tbody]:gap-4
+        data-cards:[&_tbody_tr]:block data-cards:[&_tbody_tr]:w-full md:data-cards:[&_tbody_tr]:w-[calc(33.333%-0.75rem)]
+        data-cards:[&_tbody_tr]:rounded-lg data-cards:[&_tbody_tr]:border data-cards:[&_tbody_tr]:border-slate-200
+        data-cards:[&_tbody_tr]:bg-white! data-cards:[&_tbody_tr]:p-4 data-cards:[&_tbody_tr]:shadow-sm
+        data-cards:[&_td]:flex! data-cards:[&_td]:items-center data-cards:[&_td]:justify-between
+        data-cards:[&_td]:border-0! data-cards:[&_td]:border-b! data-cards:[&_td]:border-slate-100! data-cards:[&_td]:px-0! data-cards:[&_td]:py-2!
+        data-cards:[&_td:last-child]:border-b-0!
+        data-cards:[&_td]:before:mr-4 data-cards:[&_td]:before:font-bold data-cards:[&_td]:before:text-gray-600
+        data-cards:[&_td]:before:content-[attr(data-label)]">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Office</th>
-                <th>Start Date</th>
-                <th>Salary</th>
-                <th>Actions</th> <!-- NEW ACTIONS COLUMN -->
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Position" %}</th>
+                <th>{% trans "Office" %}</th>
+                <th>{% trans "Start date" %}</th>
+                <th>{% trans "Salary" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
             {% for emp in employees %}
-            <tr>
-                <td data-label="Name">{{ emp.name }}</td>
-                <td data-label="Position">{{ emp.position }}</td>
-                <td data-label="Office">{{ emp.office }}</td>
-                <td data-label="Start Date">{{ emp.start_date }}</td>
-                <td data-label="Salary">${{ emp.salary }}</td>
-                <td data-label="Actions">
-                    <!-- Update these links/actions in Django later -->
-                    <button class="btn btn-edit">Edit</button>
-                    <button class="btn btn-delete">Delete</button>
-                </td>
-            </tr>
+                <tr>
+                    <td data-label="{% trans 'Name' %}">{{ emp.name }}</td>
+                    <td data-label="{% trans 'Position' %}">{{ emp.position }}</td>
+                    <td data-label="{% trans 'Office' %}">{{ emp.office }}</td>
+                    <td data-label="{% trans 'Start date' %}">{{ emp.start_date|date:"Y-m-d" }}</td>
+                    <td data-label="{% trans 'Salary' %}" class="tabular-nums">${{ emp.salary|floatformat:2 }}</td>
+                    <td data-label="{% trans 'Actions' %}">
+                        <div class="flex gap-1.5">
+                            <a href="{% url 'admin_page:employee_update' emp.pk %}" class="{{ ui.btn_edit_sm }}">{% trans "Edit" %}</a>
+                            <form method="post" action="{% url 'admin_page:employee_delete' emp.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="{{ ui.btn_danger_sm }}">{% trans "Delete" %}</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+{% endblock %}
 
-    <!-- 1. jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- 2. DataTables Core JS -->
-    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.js"></script>
-    <!-- 3. DataTables Responsive JS -->
-    <script src="https://cdn.datatables.net/responsive/3.0.0/js/dataTables.responsive.js"></script>
-    
-    <script>
-        $(document).ready(function() {
-            // Initialize DataTable
-            var table = $('#myTable').DataTable({
-                responsive: true,
-                paging: true,
-                searching: true,
-                ordering: true,
-                // Disable ordering on the "Actions" column (column index 5)
-                columnDefs: [
-                    { orderable: false, targets: 5 }
-                ]
-            });
-
-        });
-    </script>
-</body>
-</html>
+{% block extra_js %}
+{% trans "Switch to card view" as t_cards %}{% trans "Switch to table view" as t_table %}
+<script>
+new DataTable("#employees", {
+    layout: {topStart: {pageLength: true}, topEnd: "search", bottomStart: "info", bottomEnd: {paging: {firstLast: false}}},
+    columnDefs: [{orderable: false, searchable: false, targets: -1}],
+});
+document.getElementById("toggle-view").addEventListener("click", (event) => {
+    const cards = document.getElementById("employees").toggleAttribute("data-cards");
+    event.currentTarget.textContent = cards ? "{{ t_table|escapejs }}" : "{{ t_cards|escapejs }}";
+});
+</script>
+{% endblock %}

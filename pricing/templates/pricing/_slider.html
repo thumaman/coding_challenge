@@ -2,14 +2,14 @@
 {# Slider with a number box next to it. The number box carries the name (source of truth); the slider mirrors it. #}
 {# Values are unlocalized: number inputs need "1.5", not the Dutch "1,5". #}
 {% localize off %}
-<div class="field slider-field">
-    <label for="id_{{ prefix }}{{ name }}">{{ label }}</label>
-    <div class="slider-row">
-        <input type="range" min="{{ min }}" max="{{ max }}" step="{{ step }}" value="{{ value }}" data-sync="id_{{ prefix }}{{ name }}" aria-hidden="true" tabindex="-1">
-        <div class="number-input">
-            {% if unit_before %}<span class="unit">{{ unit_before }}</span>{% endif %}
-            <input type="number" id="id_{{ prefix }}{{ name }}" name="{{ name }}" min="{{ min }}" max="{{ hard_max|default:'' }}" step="{{ step }}" value="{{ value }}" inputmode="decimal">
-            {% if unit_after %}<span class="unit">{{ unit_after }}</span>{% endif %}
+<div class="flex flex-col gap-1">
+    <label for="id_{{ prefix }}{{ name }}" class="font-medium">{{ label }}</label>
+    <div class="flex items-center gap-3">
+        <input type="range" class="min-w-0 flex-1 accent-blue-600" min="{{ min }}" max="{{ max }}" step="{{ step }}" value="{{ value }}" data-sync="id_{{ prefix }}{{ name }}" aria-hidden="true" tabindex="-1">
+        <div class="w-30 shrink-0 {{ ui.number_box }}">
+            {% if unit_before %}<span class="{{ ui.number_box_unit }}">{{ unit_before }}</span>{% endif %}
+            <input type="number" class="{{ ui.number_box_input }}" id="id_{{ prefix }}{{ name }}" name="{{ name }}" min="{{ min }}" max="{{ hard_max|default:'' }}" step="{{ step }}" value="{{ value }}" inputmode="decimal">
+            {% if unit_after %}<span class="{{ ui.number_box_unit }}">{{ unit_after }}</span>{% endif %}
         </div>
     </div>
 </div>

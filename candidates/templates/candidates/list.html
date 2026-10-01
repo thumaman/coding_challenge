@@ -5,30 +5,30 @@
 {% block heading %}{% trans "Candidates" %}{% endblock %}
 
 {% block page_actions %}
-    <button class="btn btn-primary" data-modal-url="{% url 'candidates:create' %}" data-table="#candidates">+ {% trans "Add candidate" %}</button>
+    <button class="{{ ui.btn_primary }}" data-modal-url="{% url 'candidates:create' %}" data-table="#candidates">+ {% trans "Add candidate" %}</button>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <form class="filters" id="candidate-filters">
-        <label>{% trans "Status" %}
-            <select name="status">
+<div class="{{ ui.dt_card }}">
+    <form class="mb-4 flex flex-wrap items-end gap-3" id="candidate-filters">
+        <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Status" %}
+            <select name="status" class="{{ ui.input }}">
                 <option value="">{% trans "All" %}</option>
                 {% for value, label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
             </select>
         </label>
-        <label>{% trans "Vacancy" %}
-            <select name="vacancy">
+        <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Vacancy" %}
+            <select name="vacancy" class="{{ ui.input }}">
                 <option value="">{% trans "All" %}</option>
                 {% for v in vacancies %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
             </select>
         </label>
-        <label class="field-check" style="flex-direction:row; align-items:center">
-            <input type="checkbox" name="over" value="1"> {% trans "Over budget only" %}
+        <label class="flex items-center gap-2 py-2 text-xs text-gray-500">
+            <input type="checkbox" name="over" value="1" class="{{ ui.checkbox }}"> {% trans "Over budget only" %}
         </label>
     </form>
 
-    <table id="candidates" class="display" style="width:100%">
+    <table id="candidates" class="display w-full">
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
@@ -65,7 +65,7 @@ const table = new DataTable("#candidates", {
         {data: "remote"},
         {data: "vacancy", render: (d) => esc(d) || "—"},
         {data: "rate", render: (d, t, row) => t !== "display" ? Number(d) :
-            `<span class="badge badge-${row.budget_status}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
+            `<span class="${App.badgeClass(row.budget_status)}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
         {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", url: row.urls.update, table: "#candidates"},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},

@@ -6,23 +6,23 @@
     <title>{% trans "Log in" %} · TalentRate</title>
     <link rel="manifest" href="{% url 'core:manifest' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-    <link rel="stylesheet" href="{% static 'core/css/app.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
 </head>
-<body class="login-page">
-    <form method="post" class="card login-card">
+<body class="grid min-h-screen place-items-center bg-slate-900 font-[Inter,system-ui,sans-serif] text-sm text-gray-800">
+    <form method="post" class="flex w-[min(380px,92vw)] flex-col gap-3 {{ ui.card }}">
         {% csrf_token %}
-        <h1>TalentRate · {% trans "Recruiter login" %}</h1>
-        {% if form.errors %}<p class="form-error">{% trans "Invalid username or password." %}</p>{% endif %}
-        <div class="field">
-            <label for="id_username">{% trans "Username" %}</label>
-            <input type="text" name="username" id="id_username" autofocus required>
+        <h1 class="mb-1.5 text-xl font-bold">TalentRate · {% trans "Recruiter login" %}</h1>
+        {% if form.errors %}<p class="text-red-700">{% trans "Invalid username or password." %}</p>{% endif %}
+        <div class="flex flex-col gap-1">
+            <label for="id_username" class="font-medium">{% trans "Username" %}</label>
+            <input type="text" name="username" id="id_username" class="{{ ui.input }}" autofocus required>
         </div>
-        <div class="field">
-            <label for="id_password">{% trans "Password" %}</label>
-            <input type="password" name="password" id="id_password" required>
+        <div class="flex flex-col gap-1">
+            <label for="id_password" class="font-medium">{% trans "Password" %}</label>
+            <input type="password" name="password" id="id_password" class="{{ ui.input }}" required>
         </div>
         <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center">{% trans "Log in" %}</button>
+        <button type="submit" class="mt-1 w-full {{ ui.btn_primary }}">{% trans "Log in" %}</button>
     </form>
 </body>
 </html>

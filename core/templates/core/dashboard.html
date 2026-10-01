@@ -1,48 +1,48 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n ui %}
 
 {% block title %}{% trans "Dashboard" %}{% endblock %}
 {% block heading %}{% trans "Dashboard" %}{% endblock %}
 
 {% block page_actions %}
-    <a href="{% url 'pricing:calculator' %}" class="btn btn-primary">{% trans "Open calculator" %}</a>
+    <a href="{% url 'pricing:calculator' %}" class="{{ ui.btn_primary }}">{% trans "Open calculator" %}</a>
 {% endblock %}
 
 {% block content %}
 {# TODO(Joseph): make the KPIs clickable, add charts / notifications for >X% matches #}
-<div class="grid grid-4">
-    <div class="card kpi">
-        <div class="kpi-label">{% trans "Open vacancies" %}</div>
-        <div class="kpi-value">{{ open_vacancies }}</div>
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="{{ ui.card }}">
+        <div class="text-gray-500">{% trans "Open vacancies" %}</div>
+        <div class="mt-1.5 text-3xl font-bold">{{ open_vacancies }}</div>
     </div>
-    <div class="card kpi">
-        <div class="kpi-label">{% trans "Active candidates" %}</div>
-        <div class="kpi-value">{{ active_candidates }}</div>
+    <div class="{{ ui.card }}">
+        <div class="text-gray-500">{% trans "Active candidates" %}</div>
+        <div class="mt-1.5 text-3xl font-bold">{{ active_candidates }}</div>
     </div>
-    <div class="card kpi">
-        <div class="kpi-label">{% trans "Over client budget" %}</div>
-        <div class="kpi-value" style="color: var(--danger)">{{ over_budget }}</div>
+    <div class="{{ ui.card }}">
+        <div class="text-gray-500">{% trans "Over client budget" %}</div>
+        <div class="mt-1.5 text-3xl font-bold text-red-700">{{ over_budget }}</div>
     </div>
-    <div class="card kpi">
-        <div class="kpi-label">{% trans "Average margin / hour" %}</div>
-        <div class="kpi-value">€{{ avg_margin|floatformat:2 }}</div>
+    <div class="{{ ui.card }}">
+        <div class="text-gray-500">{% trans "Average margin / hour" %}</div>
+        <div class="mt-1.5 text-3xl font-bold">€{{ avg_margin|floatformat:2 }}</div>
     </div>
 </div>
 
-<div class="card" style="margin-top: 20px">
-    <h2>{% trans "Recently added candidates" %}</h2>
-    <table class="breakdown">
+<div class="mt-5 {{ ui.card }}">
+    <h2 class="{{ ui.h2 }}">{% trans "Recently added candidates" %}</h2>
+    <table class="{{ ui.kv_table }}">
         {% for c in recent_candidates %}
             {% with p=c.pricing %}
             <tr>
                 <td><a href="{% url 'candidates:detail' c.pk %}">{{ c.full_name }}</a></td>
-                <td class="muted">{{ c.desired_role }}</td>
-                <td class="muted">{{ c.vacancy|default:"—" }}</td>
-                <td class="value"><span class="badge badge-{{ p.budget_status }}">€{{ p.final_rate|floatformat:2 }}</span></td>
+                <td class="text-gray-500">{{ c.desired_role }}</td>
+                <td class="text-gray-500">{{ c.vacancy|default:"—" }}</td>
+                <td class="{{ ui.kv_value }}"><span class="{{ p.budget_status|badge }}">€{{ p.final_rate|floatformat:2 }}</span></td>
             </tr>
             {% endwith %}
         {% empty %}
-            <tr><td class="muted">{% trans "No candidates yet. Run `manage.py seed_demo` for demo data." %}</td></tr>
+            <tr><td class="text-gray-500">{% trans "No candidates yet. Run `manage.py seed_demo` for demo data." %}</td></tr>
         {% endfor %}
     </table>
 </div>

@@ -1,6 +1,8 @@
-<div class="field{% if field.errors %} has-error{% endif %}{% if field.field.widget.input_type == 'checkbox' %} field-check{% endif %}{% if field.field.widget.attrs.wide %} field-wide{% endif %}" data-field="{{ field.name }}">
-    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="req">*</span>{% endif %}</label>
-    {{ field }}
-    {% if field.help_text %}<small class="help">{{ field.help_text }}</small>{% endif %}
-    {% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}
+{% load ui %}{% with input_type=field.field.widget.input_type %}
+<div class="flex {% if input_type == 'checkbox' %}flex-row-reverse items-center justify-end gap-2{% else %}flex-col gap-1{% endif %}{% if field.field.widget.attrs.wide %} sm:col-span-2{% endif %}" data-field="{{ field.name }}">
+    <label for="{{ field.id_for_label }}" class="font-medium">{{ field.label }}{% if field.field.required %} <span class="text-red-700">*</span>{% endif %}</label>
+    {{ field|as_input }}
+    {% if field.help_text %}<small class="text-gray-500">{{ field.help_text }}</small>{% endif %}
+    {% for error in field.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
 </div>
+{% endwith %}

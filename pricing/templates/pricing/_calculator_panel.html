@@ -1,28 +1,31 @@
-{% load i18n %}
+{% load i18n ui %}
 {# Pricing panel for a candidate (included on candidates/detail.html). Owner: Teun. #}
 {# TODO(Teun): make this interactive (sliders + "Save to candidate" that POSTs and calls App.toast). #}
 {% with p=candidate.pricing %}
-<div class="card">
-    <div class="summary-grid">
-        <div class="summary-item"><span>{% trans "Cost price" %}</span><strong>€{{ p.cost_price }}</strong></div>
-        <div class="summary-op">+</div>
-        <div class="summary-item"><span>{% trans "Travel costs" %}</span><strong>{% if not p.travel_known %}{% trans "unknown" %}{% else %}€{{ p.travel_in_tariff }}{% endif %}</strong></div>
-        <div class="summary-op">+</div>
-        <div class="summary-item"><span>{% trans "Margin" %}</span><strong>€{{ p.margin }}</strong></div>
-        <div class="summary-op">=</div>
-        <div class="summary-item summary-total"><span>{% trans "Advised tariff" %}</span><strong>€{{ p.advised_rate }}</strong></div>
+<div class="{{ ui.card }}">
+    <div class="{{ ui.sum_grid }}">
+        <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Cost price" %}</span><strong class="{{ ui.sum_value }}">€{{ p.cost_price }}</strong></div>
+        {# Travel is only part of the tariff when it is known and not paid by the client #}
+        {% if p.travel_known and not p.client_pays_travel %}
+            <div class="{{ ui.sum_op }}">+</div>
+            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Travel costs" %}</span><strong class="{{ ui.sum_value }}">€{{ p.travel_in_tariff }}</strong></div>
+        {% endif %}
+        <div class="{{ ui.sum_op }}">+</div>
+        <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}">€{{ p.margin }}</strong></div>
+        <div class="{{ ui.sum_op }}">=</div>
+        <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}">€{{ p.advised_rate }}</strong></div>
     </div>
-    <p class="budget-line">
-        <span class="badge badge-{{ p.budget_status }}">
+    <p class="mt-3.5 flex flex-wrap items-center gap-2">
+        <span class="{{ p.budget_status|badge }}">
             {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum: too cheap?" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
         </span>
-        {% if p.max_rate %}<span class="muted">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
-        {% if candidate.proposed_rate %}<span class="muted">· {% trans "proposed" %} €{{ candidate.proposed_rate }}</span>{% endif %}
+        {% if p.max_rate %}<span class="text-gray-500">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
+        {% if candidate.proposed_rate %}<span class="text-gray-500">· {% trans "proposed" %} €{{ candidate.proposed_rate }}</span>{% endif %}
     </p>
 </div>
-<div class="card">
-    <h2>{% trans "How it is calculated" %}</h2>
+<div class="{{ ui.card }}">
+    <h2 class="{{ ui.h2 }}">{% trans "How it is calculated" %}</h2>
     {% include "pricing/_breakdown.html" with breakdown=p.breakdown %}
-    <p style="margin-top: 14px"><a class="btn btn-secondary" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a></p>
+    <p class="mt-3.5"><a class="{{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a></p>
 </div>
 {% endwith %}

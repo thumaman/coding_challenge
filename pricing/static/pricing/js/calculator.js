@@ -43,13 +43,13 @@
     // Each group is a chain of operations, drawn as its own bordered block
     function renderBreakdown(container, groups) {
         container.innerHTML = groups.map((group) => `
-            <table class="calc-group">
-                <caption>${escapeHtml(group.title)}</caption>
+            <table class="${UI.calc_table}">
+                <caption class="${UI.calc_caption}">${escapeHtml(group.title)}</caption>
                 ${group.rows.map((r) => `
-                    <tr class="${r.op === "=" ? "result" : ""}">
-                        <td class="op">${escapeHtml(r.op)}</td>
-                        <td class="label">${escapeHtml(r.label)}${r.detail ? `<small>${escapeHtml(r.detail)}</small>` : ""}</td>
-                        <td class="value">${escapeHtml(formatValue(r))}</td>
+                    <tr class="${r.op === "=" ? UI.calc_result_row : ""}">
+                        <td class="${UI.calc_op}">${escapeHtml(r.op)}</td>
+                        <td class="${UI.calc_label}">${escapeHtml(r.label)}${r.detail ? `<small class="${UI.calc_detail}">${escapeHtml(r.detail)}</small>` : ""}</td>
+                        <td class="${UI.calc_value}">${escapeHtml(formatValue(r))}</td>
                     </tr>`).join("")}
             </table>`).join("");
     }
@@ -72,14 +72,14 @@
             return; // e.g. an empty or invalid number while typing
         }
         document.getElementById("sum-cost").textContent = App.formatEuro(result.cost_price);
-        document.getElementById("sum-travel").textContent = !result.travel_known ? T.unknown
-            : result.client_pays_travel ? `${App.formatEuro(result.travel_per_hour)} (${T.paid_by_client})`
-            : App.formatEuro(result.travel_in_tariff);
+        // Travel is only shown as part of the tariff when it is known and not paid by the client
+        document.getElementById("sum-travel-part").hidden = !result.travel_known || result.client_pays_travel;
+        document.getElementById("sum-travel").textContent = App.formatEuro(result.travel_in_tariff);
         document.getElementById("sum-margin").textContent = App.formatEuro(result.margin);
         document.getElementById("sum-tariff").textContent = App.formatEuro(result.advised_rate);
 
         const badge = document.getElementById("budget-badge");
-        badge.className = `badge badge-${result.budget_status}`;
+        badge.className = App.badgeClass(result.budget_status);
         badge.textContent = T.status[result.budget_status];
         document.getElementById("room").textContent =
             result.room_per_hour !== null ? fmt(T.room, {amount: App.formatEuro(result.room_per_hour)}) : "";
@@ -142,7 +142,7 @@
     // ---- Tabs ----
     document.querySelectorAll("[data-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
-            document.querySelectorAll("[data-tab]").forEach((b) => b.classList.toggle("active", b === btn));
+            document.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", b === btn));
             document.querySelectorAll("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== btn.dataset.tab; });
         });
     });

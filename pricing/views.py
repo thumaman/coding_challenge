@@ -50,8 +50,6 @@ def calculator(request):
         "distance_estimate": _("Estimated distance (route service unavailable)."),
         "distance_failed": _("Location not found: enter the distance yourself."),
         "distance_needed": _("Choose a vacancy and enter the home location to calculate the distance."),
-        "paid_by_client": _("paid by client"),
-        "unknown": _("unknown"),
     }
     return render(request, "pricing/calculator.html", {"vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial})
 

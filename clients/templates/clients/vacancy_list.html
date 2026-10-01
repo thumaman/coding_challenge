@@ -5,13 +5,13 @@
 {% block heading %}{% trans "Vacancies" %}{% endblock %}
 
 {% block page_actions %}
-    <button class="btn btn-primary" data-modal-url="{% url 'clients:create' %}" data-table="#vacancies">+ {% trans "Add vacancy" %}</button>
+    <button class="{{ ui.btn_primary }}" data-modal-url="{% url 'clients:create' %}" data-table="#vacancies">+ {% trans "Add vacancy" %}</button>
 {% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="{{ ui.dt_card }}">
     {# TODO(Ivan): filters (client, open/closed, max rate range) #}
-    <table id="vacancies" class="display" style="width:100%">
+    <table id="vacancies" class="display w-full">
         <thead>
             <tr>
                 <th>{% trans "Title" %}</th>
@@ -40,7 +40,7 @@ new DataTable("#vacancies", {
         {data: "max_rate", render: (d) => App.formatEuro(d)},
         {data: "hours"},
         {data: "remote"},
-        {data: "is_open", render: (d) => d ? '<span class="badge badge-ok">{% trans "Open" %}</span>' : '<span class="badge">{% trans "Closed" %}</span>'},
+        {data: "is_open", render: (d) => d ? `<span class="${App.badgeClass("ok")}">{% trans "Open" %}</span>` : `<span class="${App.badgeClass("unknown")}">{% trans "Closed" %}</span>`},
         {data: null, orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", url: row.urls.update, table: "#vacancies"},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#vacancies", danger: true},

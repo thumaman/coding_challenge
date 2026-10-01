@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
 from .forms import EmployeeForm
 from .models import Employee
@@ -20,7 +21,7 @@ def employee_create(request):
 
         if form.is_valid():
             form.save()
-            return redirect("employee_list")
+            return redirect("admin_page:employee_list")
     else:
         form = EmployeeForm()
 
@@ -29,7 +30,7 @@ def employee_create(request):
         "employees/employee_form.html",
         {
             "form": form,
-            "title": "Add Employee",
+            "title": _("Add employee"),
         },
     )
 
@@ -42,7 +43,7 @@ def employee_update(request, pk):
 
         if form.is_valid():
             form.save()
-            return redirect("employee_list")
+            return redirect("admin_page:employee_list")
     else:
         form = EmployeeForm(instance=employee)
 
@@ -51,7 +52,7 @@ def employee_update(request, pk):
         "employees/employee_form.html",
         {
             "form": form,
-            "title": "Edit Employee",
+            "title": _("Edit employee"),
         },
     )
 
@@ -62,4 +63,4 @@ def employee_delete(request, pk):
     if request.method == "POST":
         employee.delete()
 
-    return redirect("employee_list")
+    return redirect("admin_page:employee_list")

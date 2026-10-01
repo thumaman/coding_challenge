@@ -47,9 +47,15 @@ class SalaryToTariffTests(SimpleTestCase):
                 PricingInput(salary_month=6000, margin=margin)
 
     def test_breakdown_groups_chain_operations(self):
-        groups = calculate(PricingInput(salary_month=6000)).breakdown
+        groups = calculate(PricingInput(salary_month=6000, travel_distance_km=25)).breakdown
         self.assertEqual([r["op"] for r in groups[-1]["rows"]], ["", "+", "+", "="])
         self.assertTrue(all(g["rows"][-1]["op"] == "=" for g in groups))
+
+    def test_travel_left_out_of_breakdown_when_unknown_or_paid_by_client(self):
+        for inp in (PricingInput(salary_month=6000),
+                    PricingInput(salary_month=6000, travel_distance_km=25, client_pays_travel=True)):
+            rows = calculate(inp).breakdown[-1]["rows"]
+            self.assertEqual([r["op"] for r in rows], ["", "+", "="])
 
     def test_budget_status(self):
         self.assertEqual(calculate(PricingInput(salary_month=6000, proposed_rate=119, max_rate=120)).budget_status, "ok")

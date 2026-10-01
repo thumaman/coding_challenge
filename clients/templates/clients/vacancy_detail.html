@@ -1,35 +1,35 @@
 {% extends "core/base.html" %}
-{% load i18n %}
+{% load i18n ui %}
 
 {% block title %}{{ vacancy.title }}{% endblock %}
-{% block heading %}{{ vacancy.title }} <span class="muted">· {{ vacancy.client.name }}</span>{% endblock %}
+{% block heading %}{{ vacancy.title }} <span class="text-gray-500">· {{ vacancy.client.name }}</span>{% endblock %}
 
 {% block page_actions %}
-    <button class="btn btn-edit" data-modal-url="{% url 'clients:update' vacancy.pk %}" data-reload>{% trans "Edit" %}</button>
+    <button class="{{ ui.btn_edit }}" data-modal-url="{% url 'clients:update' vacancy.pk %}" data-reload>{% trans "Edit" %}</button>
 {% endblock %}
 
 {% block content %}
-<div class="grid grid-4">
-    <div class="card kpi"><div class="kpi-label">{% trans "Max client rate" %}</div><div class="kpi-value">€{{ vacancy.max_rate_per_hour }}</div></div>
-    <div class="card kpi"><div class="kpi-label">{% trans "Hours / week" %}</div><div class="kpi-value">{{ vacancy.hours_per_week }}</div></div>
-    <div class="card kpi"><div class="kpi-label">{% trans "Remote days allowed" %}</div><div class="kpi-value">{{ vacancy.remote_days_allowed }}</div></div>
-    <div class="card kpi"><div class="kpi-label">{% trans "Salary range" %}</div><div class="kpi-value" style="font-size:20px">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Max client rate" %}</div><div class="mt-1.5 text-3xl font-bold">€{{ vacancy.max_rate_per_hour }}</div></div>
+    <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Hours / week" %}</div><div class="mt-1.5 text-3xl font-bold">{{ vacancy.hours_per_week }}</div></div>
+    <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Remote days allowed" %}</div><div class="mt-1.5 text-3xl font-bold">{{ vacancy.remote_days_allowed }}</div></div>
+    <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Salary range" %}</div><div class="mt-1.5 text-xl font-bold">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
 </div>
 
-<div class="card" style="margin-top: 20px">
-    <h2>{% trans "Best matching candidates" %}</h2>
+<div class="mt-5 {{ ui.card }}">
+    <h2 class="{{ ui.h2 }}">{% trans "Best matching candidates" %}</h2>
     {# TODO(Ivan): show score breakdown on hover, "link candidate to vacancy" action #}
-    <table class="breakdown">
+    <table class="{{ ui.kv_table }}">
         {% for row in ranked %}
             <tr>
                 <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
-                <td class="muted">{{ row.candidate.desired_role }}</td>
-                <td style="width: 30%"><progress max="100" value="{{ row.score.total }}" style="width:100%"></progress></td>
+                <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
+                <td class="w-[30%]"><progress max="100" value="{{ row.score.total }}" class="w-full accent-blue-600"></progress></td>
                 <td>{{ row.score.total }}%</td>
-                <td class="value"><span class="badge badge-{{ row.pricing.budget_status }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
+                <td class="{{ ui.kv_value }}"><span class="{{ row.pricing.budget_status|badge }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
             </tr>
         {% empty %}
-            <tr><td class="muted">{% trans "No candidates yet." %}</td></tr>
+            <tr><td class="text-gray-500">{% trans "No candidates yet." %}</td></tr>
         {% endfor %}
     </table>
 </div>

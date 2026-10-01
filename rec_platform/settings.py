@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "candidates",  # Vidic: candidate CRUD
     "pricing",     # Teun: pricing engine + calculator
     "clients",     # Ivan: clients, vacancies, matching, AI advisor
+    "admin_page",  # employee list (DataTables example)
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.navigation",
+                "core.context_processors.ui",
             ],
         },
     },

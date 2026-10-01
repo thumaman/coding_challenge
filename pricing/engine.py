@@ -7,6 +7,7 @@ Salary → tariff (candidate known):
     hourly      = monthly × 3 ÷ 13 ÷ hours_per_week
     cost        = hourly × cost_factor          (vacation days etc. are included in the factor)
     travel      = only when the travel distance is known AND the client doesn't pay travel itself
+                  (otherwise it is left out of the breakdown entirely)
     tariff      = cost + travel + margin
 
 Tariff → salary (indicative, before meeting a candidate, travel EXCLUDED):
@@ -174,13 +175,11 @@ def calculate(inp: PricingInput) -> PricingResult:
     final = inp.proposed_rate if inp.proposed_rate is not None else advised
     status = budget_status(money(final), inp.max_rate)
 
-    if not inp.travel_known:
-        travel_row = row("+", _("Travel costs / hour"), 0, detail=_("unknown yet, not included"))
-    elif inp.client_pays_travel:
-        travel_row = row("+", _("Travel costs / hour"), 0,
-                         detail=_("€%(amount)s paid by the client, not included") % {"amount": money(travel)})
-    else:
-        travel_row = row("+", _("Travel costs / hour"), travel, detail=_travel_detail(inp))
+    # Travel only appears in the tariff chain when it is actually charged (known and not paid by the client)
+    tariff_rows = [row("", _("Cost price / hour"), cost)]
+    if inp.travel_known and not inp.client_pays_travel:
+        tariff_rows.append(row("+", _("Travel costs / hour"), travel, detail=_travel_detail(inp)))
+    tariff_rows += [row("+", _("Margin / hour"), inp.margin), row("=", _("Advised tariff / hour"), advised)]
 
     breakdown = [
         {"title": _("Gross hourly wage"), "rows": [
@@ -196,12 +195,7 @@ def calculate(inp: PricingInput) -> PricingResult:
                 detail=_("includes vacation days and other employment conditions")),
             row("=", _("Cost price / hour"), cost),
         ]},
-        {"title": _("Advised tariff"), "rows": [
-            row("", _("Cost price / hour"), cost),
-            travel_row,
-            row("+", _("Margin / hour"), inp.margin),
-            row("=", _("Advised tariff / hour"), advised),
-        ]},
+        {"title": _("Advised tariff"), "rows": tariff_rows},
     ]
 
     return PricingResult(

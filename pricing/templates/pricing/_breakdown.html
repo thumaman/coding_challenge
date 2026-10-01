@@ -1,12 +1,12 @@
 {# Server-side twin of renderBreakdown() in calculator.js: groups of chained operations. #}
 {% for group in breakdown %}
-    <table class="calc-group">
-        <caption>{{ group.title }}</caption>
+    <table class="{{ ui.calc_table }}">
+        <caption class="{{ ui.calc_caption }}">{{ group.title }}</caption>
         {% for r in group.rows %}
-            <tr class="{% if r.op == '=' %}result{% endif %}">
-                <td class="op">{{ r.op }}</td>
-                <td class="label">{{ r.label }}{% if r.detail %}<small>{{ r.detail }}</small>{% endif %}</td>
-                <td class="value">{% if r.kind == "eur" %}€{{ r.value }}{% elif r.kind == "hours" %}{{ r.value }} h{% else %}{{ r.value }}{% endif %}</td>
+            <tr class="{% if r.op == '=' %}{{ ui.calc_result_row }}{% endif %}">
+                <td class="{{ ui.calc_op }}">{{ r.op }}</td>
+                <td class="{{ ui.calc_label }}">{{ r.label }}{% if r.detail %}<small class="{{ ui.calc_detail }}">{{ r.detail }}</small>{% endif %}</td>
+                <td class="{{ ui.calc_value }}">{% if r.kind == "eur" %}€{{ r.value }}{% elif r.kind == "hours" %}{{ r.value }} h{% else %}{{ r.value }}{% endif %}</td>
             </tr>
         {% endfor %}
     </table>

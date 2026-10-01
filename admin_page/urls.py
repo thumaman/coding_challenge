@@ -3,6 +3,8 @@ from django.urls import path
 from . import views
 
 
+app_name = "admin_page"
+
 urlpatterns = [
     path("", views.employee_list, name="employee_list"),
     path("add/", views.employee_create, name="employee_create"),
