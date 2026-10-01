@@ -58,13 +58,15 @@ PARTS = [
     ("hours_per_week", _("Hours per week"), _hours_per_week_points),
 ]
 
+MAX_SCORE = len(PARTS)  # every part scores at most 1 point
+
 
 def score(candidate, vacancy) -> dict:
     parts = [
         {"key": key, "label": label, "points": round(float(fn(candidate, vacancy)), 1)}
         for key, label, fn in PARTS
     ]
-    return {"total": round(sum(p["points"] for p in parts)), "parts": parts}
+    return {"total": round(sum(p["points"] for p in parts), 1), "parts": parts}
 
 
 def rank_candidates(vacancy, candidates):
