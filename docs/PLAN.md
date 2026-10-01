@@ -65,7 +65,7 @@ docs/           this plan + per-person prompts
 ## Shared contracts
 These must stay stable, because the other apps depend on them.
 
-1. **Templates.** Every template does `{% extends "core/base.html" %}` and uses the blocks `title`, `page_actions`, `content` and `extra_js`.
+1. **Templates.** Every template does `{% extends "core/base.html" %}` and uses the blocks `title`, `heading`, `page_actions`, `content` and `extra_js`.
 2. **Modals and toasts via `window.App`** (in `core/static/core/js/app.js`). Buttons carry `data-modal-url` and `data-table`.
    - **Opening:** the modal partial is loaded with a GET.
    - **Saving:** the form is sent with a POST that includes the CSRF header. The view returns JSON: either `{ok: true, message}`, or `{ok: false, html}` when the form has errors.
