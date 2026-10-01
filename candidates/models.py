@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -126,3 +127,25 @@ class Candidate(models.Model):
         if self._state.adding and self.travel_distance_km is None:
             self.refresh_travel_distance()
         super().save(*args, **kwargs)
+
+
+class CandidateDraft(models.Model):
+    """An unfinished "new candidate" form. Kept apart from Candidate so drafts never enter the candidate pool."""
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="candidate_drafts")
+    data = models.JSONField(default=dict)  # raw form values: {field name: value}
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        verbose_name = _("candidate draft")
+        verbose_name_plural = _("candidate drafts")
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def title(self):
+        name = f"{self.data.get('first_name', '')} {self.data.get('last_name', '')}".strip()
+        return name or str(_("Untitled draft"))

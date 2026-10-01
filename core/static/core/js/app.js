@@ -109,16 +109,20 @@
         });
     }
 
-    // Row action menu (3 dots): App.rowMenu([{label, url, table, danger}])
+    // Row action menu (3 dots): App.rowMenu([{label, url, table, danger}]); {label, href} is a plain link
     function rowMenu(items) {
         const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
         return `<div class="group/menu relative inline-block" data-row-menu>
             <button type="button" class="size-8 cursor-pointer rounded-md border border-transparent text-xl leading-none text-gray-500 hover:border-slate-200 hover:bg-slate-100 hover:text-gray-800 group-data-open/menu:border-slate-200 group-data-open/menu:bg-slate-100 group-data-open/menu:text-gray-800"
                 data-menu-toggle aria-haspopup="true" aria-label="${esc(I18N.actions)}">&#8942;</button>
             <div class="absolute right-0 top-full z-50 mt-1 hidden min-w-37.5 rounded-lg border border-slate-200 bg-white p-1 shadow-xl group-data-open/menu:block" role="menu">
-                ${items.map((i) => `<button type="button" role="menuitem"
-                    class="block w-full cursor-pointer rounded-md px-3 py-2 text-left hover:bg-slate-100 ${i.danger ? "text-red-700" : "text-gray-800"}"
-                    data-modal-url="${esc(i.url)}" ${i.table ? `data-table="${esc(i.table)}"` : ""}>${esc(i.label)}</button>`).join("")}
+                ${items.map((i) => {
+                    const cls = `block w-full cursor-pointer rounded-md px-3 py-2 text-left hover:bg-slate-100 ${i.danger ? "text-red-700" : "text-gray-800"}`;
+                    return i.href
+                        ? `<a role="menuitem" class="${cls}" href="${esc(i.href)}">${esc(i.label)}</a>`
+                        : `<button type="button" role="menuitem" class="${cls}"
+                            data-modal-url="${esc(i.url)}" ${i.table ? `data-table="${esc(i.table)}"` : ""}>${esc(i.label)}</button>`;
+                }).join("")}
             </div>
         </div>`;
     }
@@ -212,14 +216,28 @@
     window.UI = UI;
     window.App = {csrfToken, toast, reloadTable, openModal, closeModal, post, rowMenu, badgeClass, formatEuro: (v) => eur.format(Number(v))};
 
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        input.addEventListener("blur", () => {
-            const min = Number(input.min);
-            const max = Number(input.max);
-            const value = Number(input.value);
+    // Leaving a number box: clamp it to its min/max. Only bounds that are actually set count (a missing max
+    // is "", which Number() turns into 0). Announce the change so autosave and live calculations see it.
+    document.addEventListener("focusout", (event) => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement) || input.type !== "number" || input.value === "") return;
+        const value = Number(input.value);
+        let clamped = value;
+        if (input.min !== "" && value < Number(input.min)) clamped = Number(input.min);
+        if (input.max !== "" && value > Number(input.max)) clamped = Number(input.max);
+        if (clamped !== value) {
+            input.value = clamped;
+            input.dispatchEvent(new Event("input", {bubbles: true}));
+        }
+    });
 
-            if (value < min) input.value = min;
-            if (value > max) input.value = max;
-        });
+    // <form data-enter-leaves-field>: Enter in a field only leaves that field instead of submitting the form
+    // (the candidate page has several submit buttons; Enter would pick the first one, "Save as draft").
+    document.addEventListener("keydown", (event) => {
+        const field = event.target;
+        if (event.key !== "Enter" || !field.form || !field.form.hasAttribute("data-enter-leaves-field")) return;
+        if (field.tagName === "TEXTAREA" || field.type === "submit" || field.type === "button") return;
+        event.preventDefault();
+        field.blur();
     });
 })();

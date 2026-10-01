@@ -1,5 +1,7 @@
 // Interactive calculator (owner: Teun). Inputs -> debounced POST to the pricing API -> render.
 // No pricing formulas in JS: the engine in pricing/engine.py is the single source of truth.
+// Also drives the candidate form page: inputs are found via data-role, and data-field-map on the form
+// renames its (model) field names to the pricing API names.
 (function () {
     "use strict";
 
@@ -52,15 +54,27 @@
 
     // ---- Salary -> tariff ----
     const forward = document.getElementById("forward-form");
-    const vacancySelect = forward.querySelector("[name=vacancy_id]");
-    const homeInput = forward.querySelector("[name=home_location]");
-    const distanceInput = forward.querySelector("[name=travel_distance_km]");
+    const fieldMap = JSON.parse(forward.dataset.fieldMap || "{}");
+    const vacancySelect = forward.querySelector("[data-role=vacancy]");
+    const homeInput = forward.querySelector("[data-role=home]");
+    const distanceInput = forward.querySelector("[data-role=distance]");
     const distanceStatus = document.getElementById("distance-status");
-    const paysTravel = forward.querySelector("[name=client_pays_travel]");
+    const paysTravel = forward.querySelector("[name=client_pays_travel]"); // calculator only
+
+    function forwardData() {
+        const data = {};
+        Object.entries(formData(forward)).forEach(([name, value]) => { data[fieldMap[name] || name] = value; });
+        delete data.home_location;
+        if (!paysTravel) {
+            // No toggle on the page: the selected vacancy decides who pays the travel costs
+            const option = vacancySelect.selectedOptions[0];
+            data.client_pays_travel = Boolean(option && option.dataset.paysTravel === "1");
+        }
+        return data;
+    }
 
     async function updateForward() {
-        const data = formData(forward);
-        delete data.home_location;
+        const data = forwardData();
         let result;
         try {
             ({result} = await App.post(forward.dataset.endpoint, data));
@@ -112,7 +126,7 @@
 
     vacancySelect.addEventListener("change", () => {
         const option = vacancySelect.selectedOptions[0];
-        paysTravel.checked = option && option.dataset.paysTravel === "1";
+        if (paysTravel) paysTravel.checked = option && option.dataset.paysTravel === "1";
         runDistance();
     });
     homeInput.addEventListener("input", runDistance);
@@ -121,8 +135,13 @@
     });
     forward.addEventListener("change", runForward);
 
-    // ---- Tariff -> salary ----
+    // The candidate form (method=post) really submits; the calculator forms never do
+    if (forward.method !== "post") forward.addEventListener("submit", (e) => e.preventDefault());
+    updateForward();
+
+    // ---- Tariff -> salary (calculator page only) ----
     const reverse = document.getElementById("reverse-form");
+    if (!reverse) return;
     const runReverse = debounce(async () => {
         try {
             const {result} = await App.post(reverse.dataset.endpoint, formData(reverse));
@@ -134,8 +153,7 @@
     });
     reverse.addEventListener("input", runReverse);
 
-    [forward, reverse].forEach((form) => form.addEventListener("submit", (e) => e.preventDefault()));
-    updateForward();
+    reverse.addEventListener("submit", (e) => e.preventDefault());
     runReverse();
 
     // ---- Tabs ----

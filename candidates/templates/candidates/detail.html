@@ -5,7 +5,7 @@
 {% block heading %}{{ candidate.full_name }} <span class="text-gray-500">· {{ candidate.desired_role }}</span>{% endblock %}
 
 {% block page_actions %}
-    <button class="{{ ui.btn_edit }}" data-modal-url="{% url 'candidates:update' candidate.pk %}" data-reload>{% trans "Edit" %}</button>
+    <a class="{{ ui.btn_edit }}" href="{% url 'candidates:update' candidate.pk %}">{% trans "Edit" %}</a>
 {% endblock %}
 
 {% block content %}

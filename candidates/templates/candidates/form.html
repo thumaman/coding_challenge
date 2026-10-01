@@ -1,0 +1,116 @@
+{% extends "core/base.html" %}
+{% load i18n static l10n ui %}
+
+{% block title %}{% if object %}{% trans "Edit candidate" %}{% else %}{% trans "New candidate" %}{% endif %}{% endblock %}
+{% block heading %}{% if object %}{% trans "Edit candidate" %} <span class="text-gray-500">· {{ object.full_name }}</span>{% else %}{% trans "New candidate" %}{% if draft %} <span class="text-gray-500">· {% trans "draft" %}</span>{% endif %}{% endif %}{% endblock %}
+
+{% block page_actions %}
+    <span class="text-xs text-gray-500" id="draft-status" aria-live="polite"></span>
+    <a class="{{ ui.btn_secondary }}" href="{% if object %}{% url 'candidates:detail' object.pk %}{% else %}{% url 'candidates:list' %}{% endif %}">{% trans "Cancel" %}</a>
+    {% if not object %}<button type="submit" form="forward-form" name="action" value="draft" class="{{ ui.btn_secondary }}" formnovalidate>{% trans "Save as draft" %}</button>{% endif %}
+    <button type="submit" form="forward-form" class="{{ ui.btn_primary }}">{% if object %}{% trans "Save" %}{% else %}{% trans "Save candidate" %}{% endif %}</button>
+{% endblock %}
+
+{% block content %}
+{# Same layout as the calculator (pricing/calculator.html): live tariff on top, inputs in cards below. #}
+{# Inputs carry the Candidate field names; data-field-map translates them for the pricing API in calculator.js. #}
+<div class="flex flex-col gap-5">
+    {% include "pricing/_result_card.html" %}
+
+    <form method="post" class="grid gap-5 lg:grid-cols-2" id="forward-form" novalidate autocomplete="off" data-enter-leaves-field
+          data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}"
+          data-field-map="{{ field_map_json }}"
+          {% if not object %}data-autosave="{% url 'candidates:draft_autosave' %}"{% endif %}>
+        {% csrf_token %}
+        <input type="hidden" name="draft" value="{{ draft.pk|default_if_none:'' }}">
+        {% if form.non_field_errors %}<div class="text-red-700 lg:col-span-2">{{ form.non_field_errors }}</div>{% endif %}
+
+        <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Personal" %}</h2>
+                <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                    {% include "core/_field.html" with field=form.first_name %}
+                    {% include "core/_field.html" with field=form.last_name %}
+                    {% include "core/_field.html" with field=form.email %}
+                    {% include "core/_field.html" with field=form.phone %}
+                    {% include "core/_field.html" with field=form.desired_role %}
+                    {% include "core/_field.html" with field=form.status %}
+                </div>
+            </div>
+
+            <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Employer & travel" %}</h2>
+                <div class="flex flex-col gap-1">
+                    <label for="id_vacancy" class="font-medium">{% trans "Employer / vacancy" %}</label>
+                    <select name="vacancy" id="id_vacancy" data-role="vacancy" class="{% if form.vacancy.errors %}{{ ui.input_error }}{% else %}{{ ui.input }}{% endif %}">
+                        <option value="">{% trans "— choose a vacancy —" %}</option>
+                        {% with selected=form.vacancy.value|stringformat:"s" %}
+                        {% for v in vacancies %}
+                            <option value="{{ v.pk }}"{% if v.pk|stringformat:"s" == selected %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
+                                {{ v.client.name }} · {{ v.title }} ({{ v.location }}, max €{{ v.max_rate_per_hour }})
+                            </option>
+                        {% endfor %}
+                        {% endwith %}
+                    </select>
+                    {% for error in form.vacancy.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+                </div>
+                {% include "core/_field.html" with field=form.city %}
+                <div class="flex flex-col items-start gap-1">
+                    <span class="font-medium">{% trans "Travel means" %}</span>
+                    <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
+                        {% for value, label in form.fields.transport_type.choices %}
+                            <label><input type="radio" class="peer sr-only" name="transport_type" value="{{ value }}"{% if form.transport_type.value == value %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{{ label }}</span></label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
+                    <div class="{{ ui.number_box }}">
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ form.travel_distance_km.value|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                        <span class="{{ ui.number_box_unit }}">km</span>
+                    </div>
+                    <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
+                    {% for error in form.travel_distance_km.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+                </div>
+                {% include "core/_field.html" with field=form.remote_days_per_week %}
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Salary & hours" %}</h2>
+                {% include "pricing/_slider.html" with name="expected_salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=999999 step=50 value=form.expected_salary_month.value|default:4500 unit_before="€" %}
+                {% for error in form.expected_salary_month.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+                {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=1 max=40 hard_max=60 step=1 value=form.hours_per_week.value|default:40 unit_after="h" %}
+                {% for error in form.hours_per_week.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+            </div>
+            <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Pricing" %}</h2>
+                {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=form.cost_factor.value|default:"2.0" %}
+                <small class="-mt-2 text-gray-500">{% trans "Includes vacation days and other secondary employment conditions." %}</small>
+                {% for error in form.cost_factor.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+                {% include "pricing/_slider.html" with name="margin_per_hour" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=form.margin_per_hour.value|default:C.DEFAULT_MARGIN unit_before="€" %}
+                {% for error in form.margin_per_hour.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+                {% include "core/_field.html" with field=form.proposed_rate %}
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 lg:col-span-2 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Notes" %}</h2>
+            {{ form.notes|as_input }}
+            {% for error in form.notes.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+        </div>
+    </form>
+</div>
+
+{{ i18n|json_script:"calc-i18n" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'pricing/js/calculator.js' %}"></script>
+{% if not object %}
+{% trans "Draft saved" as t_saved %}
+<script>window.DRAFT_I18N = {saved: "{{ t_saved|escapejs }}"};</script>
+<script src="{% static 'candidates/js/draft.js' %}"></script>
+{% endif %}
+{% endblock %}

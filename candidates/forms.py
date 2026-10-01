@@ -23,6 +23,9 @@ class CandidateForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"rows": 3, "wide": True}),
             "margin_per_hour": forms.NumberInput(attrs={"min": C.MIN_MARGIN, "max": C.MAX_MARGIN, "step": "0.5"}),
             "cost_factor": forms.NumberInput(attrs={"step": "0.05"}),
+            "remote_days_per_week": forms.NumberInput(attrs={"min": 0, "max": 5}),
+            # Hooks for calculator.js on the candidate page (live distance + tariff)
+            "city": forms.TextInput(attrs={"data-role": "home"}),
         }
 
     def fieldsets(self):

@@ -13,30 +13,14 @@
 
 {# Results on top (full width), inputs below in cards; both columns stretch to the same height. #}
 <section class="mt-4 flex flex-col gap-5" data-panel="forward">
-    <div class="{{ ui.card }}">
-        <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
-        <div class="{{ ui.sum_grid }}">
-            {% trans "Cost price" as label %}{% trans "How is the cost price calculated?" as hint %}
-            {% include "pricing/_steps_tile.html" with value_id="sum-cost" steps_id="cost-steps" %}
-            {# Hidden by calculator.js when travel is unknown or paid by the client #}
-            <div class="contents" id="sum-travel-part" hidden>
-                <div class="{{ ui.sum_op }}">+</div>
-                {% trans "Travel costs" as label %}{% trans "How are the travel costs calculated?" as hint %}
-                {% include "pricing/_steps_tile.html" with value_id="sum-travel" steps_id="travel-steps" %}
-            </div>
-            <div class="{{ ui.sum_op }}">+</div>
-            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}" id="sum-margin">–</strong></div>
-            <div class="{{ ui.sum_op }}">=</div>
-            <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}" id="sum-tariff">–</strong></div>
-        </div>
-    </div>
+    {% include "pricing/_result_card.html" %}
 
     <form class="grid gap-5 lg:grid-cols-2" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}" autocomplete="off">
         <div class="flex flex-col gap-3 {{ ui.card }}">
             <h2 class="{{ ui.section_label }}">{% trans "Employer & travel" %}</h2>
             <div class="flex flex-col gap-1">
                 <label for="id_vacancy" class="font-medium">{% trans "Employer / vacancy" %}</label>
-                <select name="vacancy_id" id="id_vacancy" class="{{ ui.input }}">
+                <select name="vacancy_id" id="id_vacancy" data-role="vacancy" class="{{ ui.input }}">
                     <option value="">{% trans "— choose a vacancy —" %}</option>
                     {% for v in vacancies %}
                         <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
@@ -54,7 +38,7 @@
             </div>
             <div class="flex flex-col gap-1">
                 <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
-                <input type="text" id="id_home" name="home_location" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
+                <input type="text" id="id_home" name="home_location" data-role="home" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
             </div>
             <div class="flex flex-col items-start gap-1">
                 <span class="font-medium">{% trans "Travel means" %}</span>
@@ -66,7 +50,7 @@
             <div class="flex flex-col gap-1">
                 <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
                 <div class="{{ ui.number_box }}">
-                    <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                    <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
                     <span class="{{ ui.number_box_unit }}">km</span>
                 </div>
                 <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>

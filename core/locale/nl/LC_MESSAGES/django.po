@@ -1070,3 +1070,54 @@ msgstr "%(hours)s u × 13 ÷ 3"
 #: clients/templates/clients/vacancy_detail.html
 msgid "Score"
 msgstr "Score"
+
+#: candidates/models.py candidates/templates/candidates/_drafts.html
+msgid "Untitled draft"
+msgstr "Naamloos concept"
+
+msgid "candidate draft"
+msgstr "kandidaatconcept"
+
+msgid "candidate drafts"
+msgstr "kandidaatconcepten"
+
+#: candidates/views.py
+msgid "Draft saved."
+msgstr "Concept opgeslagen."
+
+msgid "Delete draft"
+msgstr "Concept verwijderen"
+
+msgid "Draft deleted."
+msgstr "Concept verwijderd."
+
+#: candidates/templates/candidates/form.html
+msgid "draft"
+msgstr "concept"
+
+msgid "Save as draft"
+msgstr "Opslaan als concept"
+
+msgid "Save candidate"
+msgstr "Kandidaat opslaan"
+
+msgid "Draft saved"
+msgstr "Concept opgeslagen"
+
+#: candidates/templates/candidates/list.html
+msgid "Drafts"
+msgstr "Concepten"
+
+#: candidates/templates/candidates/_drafts.html
+msgid "Draft candidates"
+msgstr "Conceptkandidaten"
+
+#, python-format
+msgid "edited %(when)s ago"
+msgstr "%(when)s geleden bewerkt"
+
+msgid "Continue"
+msgstr "Verder gaan"
+
+msgid "No drafts. Unfinished new candidates are saved here automatically."
+msgstr "Geen concepten. Onafgemaakte nieuwe kandidaten worden hier automatisch bewaard."
