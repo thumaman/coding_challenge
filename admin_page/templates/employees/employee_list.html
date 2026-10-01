@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Employees</title>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/buttons/3.2.5/css/buttons.dataTables.css"
+>
+
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+        }
+
+        .add-button {
+            display: inline-block;
+            background: #198754;
+            color: white;
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-button:hover {
+            background: #157347;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 4px;
+            border: none;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-form {
+            display: inline;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>Employees</h1>
+
+        <a
+            href="{% url 'employee_create' %}"
+            class="add-button"
+        >
+            + Add Employee
+        </a>
+
+    </div>
+
+
+    <table
+        id="employees"
+        class="display"
+        style="width:100%"
+    >
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Start Date</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for employee in employees %}
+
+                <tr>
+
+                    <td>
+                        {{ employee.name }}
+                    </td>
+
+                    <td>
+                        {{ employee.position }}
+                    </td>
+
+                    <td>
+                        {{ employee.office }}
+                    </td>
+
+                    <td>
+                        {{ employee.start_date|date:"Y-m-d" }}
+                    </td>
+
+                    <td>
+                        ${{ employee.salary|floatformat:2 }}
+                    </td>
+
+                    <td>
+
+                        <div class="action-buttons">
+
+                            <a
+                                href="{% url 'employee_update' employee.pk %}"
+                                class="btn btn-edit"
+                            >
+                                Edit
+                            </a>
+
+                            <form
+                                method="post"
+                                action="{% url 'employee_delete' employee.pk %}"
+                                class="delete-form"
+                                onsubmit="return confirm('Are you sure you want to delete this employee?');"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-delete"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/3.2.5/js/dataTables.buttons.js"></script>
+
+
+<script>
+
+new DataTable("#employees", {
+
+    layout: {
+        topStart: {
+            pageLength: true,
+        },
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+    }
+});
+
+</script>
+
+</body>
+
+</html>

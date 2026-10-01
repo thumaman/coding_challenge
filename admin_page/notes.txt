@@ -1,0 +1,293 @@
+Prompt:
+
+We are working on a hackathon where we have 36 hours to design and develop a software tool that can be used by a recruitment company to make matching candidates to potential employers easier. Here is exactly what they are asking of us:
+- It should be a platform that's only used by the recruiters, so not by the employers and also not by the candidates
+- ⁠Its main function should be to calculate the advice price they can ask an employer for a candidate based on a whole load of variables (expected salary, travel costs, recruiter margin, secondary employment conditions). It should also take into account things like how many days a candidate wants to work remotely and based on that adjust the calculation, and it should be interactive, i.d. the recruiters should be able to tweak certain conditions like wage, margin, sick days and see how this influences the final advice price, this will be do using sliders or switches.
+- ⁠The ideal use case would be during an intake conversation with a potential candidate, where the recruiter just fills out the required fields based on the conversation to see what both parties expect and then the tool instantly comes up with the cost price / tarrif which can be instantly discussed with the candidate
+
+Here are some ideas we are currently thinking about:
+- For the format we are considering building a website which is downloadable as an app, using pwa
+- ⁠A candidate list where you can see, search and filter candidates with a short overview and the currently calculated advice price based on their properties.
+- ⁠A job openings/ company list where you can filter job openings and then maybe show a ranking for which candidates would be better
+- ⁠These lists should be easily accessible in a nice overview bar on the left side of the screen
+
+Finally, we are working on this project with a team of 4 so we are looking for a nice division of the workload, also in the codebase, which we are managing through GitHub. 
+- if a calculation for the candidate is too expensive and exceeds the company budget, we want to have an AI recommendation system that proposed possible tweaks for the candidate to reduce the cost for that candidate (e.g. reduce vacation days, reduce salary to fit the budget), and the recruited could then have an option to apply these changes to the candidate
+
+Please design a template for this tool which we can then semi-separately develop further in 4 main parts. So in your plan give 4 distinct parts that can be given to 4 different people to work on independently.
+
+We are working with Django framework, so prepare all files for the project and the separation of work for each team member. For the datatable we want to use javascript datatables available on: https://datatables.net. We also want to have a button to add a new candidate which opens a floating window with the form. The last column in the datatable should have buttons Edit and Delete, which would again open floating windows with appropriate forms. For Edit the current candidate's information would be filled in and saved on Save. For delete, it should open a confirmation window and refresh the table if the candidate was deleted to not display them anymore. After the successful adding/edit/delete there should be a toast message displayed on the top left, indicating a successful operation.
+
+This is the template of a page with a datatable element with some placeholder fields. These fields should not be used, instead you should use the candidate fields that are listed as a candidate example:
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Employees</title>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/buttons/3.2.5/css/buttons.dataTables.css"
+>
+
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+        }
+
+        .add-button {
+            display: inline-block;
+            background: #198754;
+            color: white;
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .add-button:hover {
+            background: #157347;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 4px;
+            border: none;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-form {
+            display: inline;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>Employees</h1>
+
+        <a
+            href="{% url 'employee_create' %}"
+            class="add-button"
+        >
+            + Add Employee
+        </a>
+
+    </div>
+
+
+    <table
+        id="employees"
+        class="display"
+        style="width:100%"
+    >
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Start Date</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for employee in employees %}
+
+                <tr>
+
+                    <td>
+                        {{ employee.name }}
+                    </td>
+
+                    <td>
+                        {{ employee.position }}
+                    </td>
+
+                    <td>
+                        {{ employee.office }}
+                    </td>
+
+                    <td>
+                        {{ employee.start_date|date:"Y-m-d" }}
+                    </td>
+
+                    <td>
+                        ${{ employee.salary|floatformat:2 }}
+                    </td>
+
+                    <td>
+
+                        <div class="action-buttons">
+
+                            <a
+                                href="{% url 'employee_update' employee.pk %}"
+                                class="btn btn-edit"
+                            >
+                                Edit
+                            </a>
+
+                            <form
+                                method="post"
+                                action="{% url 'employee_delete' employee.pk %}"
+                                class="delete-form"
+                                onsubmit="return confirm('Are you sure you want to delete this employee?');"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-delete"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/3.2.5/js/dataTables.buttons.js"></script>
+
+
+<script>
+
+new DataTable("#employees", {
+
+    layout: {
+        topStart: {
+            pageLength: true,
+        },
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+    }
+});
+
+</script>
+
+</body>
+
+</html>
+
+
+The design of the application should be intuitive, practical and corporate.
+You should already write code for the files which we would then tweak for our purpose.
+
+
+These are our explicit notes that should be followed thoroughly, from these instruction, extract which fields are required for candidates to be used on our platform:
+
+Salaris en tarief: Berekeningen voor kandidaten en opdrachtgeverstarieven
+1.⁠ ⁠Salaris - tarief
+Hier hebben we de kandidaat gesproken en beschikken we wél over de reisgegevens.
+Voorbeeld: €6.000 bruto p/m, 40 uur, kostprijsfactor 2,0.
+€6.000 × 3 ÷ 13 = €1.384,62 per week t
+€1.384,62 ÷ 40 = €34,62 bruto per uur
+€34,62 × 2,0 = €69,23 kostprijs per uur
+•⁠  ⁠€2,13 reiskosten = €71,36 all-in kostprijs
+•⁠  ⁠€10 marge = €81,36 all-in tarief
+Max. opdrachtgeverstarief is €120. De recruiter ziet dus dat er veel ruimte overblijft en kan
+besluiten de kandidaat bijvoorbeeld voor €119 per uur voor te stellen.
+Input: opdrachtgever + salaris + uren reisafstand auto/ov
+Output: kostprijs + reiskosten + marge + geadviseerd/aanpasbaar voorsteltarief.
+shift
+2.⁠ ⁠Tarief → salaris
+Deze berekening gebruiken we bijvoorbeeld voordat we een kandidaat hebben gesproken. We willen weten:
+Als de opdrachtgever maximaal €120 per uur betaalt, welk bruto salaris kunnen wij daar ongeveer tegenover zetten?
+Omdat we de kandidaat nog niet kennen, weten we ook reisafstand en vervoerstype nog niet.
+Reiskosten blijven daarom buiten deze indicatieve berekening.
+Bijvoorbeeld:
+Max. opdrachtgeverstarief: €120
+Gewenste marge IR: €10
+Kostprijsfactor: 2,0
+Werkweek: 40 uur
+€120 - €10 marge = €110 kostprijs per uur
+€110 ÷ 2,0 = €55 bruto uurloon
+
+Salaris en tarief: Berekeningen voor kandidaten en opdrachtgeverstarieven
+Vervolgens terug naar een maandsalaris:
+€55 x 40 uur = €2.200 bruto per week
+€2.200 × 13 ÷ 3 = €9.533,33 bruto per maand
+Indicatief maximaal salaris: + €9.533 bruto per maand o.b.v. 40 uur.
+Belangrijk: dit is dus niet het definitieve maximale salaris. Zodra we een kandidaat spreken en bijvoorbeeld €2,13 reiskosten per uur moeten vergoeden, verandert de definitieve berekening.
+De twee functies in één oogopslag
+Salaris → tarief
+Salaris - bruto uurloon - kostprijsfactor → reiskosten → marge → tarief
+Tarief → salaris
+maandsalaris
+Max. klanttarief → marge eraf → kostprijsfactor terugrekenen → bruto uurloon → bruto
+En voor de IT'ers is vooral deze business rule belangrijk: reiskosten zijn alleen onderdeel van de berekening wanneer de reisgegevens van een concrete kandidaat bekend zijn

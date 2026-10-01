@@ -155,7 +155,6 @@ body.sidebar-collapsed .sidebar-footer { display: none; }
     padding: 20px;
 }
 
-.card + .card { margin-top: 20px; }
 .card h2 { margin: 0 0 14px; font-size: 16px; }
 
 .grid { display: grid; gap: 20px; }

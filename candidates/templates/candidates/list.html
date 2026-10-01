@@ -54,7 +54,6 @@ const dataUrl = () => "{% url 'candidates:data' %}?" + new URLSearchParams(new F
 
 const table = new DataTable("#candidates", {
     ajax: dataUrl(),
-    cardView: true,
     layout: {topStart: {pageLength: true}, topEnd: "search", bottomStart: "info", bottomEnd: "paging"},
     order: [],
     columns: [
