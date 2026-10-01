@@ -1,8 +1,8 @@
-{# Server-side twin of renderCostSteps() in calculator.js: salary → cost price in a few short lines. #}
+{# Server-side twin of renderSteps() in calculator.js: a short chain of calculation steps. #}
 {% for r in steps %}
     <div class="{% if r.op == '=' %}{{ ui.step_result_row }}{% else %}{{ ui.step_row }}{% endif %}">
         <span class="{{ ui.step_op }}">{{ r.op }}</span>
         <span>{{ r.label }}{% if r.detail %}<span class="{{ ui.step_detail }}">{{ r.detail }}</span>{% endif %}</span>
-        <span class="{{ ui.step_value }}">{% if r.kind == "eur" %}€{{ r.value }}{% else %}{{ r.value }}{% endif %}</span>
+        <span class="{{ ui.step_value }}">{% if r.kind == "eur" %}€{{ r.value }}{% elif r.kind == "hours" %}{{ r.value }} h{% else %}{{ r.value }}{% endif %}</span>
     </div>
 {% endfor %}

@@ -29,6 +29,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.utils.translation import gettext as _
 
 from . import constants as C
+from . import travel as T
 from .travel import estimate_monthly_travel_cost  # <-- IMPORTED NEW LOGIC
 
 CENT = Decimal("0.01")
@@ -117,6 +118,7 @@ class PricingResult:
     room_per_hour: Decimal | None  # max_rate − final_rate
     breakdown: list[dict] = field(default_factory=list)
     cost_steps: list[dict] = field(default_factory=list)  # compact salary → cost price chain (cost price dropdown)
+    travel_steps: list[dict] = field(default_factory=list)  # how the travel costs / hour are built up (travel dropdown)
 
     def as_dict(self) -> dict:
         return {k: (str(v) if isinstance(v, Decimal) else v) for k, v in self.__dict__.items()}
@@ -195,6 +197,48 @@ def _travel_detail(inp: PricingInput) -> str:
         "fte": fte_str,
     }
 
+def _travel_steps(inp: PricingInput, travel: Decimal) -> list[dict]:
+    """Compact chain for the travel costs dropdown: monthly travel cost → per hour."""
+    if not inp.travel_known:
+        return []
+    if inp.travel_per_hour_override is not None:
+        return [row("=", _("Travel costs / hour"), travel, detail=_("fixed amount"))]
+
+    km = D(inp.travel_distance_km)
+    workdays = workdays_per_week(inp.hours_per_week)
+    monthly = estimate_monthly_travel_cost(km, workdays, inp.transport_type, inp.ov_subscription_month or 0)
+
+    if inp.transport_type == "ov":
+        flat = km * T.OV_RATE_PER_KM
+        if inp.ov_subscription_month:
+            steps = [row("", _("OV subscription / month"), monthly, detail=_("fixed amount"))]
+        elif flat >= T.NS_FLEX_ALTIJD_VRIJ_MONTH:
+            steps = [row("", _("NS Flex Altijd Vrij / month"), monthly)]
+        else:
+            steps = [
+                row("", _("Distance one way"), f"{num(km)} km", kind="text"),
+                row("×", _("Flat rate / km"), T.OV_RATE_PER_KM),
+                row("=", _("Travel costs / month"), monthly),
+            ]
+    else:  # car / bicycle: tax-free allowance for every return trip
+        fte = workdays / T.FULL_TIME_DAYS_PER_WEEK
+        steps = [
+            row("", _("Distance return trip"), f"{num(km * 2)} km", kind="text",
+                detail=_("%(km)s km × 2") % {"km": num(km)}),
+            row("×", _("Working days / year"), num((T.WORKABLE_DAYS_PER_YEAR_FULL_TIME * fte).quantize(CENT)), kind="text",
+                detail=_("%(days)s × %(fte)s FTE") % {"days": num(T.WORKABLE_DAYS_PER_YEAR_FULL_TIME),
+                                                     "fte": num(fte.quantize(CENT))}),
+            row("×", _("Tax-free rate / km"), T.TAX_FREE_RATE_PER_KM),
+            row("÷", _("Months / year"), num(T.MONTHS_IN_YEAR), kind="text"),
+            row("=", _("Travel costs / month"), monthly),
+        ]
+    return steps + [
+        row("÷", _("Hours / month"), num((D(inp.hours_per_week) * 13 / 3).quantize(CENT)), kind="hours",
+            detail=_("%(hours)s h × 13 ÷ 3") % {"hours": num(inp.hours_per_week)}),
+        row("=", _("Travel costs / hour"), travel),
+    ]
+
+
 def calculate(inp: PricingInput) -> PricingResult:
     """Salary → tariff."""
     weekly = D(inp.salary_month) * C.MONTH_TO_WEEK
@@ -266,6 +310,7 @@ def calculate(inp: PricingInput) -> PricingResult:
         room_per_hour=money(inp.max_rate - final) if inp.max_rate is not None else None,
         breakdown=breakdown,
         cost_steps=cost_steps,
+        travel_steps=_travel_steps(inp, travel),
     )
 
 
@@ -282,6 +327,16 @@ def rate_to_salary(max_rate, margin=C.DEFAULT_MARGIN, cost_factor=C.DEFAULT_COST
         "hourly_wage": money(hourly),
         "weekly_salary": money(weekly),
         "monthly_salary": money(monthly),
+        # Compact chain for the salary dropdown
+        "steps": [
+            row("", _("Client tariff / hour"), max_rate),
+            row("−", _("Margin / hour"), margin),
+            row("=", _("Cost price / hour"), cost),
+            row("÷", _("Cost price factor"), cost_factor, kind="factor"),
+            row("=", _("Hourly wage"), hourly),
+            row("=", _("Max gross salary / month"), monthly,
+                detail=_("× %(hours)s h × 13 ÷ 3") % {"hours": num(hours)}),
+        ],
         "breakdown": [
             {"title": _("Cost price"), "rows": [
                 row("", _("Client tariff / hour"), max_rate),

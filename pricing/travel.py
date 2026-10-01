@@ -11,6 +11,10 @@ WORKABLE_DAYS_PER_YEAR_FULL_TIME = Decimal("214")
 FULL_TIME_DAYS_PER_WEEK = Decimal("5")
 MONTHS_IN_YEAR = Decimal("12")
 
+# Public transport (OV): flat rate per one-way km, capped at the NS Flex Altijd Vrij subscription price
+OV_RATE_PER_KM = Decimal("10.00")
+NS_FLEX_ALTIJD_VRIJ_MONTH = Decimal("400.00")
+
 
 def geocode(location: str) -> tuple[float, float] | None:
     """Free text-to-coordinates using OpenStreetMap (Restored name to fix API imports)."""
@@ -71,9 +75,8 @@ def estimate_monthly_travel_cost(
         if ov_subscription_cost and Decimal(str(ov_subscription_cost)) > 0:
             return Decimal(str(ov_subscription_cost)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         
-        # Hackathon Heuristic: ~€8.50 per km, maxing out at €353 (NS Altijd Vrij price)
-        mock_ov_cost = distance * Decimal("8.50")
-        final_ov_cost = min(Decimal("353.00"), mock_ov_cost)
+        # Hackathon heuristic: flat rate per km, capped at the NS Flex Altijd Vrij price
+        final_ov_cost = min(NS_FLEX_ALTIJD_VRIJ_MONTH, distance * OV_RATE_PER_KM)
         return final_ov_cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     if transport_method in ("car", "bicycle"):

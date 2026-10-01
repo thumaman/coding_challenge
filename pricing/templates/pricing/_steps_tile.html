@@ -1,0 +1,16 @@
+{% load i18n %}
+{# Result tile (e.g. "Cost price") that opens a dropdown with how the amount is built up. #}
+{# label, hint: texts; dark: the highlighted total style. value/steps are rendered server-side; #}
+{# with value_id/steps_id calculator.js fills them in. #}
+<details class="group/steps relative min-w-27.5 flex-1" data-dropdown>
+    <summary class="{% if dark %}{{ ui.steps_tile_total }}{% else %}{{ ui.steps_tile }}{% endif %}" title="{{ hint }}">
+        <span class="flex items-center justify-between {% if dark %}{{ ui.sum_total_label }}{% else %}{{ ui.sum_label }}{% endif %}">
+            {{ label }}
+            <svg class="size-3.5 transition group-open/steps:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </span>
+        <strong class="{% if dark %}{{ ui.sum_total_value }}{% else %}{{ ui.sum_value }}{% endif %}"{% if value_id %} id="{{ value_id }}"{% endif %}>{% if value is not None %}€{{ value }}{% else %}–{% endif %}</strong>
+    </summary>
+    <div class="{{ ui.steps_dropdown }}"{% if steps_id %} id="{{ steps_id }}"{% endif %}>
+        {% include "pricing/_steps.html" %}
+    </div>
+</details>

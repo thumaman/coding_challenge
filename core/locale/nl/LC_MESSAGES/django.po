@@ -992,6 +992,78 @@ msgstr "Uurloon"
 msgid "× 3 ÷ 13 ÷ %(hours)s h"
 msgstr "× 3 ÷ 13 ÷ %(hours)s u"
 
-#: pricing/templates/pricing/_cost_tile.html
+#: pricing/templates/pricing/_calculator_panel.html pricing/templates/pricing/calculator.html
 msgid "How is the cost price calculated?"
 msgstr "Hoe wordt de kostprijs berekend?"
+
+#: pricing/templates/pricing/calculator.html
+msgid "How is the salary calculated?"
+msgstr "Hoe wordt het salaris berekend?"
+
+#: pricing/engine.py
+#, python-format
+msgid "× %(hours)s h × 13 ÷ 3"
+msgstr "× %(hours)s u × 13 ÷ 3"
+
+#: pricing/templates/pricing/calculator.html
+msgid "Employer & travel"
+msgstr "Werkgever & reizen"
+
+#: pricing/engine.py
+msgid "How are the travel costs calculated?"
+msgstr "Hoe worden de reiskosten berekend?"
+
+#: pricing/engine.py
+msgid "OV subscription / month"
+msgstr "OV-abonnement / maand"
+
+#: pricing/engine.py
+msgid "NS Flex Altijd Vrij / month"
+msgstr "NS Flex Altijd Vrij / maand"
+
+#: pricing/engine.py
+msgid "Distance one way"
+msgstr "Afstand enkele reis"
+
+#: pricing/engine.py
+msgid "Flat rate / km"
+msgstr "Vast tarief / km"
+
+#: pricing/engine.py
+msgid "Travel costs / month"
+msgstr "Reiskosten / maand"
+
+#: pricing/engine.py
+msgid "Distance return trip"
+msgstr "Afstand heen en terug"
+
+#: pricing/engine.py
+#, python-format
+msgid "%(km)s km × 2"
+msgstr "%(km)s km × 2"
+
+#: pricing/engine.py
+msgid "Working days / year"
+msgstr "Werkdagen / jaar"
+
+#: pricing/engine.py
+#, python-format
+msgid "%(days)s × %(fte)s FTE"
+msgstr "%(days)s × %(fte)s fte"
+
+#: pricing/engine.py
+msgid "Tax-free rate / km"
+msgstr "Belastingvrije vergoeding / km"
+
+#: pricing/engine.py
+msgid "Months / year"
+msgstr "Maanden / jaar"
+
+#: pricing/engine.py
+msgid "Hours / month"
+msgstr "Uren / maand"
+
+#: pricing/engine.py
+#, python-format
+msgid "%(hours)s h × 13 ÷ 3"
+msgstr "%(hours)s u × 13 ÷ 3"
