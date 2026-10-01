@@ -4,11 +4,10 @@ from .ui import UI
 
 # Sidebar entries: (url name, label, icon key, view-name prefix that marks the item active)
 NAV_ITEMS = [
-    ("core:dashboard", _("Dashboard"), "home", "core:dashboard"),
-    ("pricing:calculator", _("Calculator"), "calc", "pricing:"),
     ("candidates:list", _("Candidates"), "users", "candidates:"),
     ("clients:vacancy_list", _("Vacancies"), "briefcase", "clients:vacancy"),
     ("clients:client_list", _("Clients"), "building", "clients:client"),
+    ("pricing:calculator", _("Calculator"), "calc", "pricing:"),
 ]
 
 
