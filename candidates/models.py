@@ -47,6 +47,10 @@ class Candidate(models.Model):
         help_text=_("Calculated automatically from the home location and the vacancy location"),
     )
     transport_type = models.CharField(_("travel means"), max_length=10, choices=Transport.choices, default=Transport.CAR)
+    client_pays_travel = models.BooleanField(
+        _("client pays travel costs"), default=False,
+        help_text=_("Travel costs are then left out of the tariff (defaults to the vacancy's setting)"),
+    )
     remote_days_per_week = models.PositiveSmallIntegerField(
         _("remote days / week"), default=0, validators=[MaxValueValidator(5)],
         help_text=_("Used for matching only"),
@@ -79,6 +83,7 @@ class Candidate(models.Model):
         "margin": "margin_per_hour",
         "travel_distance_km": "travel_distance_km",
         "transport_type": "transport_type",
+        "client_pays_travel": "client_pays_travel",
     }
 
     class Meta:
@@ -97,8 +102,10 @@ class Candidate(models.Model):
         """Build the engine input from this candidate; overrides use PricingInput field names."""
         vacancy = self.vacancy if vacancy is _UNSET else vacancy
         data = {engine: getattr(self, model) for engine, model in self.PRICING_FIELD_MAP.items()}
+        if vacancy != self.vacancy:
+            # Pricing against another vacancy (matching): that vacancy's default applies
+            data["client_pays_travel"] = bool(vacancy and vacancy.client_pays_travel)
         data.update(
-            client_pays_travel=vacancy.client_pays_travel if vacancy else False,
             max_rate=vacancy.max_rate_per_hour if vacancy else None,
             proposed_rate=self.proposed_rate,
         )

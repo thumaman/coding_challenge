@@ -22,7 +22,7 @@ def _initial_from_candidate(candidate_id):
     return {
         "candidate": candidate,
         "vacancy_id": candidate.vacancy_id,
-        "client_pays_travel": bool(candidate.vacancy and candidate.vacancy.client_pays_travel),
+        "client_pays_travel": candidate.client_pays_travel,
         "salary_month": candidate.expected_salary_month,
         "hours_per_week": candidate.hours_per_week,
         "home_location": candidate.city,

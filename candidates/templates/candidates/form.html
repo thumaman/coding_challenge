@@ -63,6 +63,14 @@
                         {% endfor %}
                     </div>
                 </div>
+                {# Follows the vacancy's default when a vacancy is picked (calculator.js); can be changed per candidate #}
+                <div class="flex items-center gap-2">
+                    <label class="relative inline-flex cursor-pointer">
+                        <input type="checkbox" class="peer sr-only" id="id_client_pays_travel" name="client_pays_travel"{% if form.client_pays_travel.value %} checked{% endif %}>
+                        <span class="h-5.5 w-9.5 rounded-full bg-slate-300 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600/40 after:absolute after:left-0.75 after:top-0.75 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
+                    </label>
+                    <label for="id_client_pays_travel" class="font-medium">{% trans "Client pays the travel costs" %}</label>
+                </div>
                 <div class="flex flex-col gap-1">
                     <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
                     <div class="{{ ui.number_box }}">

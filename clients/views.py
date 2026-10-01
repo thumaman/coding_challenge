@@ -91,28 +91,20 @@ def advisor_panel_context(candidate):
     return {"candidate": candidate, "options": suggest_tweaks(candidate)}
 
 
-VACANCY_TWEAK_FIELDS = {"vacancy.client_pays_travel"}
-
-
 @require_POST
 def apply_tweak(request, candidate_pk):
-    """POST {"changes": {field: value}} -> apply to the candidate (or `vacancy.<field>` to its vacancy)."""
+    """POST {"changes": {field: value}} -> apply to the candidate."""
     candidate = get_object_or_404(Candidate.objects.select_related("vacancy"), pk=candidate_pk)
     try:
         changes = json.loads(request.POST.get("changes") or request.body or "{}")
         changes = changes.get("changes", changes)
     except json.JSONDecodeError:
         return JsonResponse({"ok": False, "message": "Invalid changes"}, status=400)
-    allowed = set(Candidate.PRICING_FIELD_MAP.values()) | VACANCY_TWEAK_FIELDS
+    allowed = set(Candidate.PRICING_FIELD_MAP.values())
     if not set(changes) <= allowed:
         return JsonResponse({"ok": False, "message": f"Field not allowed: {set(changes) - allowed}"}, status=400)
     for field, value in changes.items():
-        if field.startswith("vacancy."):
-            name = field.removeprefix("vacancy.")
-            setattr(candidate.vacancy, name, candidate.vacancy._meta.get_field(name).to_python(value))
-            candidate.vacancy.save()
-        else:
-            setattr(candidate, field, Candidate._meta.get_field(field).to_python(value))
+        setattr(candidate, field, Candidate._meta.get_field(field).to_python(value))
     candidate.proposed_rate = None  # the advised tariff is recalculated from the new terms
     candidate.save()
     return JsonResponse({"ok": True, "message": _("Tweak applied to %(name)s.") % {"name": candidate.full_name}})

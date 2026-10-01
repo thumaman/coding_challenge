@@ -43,11 +43,12 @@ class AdvisorTests(TestCase):
         self.assertNotEqual(self.candidate.pricing.budget_status, "over")
 
     @mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""})
-    def test_client_pays_travel_option_updates_vacancy(self):
+    def test_client_pays_travel_option_updates_candidate(self):
         option = next(o for o in suggest_tweaks(self.candidate) if o["key"] == "client_travel")
         self.client.post(reverse("clients:apply_tweak", args=[self.candidate.pk]), {"changes": option["changes_json"]})
-        self.vacancy.refresh_from_db()
-        self.assertTrue(self.vacancy.client_pays_travel)
+        self.candidate.refresh_from_db()
+        self.assertTrue(self.candidate.client_pays_travel)
+        self.assertEqual(self.candidate.pricing.travel_in_tariff, 0)
 
     def test_apply_tweak_rejects_unknown_fields(self):
         response = self.client.post(reverse("clients:apply_tweak", args=[self.candidate.pk]),

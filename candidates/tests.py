@@ -37,6 +37,13 @@ class CandidateCrudTests(TestCase):
         self.assertRedirects(response, reverse("candidates:detail", args=[candidate.pk]))
         self.assertEqual(candidate.pricing.advised_rate, Decimal("79.23"))
 
+    def test_client_pays_travel_toggle_leaves_travel_out(self):
+        self.client.post(reverse("candidates:create"), {**VALID, "travel_distance_km": "50", "client_pays_travel": "on"})
+        candidate = Candidate.objects.get()
+        self.assertTrue(candidate.client_pays_travel)
+        self.assertEqual(candidate.pricing.travel_in_tariff, 0)
+        self.assertEqual(candidate.pricing.advised_rate, Decimal("79.23"))
+
     def test_invalid_form_rerenders_page(self):
         response = self.client.post(reverse("candidates:create"), {**VALID, "first_name": ""})
         self.assertEqual(response.status_code, 200)

@@ -89,6 +89,7 @@ class Command(BaseCommand):
                 # Offline estimate so seeding needs no network; the form recalculates via the routing API
                 travel_distance_km=offline_distance_km(city, vacancy.location) if vacancy else None,
                 transport_type=rng.choice(["car", "car", "ov"]),
+                client_pays_travel=bool(vacancy and vacancy.client_pays_travel),
                 remote_days_per_week=rng.choice([0, 1, 2, 2, 3]),
                 vacancy=vacancy, notes=rng.choice(NOTES),
             )

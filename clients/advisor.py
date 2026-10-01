@@ -27,20 +27,15 @@ logger = logging.getLogger(__name__)
 MARGIN_FLOOR = Decimal("5.00")
 
 
-def _rate(candidate, vacancy, client_pays_travel=None, **overrides) -> Decimal:
-    if client_pays_travel is not None:
-        overrides["client_pays_travel"] = client_pays_travel
+def _rate(candidate, vacancy, **overrides) -> Decimal:
     inp = candidate.pricing_input(vacancy=vacancy, proposed_rate=None, **overrides)
     return calculate(inp).advised_rate
 
 
 def _option(candidate, vacancy, key, title, changes, current, reason):
-    """`changes` uses PricingInput names; `vacancy.<field>` keys change the vacancy instead."""
-    model_changes = {
-        (k if k.startswith("vacancy.") else candidate.PRICING_FIELD_MAP.get(k, k)): v for k, v in changes.items()
-    }
-    rate_changes = {k.removeprefix("vacancy."): v for k, v in changes.items()}
-    new_rate = _rate(candidate, vacancy, **rate_changes)
+    """`changes` uses PricingInput names; they are stored as Candidate model fields."""
+    model_changes = {candidate.PRICING_FIELD_MAP.get(k, k): v for k, v in changes.items()}
+    new_rate = _rate(candidate, vacancy, **changes)
     serialized = {k: str(v) for k, v in model_changes.items()}
     return {
         "key": key,
@@ -93,10 +88,10 @@ def suggest_tweaks(candidate, vacancy=None) -> list[dict]:
                                _("Reduce our margin to €%(margin)s/hour; the candidate's terms stay the same.")
                                % {"margin": margin}))
 
-    # Lever 3: the client pays the travel costs (changes the vacancy)
+    # Lever 3: the client pays the travel costs
     if pricing.travel_in_tariff > 0:
         options.append(_option(candidate, vacancy, "client_travel", _("Client pays travel costs"),
-                               {"vacancy.client_pays_travel": True}, current,
+                               {"client_pays_travel": True}, current,
                                _("Ask %(client)s to reimburse travel costs (€%(travel)s/hour) separately.")
                                % {"client": vacancy.client.name, "travel": pricing.travel_in_tariff}))
 

@@ -9,7 +9,7 @@ from .models import Candidate
 FIELDSETS = [
     (_("Personal"), ["first_name", "last_name", "email", "phone", "city", "desired_role", "status", "vacancy"]),
     (_("Salary & hours"), ["expected_salary_month", "hours_per_week"]),
-    (_("Travel"), ["transport_type", "travel_distance_km", "remote_days_per_week"]),
+    (_("Travel"), ["transport_type", "client_pays_travel", "travel_distance_km", "remote_days_per_week"]),
     (_("Pricing"), ["cost_factor", "margin_per_hour", "proposed_rate"]),
     (_("Notes"), ["notes"]),
 ]

@@ -517,6 +517,10 @@ msgstr "opdrachtgever betaalt reiskosten"
 msgid "Travel costs are then left out of the tariff"
 msgstr "Reiskosten worden dan niet in het tarief meegenomen"
 
+#: candidates/models.py
+msgid "Travel costs are then left out of the tariff (defaults to the vacancy's setting)"
+msgstr "Reiskosten worden dan niet in het tarief meegenomen (standaard volgens de vacature)"
+
 #: clients/models.py:37
 msgid "open"
 msgstr "open"
@@ -1140,3 +1144,7 @@ msgstr "Verder gaan"
 
 msgid "No drafts. Unfinished new candidates are saved here automatically."
 msgstr "Geen concepten. Onafgemaakte nieuwe kandidaten worden hier automatisch bewaard."
+
+#: candidates/templates/candidates/detail.html
+msgid "Note"
+msgstr "Notitie"

@@ -152,7 +152,7 @@
     const homeInput = forward.querySelector("[data-role=home]");
     const distanceInput = forward.querySelector("[data-role=distance]");
     const distanceStatus = document.getElementById("distance-status");
-    const paysTravel = forward.querySelector("[name=client_pays_travel]"); // calculator only
+    const paysTravel = forward.querySelector("[name=client_pays_travel]");
     const travelFields = document.getElementById("travel-fields"); // calculator only
     if (document.getElementById("vacancy-combo")) vacancyPicker(vacancySelect); // calculator only
 
@@ -164,11 +164,6 @@
         const data = {};
         Object.entries(formData(forward)).forEach(([name, value]) => { data[fieldMap[name] || name] = value; });
         delete data.home_location;
-        if (!paysTravel) {
-            // No toggle on the page: the selected vacancy decides who pays the travel costs
-            const option = vacancySelect.selectedOptions[0];
-            data.client_pays_travel = Boolean(option && option.dataset.paysTravel === "1");
-        }
         return data;
     }
 
@@ -225,7 +220,8 @@
 
     vacancySelect.addEventListener("change", () => {
         const option = vacancySelect.selectedOptions[0];
-        if (paysTravel) paysTravel.checked = option && option.dataset.paysTravel === "1";
+        // Picking a vacancy applies its default for who pays the travel costs
+        paysTravel.checked = Boolean(option && option.dataset.paysTravel === "1");
         syncTravelFields();
         runDistance();
     });
