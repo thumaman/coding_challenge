@@ -33,11 +33,9 @@ def _initial_from_candidate(candidate_id):
     }
 
 
-def calculator(request):
-    # TODO(Teun): proposed vs. max tariff bar with the −10% band
-    vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
-    initial = _initial_from_candidate(request.GET.get("candidate")) if request.GET.get("candidate") else {}
-    i18n = {
+def calculator_i18n():
+    """Texts for calculator.js (also used by the candidate form page)."""
+    return {
         "status": {
             "ok": _("Within the client's budget"),
             "too_low": _("More than 10% below the client's maximum: too cheap?"),
@@ -55,7 +53,15 @@ def calculator(request):
         "max": _("max"),
         "distance_needed": _("Choose a vacancy and enter the home location to calculate the distance."),
     }
-    return render(request, "pricing/calculator.html", {"vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial})
+
+
+def calculator(request):
+    # TODO(Teun): proposed vs. max tariff bar with the −10% band
+    vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
+    initial = _initial_from_candidate(request.GET.get("candidate")) if request.GET.get("candidate") else {}
+    return render(request, "pricing/calculator.html", {
+        "vacancies": vacancies, "C": C, "i18n": calculator_i18n(), "initial": initial,
+    })
 
 
 def _payload(request):

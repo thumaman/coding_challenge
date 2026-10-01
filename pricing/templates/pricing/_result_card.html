@@ -1,0 +1,19 @@
+{% load i18n %}
+{# Live result: cost price + travel + margin = advised tariff. Filled in by calculator.js (calculator and candidate form). #}
+<div class="{{ ui.card }}">
+    <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
+    <div class="{{ ui.sum_grid }}">
+        {% trans "Cost price" as label %}{% trans "How is the cost price calculated?" as hint %}
+        {% include "pricing/_steps_tile.html" with value_id="sum-cost" steps_id="cost-steps" %}
+        {# Hidden by calculator.js when travel is unknown or paid by the client #}
+        <div class="contents" id="sum-travel-part" hidden>
+            <div class="{{ ui.sum_op }}">+</div>
+            {% trans "Travel costs" as label %}{% trans "How are the travel costs calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value_id="sum-travel" steps_id="travel-steps" %}
+        </div>
+        <div class="{{ ui.sum_op }}">+</div>
+        <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}" id="sum-margin">–</strong></div>
+        <div class="{{ ui.sum_op }}">=</div>
+        <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}" id="sum-tariff">–</strong></div>
+    </div>
+</div>

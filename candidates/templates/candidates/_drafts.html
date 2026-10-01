@@ -1,0 +1,32 @@
+{% load i18n %}
+{# Drafts modal (candidates:drafts): the current user's unfinished "new candidate" forms. #}
+<div>
+    <div class="{{ ui.modal_header }}">
+        <h2 class="{{ ui.modal_title }}">{% trans "Draft candidates" %}</h2>
+        <button type="button" class="{{ ui.icon_button }}" data-modal-close aria-label="{% trans 'Close' %}">&times;</button>
+    </div>
+    <div class="{{ ui.modal_content }}">
+        {% if drafts %}
+            <ul class="divide-y divide-slate-200">
+                {% for draft in drafts %}
+                    <li class="flex items-center gap-3 py-2.5">
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-medium">{{ draft.title }}</p>
+                            <p class="truncate text-xs text-gray-500">
+                                {% if draft.data.desired_role %}{{ draft.data.desired_role }} · {% endif %}
+                                {% blocktrans with when=draft.updated_at|timesince %}edited {{ when }} ago{% endblocktrans %}
+                            </p>
+                        </div>
+                        <a class="{{ ui.btn_primary_sm }}" href="{% url 'candidates:create' %}?draft={{ draft.pk }}">{% trans "Continue" %}</a>
+                        <button type="button" class="{{ ui.btn_danger_sm }}" data-modal-url="{% url 'candidates:draft_delete' draft.pk %}" data-reload>{% trans "Delete" %}</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-500">{% trans "No drafts. Unfinished new candidates are saved here automatically." %}</p>
+        {% endif %}
+    </div>
+    <div class="{{ ui.modal_footer }}">
+        <button type="button" class="{{ ui.btn_secondary }}" data-modal-close>{% trans "Close" %}</button>
+    </div>
+</div>
