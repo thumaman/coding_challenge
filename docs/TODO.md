@@ -20,7 +20,7 @@ In the code, search for `TODO(<your name>)` to find where to continue. Tick item
 - [x] **Prefill from a candidate.** Done: `/calculator/?candidate=<id>`.
 - [ ] **Interactive pricing panel.** Make `_calculator_panel.html` on the candidate page interactive: sliders, plus a "Save to candidate" button that saves the values and shows a toast.
 - [ ] **Check the travel cost assumptions with the client.**
-  - Rates: car €0.23/km, public transport €0.20/km.
+  - Rates: car €0.25/km tax-free (214 working days/year), public transport €10/km capped at €400 (NS Flex Altijd Vrij).
   - Should public transport use real fares (e.g. an NS API) instead of a rate per km?
 
 ## Ivan: clients, vacancies, matching, AI advisor

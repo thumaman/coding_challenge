@@ -45,8 +45,8 @@ class CandidateCrudTests(TestCase):
         self.assertTrue(response.json()["ok"])
         self.assertFalse(Candidate.objects.exists())
 
-    def test_margin_must_be_between_5_and_15(self):
-        response = self.client.post(reverse("candidates:create"), {**VALID, "margin_per_hour": "20"})
+    def test_margin_must_be_between_0_and_25(self):
+        response = self.client.post(reverse("candidates:create"), {**VALID, "margin_per_hour": "30"})
         self.assertFalse(response.json()["ok"])
 
     @mock.patch("candidates.models.route_distance_km", return_value={"km": Decimal("45.9"), "source": "route"})

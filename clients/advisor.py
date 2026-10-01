@@ -23,7 +23,8 @@ from pricing.engine import C, calculate, money
 
 logger = logging.getLogger(__name__)
 
-MARGIN_FLOOR = C.MIN_MARGIN
+# The advisor never suggests a margin below this, even though recruiters may go lower by hand
+MARGIN_FLOOR = Decimal("5.00")
 
 
 def _rate(candidate, vacancy, client_pays_travel=None, **overrides) -> Decimal:

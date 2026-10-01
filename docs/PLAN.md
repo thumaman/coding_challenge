@@ -18,10 +18,12 @@ Stack: Django 6.1 (`rec_platform/` settings), DataTables 2.3.4, a PWA (installab
   - Example: €120 → 110 → 55 → **€9,533.33** per month (an indicative maximum).
 - **Inputs (for now):** employer (vacancy), desired gross salary, desired working hours, travel distance and travel means (car / public transport).
 - **Cost price factor** (default 2.0, about 2× the gross labour cost) covers vacation days, sick leave and all other secondary employment conditions. They are not separate inputs.
-- **Margin:** between €5 and €15 per hour, default €10.
+- **Margin:** between €0 and €25 per hour, default €10 (the budget advisor never suggests less than €5).
 - **Result:** cost price + travel costs + margin = advised tariff.
 - **Travel distance** is calculated automatically from the candidate's home location to the vacancy location (OpenStreetMap geocoding + OSRM road distance, see `pricing/travel.py`). The recruiter can still overwrite it.
-- **Travel costs:** `km_one_way × 2 × workdays × €/km ÷ hours_per_week`, where workdays = hours ÷ 8 (max 5). Rates: car €0.23/km, public transport €0.20/km (`pricing/constants.py`, *assumption: check with the client*).
+- **Travel costs** (monthly, then ÷ hours per month = hours × 13 ÷ 3; see `pricing/travel.py`, *assumption: check with the client*):
+  - Car: `km_one_way × 2 × 214 working days/year × FTE × €0.25 tax-free rate ÷ 12`, where FTE = (hours ÷ 8, max 5) ÷ 5.
+  - Public transport: `km_one_way × €10`, capped at €400 (NS Flex Altijd Vrij).
 - **Travel rule:** travel costs only count when the distance is known, and **not** when the client pays the travel costs itself (a setting per vacancy).
 - **Warnings:**
   - The tariff is **more than 10% below** the client's max tariff. Candidates get rejected for being "too cheap".
@@ -38,7 +40,7 @@ Stack: Django 6.1 (`rec_platform/` settings), DataTables 2.3.4, a PWA (installab
 | Status | `status` (intake / available / proposed / placed / inactive) |
 | Salary & hours | `expected_salary_month`, `hours_per_week` (40) |
 | Travel | `travel_distance_km` (one way, calculated automatically), `transport_type` (car / ov), `remote_days_per_week` (0–5, matching only) |
-| Pricing | `cost_factor` (2.0), `margin_per_hour` (5–15, default 10), `proposed_rate` (nullable) |
+| Pricing | `cost_factor` (2.0), `margin_per_hour` (0–25, default 10), `proposed_rate` (nullable) |
 | Links & meta | `vacancy` (FK to `clients.Vacancy`, nullable), `notes`, `created_at`, `updated_at` |
 
 - The property `pricing` returns `pricing.engine.calculate(...)`.

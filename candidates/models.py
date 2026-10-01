@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from pricing import constants as C
 from pricing.engine import PricingInput, calculate
 from pricing.travel import route_distance_km
 
@@ -54,7 +55,7 @@ class Candidate(models.Model):
     cost_factor = models.DecimalField(_("cost price factor"), max_digits=4, decimal_places=2, default=Decimal("2.00"))
     margin_per_hour = models.DecimalField(
         _("margin / hour (€)"), max_digits=6, decimal_places=2, default=Decimal("10.00"),
-        validators=[MinValueValidator(Decimal("5")), MaxValueValidator(Decimal("15"))],
+        validators=[MinValueValidator(C.MIN_MARGIN), MaxValueValidator(C.MAX_MARGIN)],
     )
     proposed_rate = models.DecimalField(
         _("proposed tariff / hour (€)"), max_digits=7, decimal_places=2, null=True, blank=True,

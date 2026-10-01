@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from pricing import constants as C
+
 from .models import Candidate
 
 # (legend, [field names]) rendered as <fieldset>s by core/_modal_form.html
@@ -19,7 +21,7 @@ class CandidateForm(forms.ModelForm):
         fields = [name for _legend, names in FIELDSETS for name in names]
         widgets = {
             "notes": forms.Textarea(attrs={"rows": 3, "wide": True}),
-            "margin_per_hour": forms.NumberInput(attrs={"min": 5, "max": 15, "step": "0.5"}),
+            "margin_per_hour": forms.NumberInput(attrs={"min": C.MIN_MARGIN, "max": C.MAX_MARGIN, "step": "0.5"}),
             "cost_factor": forms.NumberInput(attrs={"step": "0.05"}),
         }
 

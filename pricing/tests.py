@@ -30,19 +30,19 @@ class SalaryToTariffTests(SimpleTestCase):
         self.assertEqual(result.advised_rate, Decimal("79.23"))
 
     def test_travel_from_distance(self):
-        # 25 km × 2 × 5 days × €0.23 ÷ 40 h = €1.4375 -> €1.44
+        # 25 km × 2 × 214 days × €0.25 ÷ 12 = €222.92 / month ÷ (40 h × 13 ÷ 3) = €1.286 -> €1.29
         result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="car"))
-        self.assertEqual(result.travel_per_hour, Decimal("1.44"))
-        self.assertEqual(result.advised_rate, Decimal("80.67"))
+        self.assertEqual(result.travel_per_hour, Decimal("1.29"))
+        self.assertEqual(result.advised_rate, Decimal("80.52"))
 
     def test_client_pays_travel(self):
         result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, client_pays_travel=True))
-        self.assertEqual(result.travel_per_hour, Decimal("1.44"))  # still shown
+        self.assertEqual(result.travel_per_hour, Decimal("1.29"))  # still shown
         self.assertEqual(result.travel_in_tariff, Decimal("0.00"))  # but not charged
         self.assertEqual(result.advised_rate, Decimal("79.23"))
 
     def test_margin_limits(self):
-        for margin in (4, 16):
+        for margin in (-1, 26):
             with self.assertRaises(ValueError):
                 PricingInput(salary_month=6000, margin=margin)
 
@@ -126,7 +126,7 @@ class PricingApiTests(TestCase):
         self.assertEqual(response.json()["result"]["advised_rate"], "79.23")
 
     def test_calculate_rejects_margin_out_of_range(self):
-        response = self.client.post(reverse("pricing:calculate"), json.dumps({"salary_month": 6000, "margin": 20}),
+        response = self.client.post(reverse("pricing:calculate"), json.dumps({"salary_month": 6000, "margin": 30}),
                                     content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
