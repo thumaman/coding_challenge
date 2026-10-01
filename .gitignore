@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
-staticfiles/
+src/coding_challenge/__init__.py
+notes.txt
