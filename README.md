@@ -1,6 +1,6 @@
-# TalentRate: recruiter pricing platform
+# IndependetRecruiters: recruiter pricing platform
 
-TalentRate is an internal tool for recruiters. It calculates the advised hourly rate to charge a client for a candidate, live during an intake conversation.
+IndependetRecruiters is an internal tool for recruiters. It calculates the advised hourly rate to charge a client for a candidate, live during an intake conversation.
 
 The full plan, business rules and team split are in [docs/PLAN.md](docs/PLAN.md). Each person's task prompt is in [docs/prompts/](docs/prompts/).
 
