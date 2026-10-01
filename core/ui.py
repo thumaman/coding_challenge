@@ -76,28 +76,19 @@ UI = {
     "sum_total_value": "text-[26px] font-bold tabular-nums",
     "sum_op": "self-center text-xl font-bold text-gray-500",
 
-    # Cost price tile that opens a dropdown with the salary → cost price steps
-    # (pricing/_cost_tile.html and renderCostSteps() in calculator.js)
-    "cost_tile": ("flex h-full cursor-pointer list-none flex-col gap-1 rounded-lg bg-slate-100 px-3.5 py-3 "
-                  "hover:bg-slate-200 group-open/cost:bg-slate-200 [&::-webkit-details-marker]:hidden"),
-    "cost_dropdown": ("absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
-                      "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] shadow-lg"),
+    # Result tile that opens a dropdown with the calculation steps
+    # (pricing/_steps_tile.html, pricing/_steps.html and renderSteps() in calculator.js)
+    "steps_tile": ("flex h-full cursor-pointer list-none flex-col gap-1 rounded-lg bg-slate-100 px-3.5 py-3 "
+                   "hover:bg-slate-200 group-open/steps:bg-slate-200 [&::-webkit-details-marker]:hidden"),
+    "steps_tile_total": ("flex h-full cursor-pointer list-none flex-col gap-1 rounded-lg bg-slate-900 px-3.5 py-3 "
+                         "text-white hover:bg-slate-800 group-open/steps:bg-slate-800 [&::-webkit-details-marker]:hidden"),
+    "steps_dropdown": ("absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
+                       "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 shadow-lg"),
     "step_row": "flex items-baseline gap-2 py-1",
     "step_result_row": "flex items-baseline gap-2 py-1 font-semibold last:mt-1 last:border-t last:border-slate-200 last:pt-2",
     "step_op": "w-3 shrink-0 text-center text-gray-400",
     "step_detail": "ml-1 text-xs font-normal text-gray-400",
     "step_value": "ml-auto whitespace-nowrap tabular-nums",
-
-    # Pricing breakdown: each group is a chain of operations in its own bordered table
-    # (renderBreakdown() in calculator.js, tariff → salary tab)
-    "calc_table": "mb-3.5 w-full border-collapse border-2 border-slate-900",
-    "calc_caption": "pb-1.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500",
-    "calc_result_row": ("bg-slate-100 font-bold [&>td]:border-b-0 [&>td]:border-t-2 [&>td]:border-t-slate-900 "
-                        "[&>td:first-child]:text-slate-900"),
-    "calc_op": "w-7 border-b border-slate-200 px-3 py-2 text-center align-top text-[17px] font-bold text-blue-600",
-    "calc_label": "border-b border-slate-200 px-3 py-2 align-top",
-    "calc_detail": "mt-0.5 block text-xs font-normal text-gray-500",
-    "calc_value": "whitespace-nowrap border-b border-slate-200 px-3 py-2 text-right align-top tabular-nums",
 
     # Toasts (top-left), created by App.toast() in app.js
     "toast": ("min-w-65 max-w-95 rounded-lg px-4 py-3 font-medium text-white shadow-lg transition duration-300 "

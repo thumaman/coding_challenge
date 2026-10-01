@@ -11,97 +11,102 @@
     <button class="inline-flex cursor-pointer items-center rounded-md border border-slate-200 bg-white px-3.5 py-2 font-medium text-gray-800 not-aria-selected:hover:bg-slate-100 aria-selected:border-slate-900 aria-selected:bg-slate-900 aria-selected:text-white" role="tab" aria-selected="false" data-tab="reverse">{% trans "Tariff → salary" %}</button>
 </div>
 
-<section class="mt-4 grid items-start gap-5 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]" data-panel="forward">
-    <form class="flex flex-col gap-3 {{ ui.card }}" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}" autocomplete="off">
-        <h2 class="mt-3 first:mt-0 {{ ui.section_label }}">{% trans "Employer" %}</h2>
-        <div class="flex flex-col gap-1">
-            <label for="id_vacancy" class="font-medium">{% trans "Employer / vacancy" %}</label>
-            <select name="vacancy_id" id="id_vacancy" class="{{ ui.input }}">
-                <option value="">{% trans "— choose a vacancy —" %}</option>
-                {% for v in vacancies %}
-                    <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
-                        {{ v.client.name }} · {{ v.title }} ({{ v.location }}, max €{{ v.max_rate_per_hour }})
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="flex items-center gap-2">
-            <label class="relative inline-flex cursor-pointer">
-                <input type="checkbox" class="peer sr-only" id="id_client_pays_travel" name="client_pays_travel"{% if initial.client_pays_travel %} checked{% endif %}>
-                <span class="h-5.5 w-9.5 rounded-full bg-slate-300 transitial peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600/40 after:absolute after:left-0.75 after:top-0.75 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
-            </label>
-            <label for="id_client_pays_travel" class="font-medium">{% trans "Client pays the travel costs" %}</label>
-        </div>
-
-        <h2 class="mt-3 first:mt-0 {{ ui.section_label }}">{% trans "Candidate" %}</h2>
-        {% include "pricing/_slider.html" with name="salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=12000 step=50 value=initial.salary_month|default:4500 unit_before="€" %}
-        {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=8 max=40 hard_max=40 step=1 value=initial.hours_per_week|default:40 unit_after="h" %}
-
-        <div class="flex flex-col gap-1">
-            <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
-            <input type="text" id="id_home" name="home_location" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
-        </div>
-        <div class="flex flex-col items-start gap-1">
-            <span class="font-medium">{% trans "Travel means" %}</span>
-            <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
-                <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
-                <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
-            </div>
-        </div>
-        <div class="flex flex-col gap-1">
-            <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
-            <div class="{{ ui.number_box }}">
-                <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
-                <span class="{{ ui.number_box_unit }}">km</span>
-            </div>
-            <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
-        </div>
-
-        <h2 class="mt-3 first:mt-0 {{ ui.section_label }}">{% trans "Pricing" %}</h2>
-        {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=initial.cost_factor|default:"2.0" %}
-        <small class="-mt-2 text-gray-500">{% trans "Includes vacation days and other secondary employment conditions." %}</small>
-        {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=initial.margin|default:C.DEFAULT_MARGIN unit_before="€" %}
-    </form>
-
-    <div class="flex flex-col gap-5">
-        <div class="{{ ui.card }}">
-            <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
-            <div class="{{ ui.sum_grid }}">
-                {% include "pricing/_cost_tile.html" with value_id="sum-cost" steps_id="cost-steps" %}
-                {# Hidden by calculator.js when travel is unknown or paid by the client #}
-                <div class="contents" id="sum-travel-part" hidden>
-                    <div class="{{ ui.sum_op }}">+</div>
-                    <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Travel costs" %}</span><strong class="{{ ui.sum_value }}" id="sum-travel">–</strong></div>
-                </div>
+{# Results on top (full width), inputs below in cards; both columns stretch to the same height. #}
+<section class="mt-4 flex flex-col gap-5" data-panel="forward">
+    <div class="{{ ui.card }}">
+        <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
+        <div class="{{ ui.sum_grid }}">
+            {% trans "Cost price" as label %}{% trans "How is the cost price calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value_id="sum-cost" steps_id="cost-steps" %}
+            {# Hidden by calculator.js when travel is unknown or paid by the client #}
+            <div class="contents" id="sum-travel-part" hidden>
                 <div class="{{ ui.sum_op }}">+</div>
-                <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}" id="sum-margin">–</strong></div>
-                <div class="{{ ui.sum_op }}">=</div>
-                <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}" id="sum-tariff">–</strong></div>
+                {% trans "Travel costs" as label %}{% trans "How are the travel costs calculated?" as hint %}
+                {% include "pricing/_steps_tile.html" with value_id="sum-travel" steps_id="travel-steps" %}
             </div>
+            <div class="{{ ui.sum_op }}">+</div>
+            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}" id="sum-margin">–</strong></div>
+            <div class="{{ ui.sum_op }}">=</div>
+            <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}" id="sum-tariff">–</strong></div>
         </div>
     </div>
+
+    <form class="grid gap-5 lg:grid-cols-2" id="forward-form" data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}" autocomplete="off">
+        <div class="flex flex-col gap-3 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Employer & travel" %}</h2>
+            <div class="flex flex-col gap-1">
+                <label for="id_vacancy" class="font-medium">{% trans "Employer / vacancy" %}</label>
+                <select name="vacancy_id" id="id_vacancy" class="{{ ui.input }}">
+                    <option value="">{% trans "— choose a vacancy —" %}</option>
+                    {% for v in vacancies %}
+                        <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-location="{{ v.location }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">
+                            {{ v.client.name }} · {{ v.title }} ({{ v.location }}, max €{{ v.max_rate_per_hour }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="relative inline-flex cursor-pointer">
+                    <input type="checkbox" class="peer sr-only" id="id_client_pays_travel" name="client_pays_travel"{% if initial.client_pays_travel %} checked{% endif %}>
+                    <span class="h-5.5 w-9.5 rounded-full bg-slate-300 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600/40 after:absolute after:left-0.75 after:top-0.75 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
+                </label>
+                <label for="id_client_pays_travel" class="font-medium">{% trans "Client pays the travel costs" %}</label>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
+                <input type="text" id="id_home" name="home_location" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
+            </div>
+            <div class="flex flex-col items-start gap-1">
+                <span class="font-medium">{% trans "Travel means" %}</span>
+                <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
+                    <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
+                    <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
+                </div>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
+                <div class="{{ ui.number_box }}">
+                    <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                    <span class="{{ ui.number_box_unit }}">km</span>
+                </div>
+                <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
+            </div>
+        </div>
+        <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Candidate" %}</h2>
+                {% include "pricing/_slider.html" with name="salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=12000 step=50 value=initial.salary_month|default:4500 unit_before="€" %}
+                {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=8 max=40 hard_max=40 step=1 value=initial.hours_per_week|default:40 unit_after="h" %}
+            </div>
+            <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
+                <h2 class="{{ ui.section_label }}">{% trans "Pricing" %}</h2>
+                {% include "pricing/_slider.html" with name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=initial.cost_factor|default:"2.0" %}
+                <small class="-mt-2 text-gray-500">{% trans "Includes vacation days and other secondary employment conditions." %}</small>
+                {% include "pricing/_slider.html" with name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=initial.margin|default:C.DEFAULT_MARGIN unit_before="€" %}
+            </div>
+        </div>
+    </form>
 </section>
 
-<section class="mt-4 grid items-start gap-5 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)]" data-panel="reverse" hidden>
-    <form class="flex flex-col gap-3 {{ ui.card }}" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}" autocomplete="off">
-        <h2 class="mt-3 first:mt-0 {{ ui.section_label }}">{% trans "What the client pays" %}</h2>
-        {% include "pricing/_slider.html" with prefix="r_" name="max_rate" label=_("Client tariff / hour") min=30 max=200 hard_max=1000 step=1 value=120 unit_before="€" %}
-        {% include "pricing/_slider.html" with prefix="r_" name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=C.DEFAULT_MARGIN unit_before="€" %}
-        {% include "pricing/_slider.html" with prefix="r_" name="cost_factor" label=_("Cost price factor") min=1.5 hard_max=2.5 step=0.05 value=2.0 %}
-        {% include "pricing/_slider.html" with prefix="r_" name="hours_per_week" label=_("Working hours / week") min=8 max=40 hard_max=60 step=1 value=40 unit_after="h" %}
-    </form>
-    <div class="flex flex-col gap-5">
-        <div class="{{ ui.card }}">
-            <div class="{{ ui.sum_grid }}">
-                <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Max gross salary / month" %}</span><strong class="{{ ui.sum_total_value }}" id="reverse-salary">–</strong></div>
-            </div>
-            <p class="mt-3.5 text-gray-500">{% trans "Indicative. Travel costs are excluded until a concrete candidate is known." %}</p>
-        </div>
-        <div class="{{ ui.card }}">
-            <h2 class="{{ ui.h2 }}">{% trans "How it is calculated" %}</h2>
-            <div id="reverse-breakdown"></div>
+<section class="mt-4 flex flex-col gap-5" data-panel="reverse" hidden>
+    <div class="{{ ui.card }}">
+        <p class="mb-3.5 text-gray-500">{% trans "Indicative. Travel costs are excluded until a concrete candidate is known." %}</p>
+        <div class="{{ ui.sum_grid }}">
+            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Cost price / hour" %}</span><strong class="{{ ui.sum_value }}" id="reverse-cost">–</strong></div>
+            <div class="{{ ui.sum_op }}">→</div>
+            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Gross hourly wage" %}</span><strong class="{{ ui.sum_value }}" id="reverse-hourly">–</strong></div>
+            <div class="{{ ui.sum_op }}">→</div>
+            {% trans "Max gross salary / month" as label %}{% trans "How is the salary calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value_id="reverse-salary" steps_id="reverse-steps" dark=True %}
         </div>
     </div>
+    <form class="grid gap-x-10 gap-y-4 sm:grid-cols-2 {{ ui.card }}" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}" autocomplete="off">
+        <h2 class="sm:col-span-2 {{ ui.section_label }}">{% trans "What the client pays" %}</h2>
+        {% include "pricing/_slider.html" with prefix="r_" name="max_rate" label=_("Client tariff / hour") min=30 max=200 hard_max=1000 step=1 value=120 unit_before="€" %}
+        {% include "pricing/_slider.html" with prefix="r_" name="margin" label=_("Margin / hour") min=C.MIN_MARGIN max=C.MAX_MARGIN hard_max=C.MAX_MARGIN step=0.5 value=C.DEFAULT_MARGIN unit_before="€" %}
+        {% include "pricing/_slider.html" with prefix="r_" name="cost_factor" label=_("Cost price factor") min=1.5 max=2.5 hard_max=2.5 step=0.05 value=2.0 %}
+        {% include "pricing/_slider.html" with prefix="r_" name="hours_per_week" label=_("Working hours / week") min=8 max=40 hard_max=60 step=1 value=40 unit_after="h" %}
+    </form>
 </section>
 
 {{ i18n|json_script:"calc-i18n" }}

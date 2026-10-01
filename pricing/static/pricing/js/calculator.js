@@ -40,22 +40,8 @@
 
     const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 
-    // Each group is a chain of operations, drawn as its own bordered block
-    function renderBreakdown(container, groups) {
-        container.innerHTML = groups.map((group) => `
-            <table class="${UI.calc_table}">
-                <caption class="${UI.calc_caption}">${escapeHtml(group.title)}</caption>
-                ${group.rows.map((r) => `
-                    <tr class="${r.op === "=" ? UI.calc_result_row : ""}">
-                        <td class="${UI.calc_op}">${escapeHtml(r.op)}</td>
-                        <td class="${UI.calc_label}">${escapeHtml(r.label)}${r.detail ? `<small class="${UI.calc_detail}">${escapeHtml(r.detail)}</small>` : ""}</td>
-                        <td class="${UI.calc_value}">${escapeHtml(formatValue(r))}</td>
-                    </tr>`).join("")}
-            </table>`).join("");
-    }
-
-    // Salary -> cost price steps in the cost price dropdown (twin of pricing/_cost_steps.html)
-    function renderCostSteps(container, steps) {
+    // Calculation steps in a result tile's dropdown (twin of pricing/_steps.html)
+    function renderSteps(container, steps) {
         container.innerHTML = steps.map((r) => `
             <div class="${r.op === "=" ? UI.step_result_row : UI.step_row}">
                 <span class="${UI.step_op}">${escapeHtml(r.op)}</span>
@@ -93,7 +79,8 @@
         badge.textContent = T.status[result.budget_status];
         document.getElementById("room").textContent =
             result.room_per_hour !== null ? fmt(T.room, {amount: App.formatEuro(result.room_per_hour)}) : "";
-        renderCostSteps(document.getElementById("cost-steps"), result.cost_steps);
+        renderSteps(document.getElementById("cost-steps"), result.cost_steps);
+        renderSteps(document.getElementById("travel-steps"), result.travel_steps);
     }
 
     async function updateDistance() {
@@ -139,8 +126,10 @@
     const runReverse = debounce(async () => {
         try {
             const {result} = await App.post(reverse.dataset.endpoint, formData(reverse));
+            document.getElementById("reverse-cost").textContent = App.formatEuro(result.cost_price);
+            document.getElementById("reverse-hourly").textContent = App.formatEuro(result.hourly_wage);
             document.getElementById("reverse-salary").textContent = App.formatEuro(result.monthly_salary);
-            renderBreakdown(document.getElementById("reverse-breakdown"), result.breakdown);
+            renderSteps(document.getElementById("reverse-steps"), result.steps);
         } catch (err) { /* invalid input while typing */ }
     });
     reverse.addEventListener("input", runReverse);

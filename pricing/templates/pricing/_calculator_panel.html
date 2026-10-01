@@ -12,11 +12,13 @@
         <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a>
     </p>
     <div class="{{ ui.sum_grid }}">
-        {% include "pricing/_cost_tile.html" with value=p.cost_price steps=p.cost_steps %}
+        {% trans "Cost price" as label %}{% trans "How is the cost price calculated?" as hint %}
+        {% include "pricing/_steps_tile.html" with value=p.cost_price steps=p.cost_steps %}
         {# Travel is only part of the tariff when it is known and not paid by the client #}
         {% if p.travel_known and not p.client_pays_travel %}
             <div class="{{ ui.sum_op }}">+</div>
-            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Travel costs" %}</span><strong class="{{ ui.sum_value }}">€{{ p.travel_in_tariff }}</strong></div>
+            {% trans "Travel costs" as label %}{% trans "How are the travel costs calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value=p.travel_in_tariff steps=p.travel_steps %}
         {% endif %}
         <div class="{{ ui.sum_op }}">+</div>
         <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Margin" %}</span><strong class="{{ ui.sum_value }}">€{{ p.margin }}</strong></div>

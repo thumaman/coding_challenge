@@ -56,6 +56,24 @@ class SalaryToTariffTests(SimpleTestCase):
         self.assertEqual([r["op"] for r in result.cost_steps], ["", "=", "×", "="])
         self.assertEqual(result.cost_steps[-1]["value"], str(result.cost_price))
 
+    def test_travel_steps_car(self):
+        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="car"))
+        labels = [r["label"] for r in result.travel_steps]
+        self.assertIn("Working days / year", labels)
+        self.assertIn("Tax-free rate / km", labels)
+        self.assertEqual(result.travel_steps[0]["value"], "50 km")
+        self.assertEqual(result.travel_steps[-1]["value"], str(result.travel_per_hour))
+
+    def test_travel_steps_ov_flat_rate_or_ns_flex(self):
+        flat = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="ov"))
+        self.assertIn("Flat rate / km", [r["label"] for r in flat.travel_steps])
+        capped = calculate(PricingInput(salary_month=6000, travel_distance_km=60, transport_type="ov"))
+        self.assertEqual(capped.travel_steps[0]["label"], "NS Flex Altijd Vrij / month")
+        self.assertEqual(capped.travel_steps[0]["value"], "400.00")
+
+    def test_no_travel_steps_when_distance_unknown(self):
+        self.assertEqual(calculate(PricingInput(salary_month=6000)).travel_steps, [])
+
     def test_travel_left_out_of_breakdown_when_unknown_or_paid_by_client(self):
         for inp in (PricingInput(salary_month=6000),
                     PricingInput(salary_month=6000, travel_distance_km=25, client_pays_travel=True)):
@@ -114,7 +132,9 @@ class PricingApiTests(TestCase):
 
     def test_reverse_endpoint(self):
         response = self.client.post(reverse("pricing:reverse"), json.dumps({"max_rate": 120}), content_type="application/json")
-        self.assertEqual(response.json()["result"]["monthly_salary"], "9533.33")
+        result = response.json()["result"]
+        self.assertEqual(result["monthly_salary"], "9533.33")
+        self.assertEqual(result["steps"][-1]["value"], "9533.33")
 
     @mock.patch("pricing.views.route_distance_km", return_value={"km": Decimal("45.9"), "source": "route"})
     def test_distance_endpoint(self, route):
