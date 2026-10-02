@@ -1083,6 +1083,10 @@ msgstr "afstand onbekend"
 msgid "client pays travel"
 msgstr "opdrachtgever betaalt reis"
 
+#: pricing/templates/pricing/_calculator_panel.html
+msgid "Show calculation"
+msgstr "Berekening tonen"
+
 #: pricing/templates/pricing/_calculator_panel.html:16
 msgid "Open in calculator"
 msgstr "Openen in calculator"

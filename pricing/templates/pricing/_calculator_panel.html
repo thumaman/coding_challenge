@@ -1,10 +1,14 @@
 {% load i18n ui %}
 {# Tariff card for one vacancy a candidate is considered for (candidates/detail.html). Owner: Teun. #}
-{# Context: link (CandidateVacancy), options (advisor options for this link, see clients/advisor.py). #}
+{# Context: link (CandidateVacancy), options (advisor options for this link, see clients/advisor.py), #}
+{# collapsed (start with the calculation folded away; the chevron toggles it, see app.js). #}
 {# TODO(Teun): make this interactive (sliders + "Save to candidate" that POSTs and calls App.toast). #}
 {% with p=link.pricing vacancy=link.vacancy %}
-<div class="{{ ui.card }}">
-    <div class="mb-3.5 flex flex-wrap items-start gap-x-4 gap-y-2">
+<div class="group/card {{ ui.card }}" data-collapsible{% if not collapsed %} data-open{% endif %}>
+    <div class="flex flex-wrap items-start gap-x-4 gap-y-2 group-data-open/card:mb-3.5">
+        <button type="button" class="{{ ui.icon_button }} -ml-1.5 shrink-0" data-collapse-toggle aria-expanded="{{ collapsed|yesno:'false,true' }}" aria-label="{% trans 'Show calculation' %}">
+            <svg class="size-4 -rotate-90 transition group-data-open/card:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
         <div class="min-w-0">
             <h2 class="text-base font-bold"><a href="{% url 'clients:detail' vacancy.pk %}">{{ vacancy.title }}</a></h2>
             <p class="text-gray-500">
@@ -30,8 +34,11 @@
                 {% endfor %}
             </div>
         </details>
+        {# Folded: the outcome stays visible next to the status #}
+        <span class="{{ p.budget_status|badge }} group-data-open/card:hidden" title="{% trans 'Advised tariff' %}">€{{ p.advised_rate }}</span>
         <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ link.candidate_id }}&amp;vacancy={{ vacancy.pk }}">{% trans "Open in calculator" %}</a>
     </div>
+    <div class="hidden group-data-open/card:block">
     <p class="mb-3.5 flex flex-wrap items-center gap-2">
         <span class="{{ p.budget_status|badge }}">
             {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum: too cheap?" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
@@ -54,5 +61,6 @@
         <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}">€{{ p.advised_rate }}</strong></div>
     </div>
     {% if p.budget_status == "over" or options %}{% include "clients/_advisor_panel.html" %}{% endif %}
+    </div>
 </div>
 {% endwith %}
