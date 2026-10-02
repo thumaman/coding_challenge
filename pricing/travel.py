@@ -149,13 +149,17 @@ def offline_distance_km(origin: str, destination: str) -> Decimal | None:
 
 def estimate_monthly_travel_cost(
     one_way_distance_km: float | Decimal,
-    days_worked_per_week: float | Decimal,
+    days_worked_per_week: float | Decimal,  # office days: working days minus remote days
     transport_method: str = "car",
     ov_subscription_cost: float | Decimal = 0.0,
 ) -> Decimal:
     """Calculates the estimated monthly travel cost based on Belastingdienst formulas."""
     transport_method = transport_method.strip().lower()
     distance = Decimal(str(one_way_distance_km))
+
+    # Fully remote: no commute, so no travel costs
+    if Decimal(str(days_worked_per_week)) <= 0:
+        return Decimal("0.00")
 
     if transport_method == "ov":
         if ov_subscription_cost and Decimal(str(ov_subscription_cost)) > 0:

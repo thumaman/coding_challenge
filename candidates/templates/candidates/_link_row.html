@@ -3,7 +3,7 @@
 {# Also rendered from formset.empty_form into a <template> that calculator.js clones (vacancy is then empty #}
 {# and the data-slot texts are filled in from the picked option). Removing a row ticks DELETE and hides it. #}
 {% with deleted=form.DELETE.value %}
-<div class="rounded-lg border border-slate-200 p-3.5 transition data-active:border-blue-600 data-active:ring-2 data-active:ring-blue-600/25"
+<div class="cursor-pointer rounded-lg border border-slate-200 p-3.5 transition data-active:border-blue-600 data-active:ring-2 data-active:ring-blue-600/25"
      data-link-row data-location="{{ vacancy.location }}" data-max="{{ vacancy.max_rate_per_hour|unlocalize }}"{% if deleted %} hidden{% endif %}>
     {{ form.id }}
     <input type="hidden" name="{{ form.vacancy.html_name }}" value="{{ form.vacancy.value|default_if_none:'' }}" data-field="vacancy">

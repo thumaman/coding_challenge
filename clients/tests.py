@@ -1,4 +1,3 @@
-import json
 from decimal import Decimal
 from unittest import mock
 
@@ -25,12 +24,6 @@ class AdvisorTests(TestCase):
         )
         self.link = CandidateVacancy.objects.create(candidate=self.candidate, vacancy=self.vacancy, travel_distance_km=50)
 
-    def fresh_link(self):
-        return CandidateVacancy.objects.select_related("candidate", "vacancy").get(pk=self.link.pk)
-
-    def apply(self, changes):
-        return self.client.post(reverse("clients:apply_tweak", args=[self.link.pk]), {"changes": json.dumps(changes)})
-
     @mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""})
     def test_solver_brings_candidate_within_budget(self):
         self.assertEqual(self.link.pricing.budget_status, "over")
@@ -40,37 +33,16 @@ class AdvisorTests(TestCase):
             self.assertLessEqual(Decimal(option["new_rate"]), Decimal(80))
 
     @mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""})
-    def test_apply_tweak(self):
-        option = next(o for o in suggest_tweaks(self.link) if o["key"] == "salary")
-        self.assertTrue(self.apply(option["changes"]).json()["ok"])
-        self.assertNotEqual(self.fresh_link().pricing.budget_status, "over")
+    def test_client_pays_travel_option(self):
+        option = next(o for o in suggest_tweaks(self.link) if o["key"] == "client_travel")
+        self.assertEqual(option["changes"], {"client_pays_travel": "True"})
 
     @mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""})
-    def test_client_pays_travel_option_updates_only_this_vacancy(self):
-        other = CandidateVacancy.objects.create(candidate=self.candidate, travel_distance_km=50,
-                                                vacancy=Vacancy.objects.create(client=self.vacancy.client, title="Other", max_rate_per_hour=80))
-        option = next(o for o in suggest_tweaks(self.link) if o["key"] == "client_travel")
-        self.apply(option["changes"])
-        link = self.fresh_link()
-        self.assertTrue(link.client_pays_travel)
-        self.assertEqual(link.pricing.travel_in_tariff, 0)
-        other.refresh_from_db()
-        self.assertFalse(other.client_pays_travel)
-
-    def test_apply_tweak_resets_the_proposed_rate(self):
-        self.link.proposed_rate = 95
-        self.link.save()
-        self.apply({"margin_per_hour": "5"})
-        link = self.fresh_link()
-        self.assertIsNone(link.proposed_rate)
-        self.assertEqual(link.candidate.margin_per_hour, Decimal("5"))
-
-    def test_apply_tweak_rejects_unknown_fields(self):
-        self.assertEqual(self.apply({"first_name": "x"}).status_code, 400)
-
-    def test_detail_shows_advisor_on_the_over_budget_vacancy(self):
+    def test_detail_shows_advisor_without_apply_button(self):
         response = self.client.get(reverse("candidates:detail", args=[self.candidate.pk]))
-        self.assertContains(response, reverse("clients:apply_tweak", args=[self.link.pk]))
+        self.assertContains(response, "Advisor Insights")
+        self.assertContains(response, "Lower salary")
+        self.assertNotContains(response, "/advisor/")
 
     def test_vacancy_detail_marks_linked_candidates(self):
         response = self.client.get(reverse("clients:detail", args=[self.vacancy.pk]))
@@ -85,6 +57,23 @@ VACANCY = {
     "title": "Data Engineer", "max_rate_per_hour": "100", "hours_per_week": "40", "remote_days_allowed": "1",
     "is_open": "on",
 }
+
+
+class VacancyDataTests(TestCase):
+    def setUp(self):
+        self.client.force_login(User.objects.create_user("recruiter"))
+        company = Client.objects.create(name="ACME")
+        Vacancy.objects.create(client=company, title="Open", max_rate_per_hour=80)
+        Vacancy.objects.create(client=company, title="Closed", max_rate_per_hour=80, is_open=False)
+
+    def titles(self, **params):
+        return {r["title"] for r in self.client.get(reverse("clients:data"), params).json()["data"]}
+
+    def test_open_vacancies_by_default(self):
+        self.assertEqual(self.titles(), {"Open"})
+
+    def test_all_vacancies_with_filter(self):
+        self.assertEqual(self.titles(all=1), {"Open", "Closed"})
 
 
 class VacancyPageTests(TestCase):

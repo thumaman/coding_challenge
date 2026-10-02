@@ -20,6 +20,4 @@ urlpatterns = [
     path("new/", views.ClientCreateView.as_view(), name="client_create"),
     path("<int:pk>/edit/", views.ClientUpdateView.as_view(), name="client_update"),
     path("<int:pk>/delete/", views.ClientDeleteView.as_view(), name="client_delete"),
-    # AI advisor
-    path("advisor/link/<int:link_pk>/apply/", views.apply_tweak, name="apply_tweak"),
 ]

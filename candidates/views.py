@@ -30,27 +30,18 @@ def candidate_list(request):
 
 
 def candidate_data(request):
-    """JSON for the candidates DataTable (filters via query string)."""
+    """JSON for the candidates DataTable (filters via query string): one row per vacancy a candidate is
+    considered for; candidates without a vacancy get a single row."""
     qs = Candidate.objects.prefetch_related("links__vacancy__client")
     if status := request.GET.get("status"):
         qs = qs.filter(status=status)
-    if vacancy := request.GET.get("vacancy"):
+    vacancy = request.GET.get("vacancy")
+    if vacancy:
         qs = qs.filter(vacancies=vacancy).distinct()
 
     rows = []
     for c in qs:
-        links = []
-        for link in c.links.all():
-            p = link.pricing
-            links.append({
-                "vacancy": str(link.vacancy),
-                "url": reverse("clients:detail", args=[link.vacancy_id]),
-                "status": link.get_status_display(),
-                "rate": str(p.final_rate),
-                "max_rate": str(p.max_rate),
-                "budget_status": p.budget_status,
-            })
-        rows.append({
+        candidate = {
             "id": c.pk,
             "name": c.full_name,
             "role": c.desired_role,
@@ -58,13 +49,25 @@ def candidate_data(request):
             "salary": str(c.expected_salary_month),
             "hours": c.hours_per_week,
             "remote": c.remote_days_per_week,
-            "links": links,
             "urls": {
                 "detail": reverse("candidates:detail", args=[c.pk]),
                 "update": reverse("candidates:update", args=[c.pk]),
                 "delete": reverse("candidates:delete", args=[c.pk]),
             },
-        })
+        }
+        links = [link for link in c.links.all() if not vacancy or str(link.vacancy_id) == vacancy]
+        if not links:
+            rows.append({**candidate, "link": None})
+        for link in links:
+            p = link.pricing
+            rows.append({**candidate, "link": {
+                "vacancy": str(link.vacancy),
+                "url": reverse("clients:detail", args=[link.vacancy_id]),
+                "status": link.get_status_display(),
+                "rate": str(p.final_rate),
+                "max_rate": str(p.max_rate),
+                "budget_status": p.budget_status,
+            }})
     return JsonResponse({"data": rows})
 
 

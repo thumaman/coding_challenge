@@ -56,19 +56,35 @@ class SalaryToTariffTests(SimpleTestCase):
         self.assertEqual([r["op"] for r in result.cost_steps], ["", "=", "×", "="])
         self.assertEqual(result.cost_steps[-1]["value"], str(result.cost_price))
 
+    def test_remote_days_reduce_travel(self):
+        # 3 office days: 50 km × 214 × 3 ÷ 5 × €0.25 ÷ (40 h × 52) = €0.77
+        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, remote_days_per_week=2))
+        self.assertEqual(result.travel_per_hour, Decimal("0.77"))
+
+    def test_fully_remote_has_no_travel_costs(self):
+        for transport in ("car", "ov"):
+            result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type=transport,
+                                            remote_days_per_week=5))
+            self.assertEqual(result.travel_per_hour, Decimal("0.00"))
+
+    def test_negative_remote_days(self):
+        with self.assertRaises(ValueError):
+            PricingInput(salary_month=6000, remote_days_per_week=-1)
+
     def test_travel_steps_car(self):
-        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="car"))
+        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="car",
+                                        remote_days_per_week=1))
         labels = [r["label"] for r in result.travel_steps]
-        self.assertIn("Working days / year", labels)
-        self.assertIn("Tax-free rate / km", labels)
+        self.assertEqual(labels, ["Distance return trip", "Office days / year", "Tax-free rate / km",
+                                  "Hours / year", "Travel costs / hour"])
         self.assertEqual(result.travel_steps[0]["value"], "50 km")
+        self.assertEqual(result.travel_steps[1]["value"], "171.2")  # 214 × 4 ÷ 5
         self.assertEqual(result.travel_steps[-1]["value"], str(result.travel_per_hour))
 
-    def test_travel_steps_ov_flat_rate_or_ns_flex(self):
-        flat = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="ov"))
-        self.assertIn("Flat rate / km", [r["label"] for r in flat.travel_steps])
+    def test_travel_steps_ov(self):
         capped = calculate(PricingInput(salary_month=6000, travel_distance_km=60, transport_type="ov"))
-        self.assertEqual(capped.travel_steps[0]["label"], "NS Flex Altijd Vrij / month")
+        self.assertEqual([r["label"] for r in capped.travel_steps],
+                         ["Travel costs / month", "Hours / month", "Travel costs / hour"])
         self.assertEqual(capped.travel_steps[0]["value"], "400.00")
 
     def test_no_travel_steps_when_distance_unknown(self):

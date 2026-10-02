@@ -1,15 +1,12 @@
-import json
-
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, UpdateView
 
-from candidates.models import Candidate, CandidateVacancy
+from candidates.models import Candidate
 from core.drafts import DraftCreateMixin, DraftDeleteView, draft_autosave_view, draft_list_view
 from core.modals import ModalDeleteMixin
 from pricing import constants as C
@@ -30,10 +27,13 @@ def vacancy_list(request):
 
 
 def vacancy_data(request):
-    """JSON for the vacancies DataTable."""
-    # TODO(Ivan): filters (client, open/closed, max rate range) via request.GET
+    """JSON for the vacancies DataTable: open vacancies only, unless ?all=1."""
+    # TODO(Ivan): filters (client, max rate range) via request.GET
+    qs = Vacancy.objects.select_related("client")
+    if not request.GET.get("all"):
+        qs = qs.filter(is_open=True)
     rows = []
-    for v in Vacancy.objects.select_related("client"):
+    for v in qs:
         rows.append({
             "id": v.pk,
             "title": v.title,
@@ -184,27 +184,3 @@ def advisor_panel_context(candidate):
     """Candidate detail: one entry per vacancy the candidate is considered for, with advisor options."""
     links = list(candidate.links.all())
     return {"candidate": candidate, "links": [{"link": link, "options": suggest_tweaks(link)} for link in links]}
-
-
-@require_POST
-def apply_tweak(request, link_pk):
-    """POST {"changes": {field: value}} -> apply to the candidate and/or its link to the vacancy."""
-    link = get_object_or_404(CandidateVacancy.objects.select_related("candidate", "vacancy"), pk=link_pk)
-    candidate = link.candidate
-    try:
-        changes = json.loads(request.POST.get("changes") or request.body or "{}")
-        changes = changes.get("changes", changes)
-    except json.JSONDecodeError:
-        return JsonResponse({"ok": False, "message": "Invalid changes"}, status=400)
-    candidate_fields = set(Candidate.PRICING_FIELD_MAP.values())
-    link_fields = set(Candidate.LINK_PRICING_FIELD_MAP.values())
-    if not set(changes) <= candidate_fields | link_fields:
-        unknown = set(changes) - candidate_fields - link_fields
-        return JsonResponse({"ok": False, "message": f"Field not allowed: {unknown}"}, status=400)
-    for field, value in changes.items():
-        target = link if field in link_fields else candidate
-        setattr(target, field, target._meta.get_field(field).to_python(value))
-    link.proposed_rate = None  # the advised tariff is recalculated from the new terms
-    candidate.save()
-    link.save()
-    return JsonResponse({"ok": True, "message": _("Tweak applied to %(name)s.") % {"name": candidate.full_name}})

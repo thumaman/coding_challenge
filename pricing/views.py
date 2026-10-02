@@ -30,6 +30,7 @@ def _initial_from_candidate(candidate_id, vacancy_id=None):
         "hours_per_week": candidate.hours_per_week,
         "home_location": candidate.city,
         "transport_type": candidate.transport_type,
+        "remote_days_per_week": candidate.remote_days_per_week,
         "travel_distance_km": link.travel_distance_km if link else None,
         "cost_factor": candidate.cost_factor,
         "margin": candidate.margin_per_hour,

@@ -107,13 +107,14 @@ function paintSlider(el) {
 
     // ---- Event delegation ----
 
-    function closeMenus(except) {
+    // `inside`: the clicked element's path (event.composedPath()); a dropdown on that path stays open
+    function closeMenus(except, inside = except ? [except] : []) {
         document.querySelectorAll("[data-row-menu][data-open]").forEach((menu) => {
             if (menu !== except) menu.removeAttribute("data-open");
         });
         // <details data-dropdown> (e.g. the cost price breakdown) close like menus
         document.querySelectorAll("details[data-dropdown][open]").forEach((d) => {
-            if (!except || !d.contains(except)) d.open = false;
+            if (!inside.some((el) => el === d || (el instanceof Node && d.contains(el)))) d.open = false;
         });
     }
 
@@ -143,7 +144,8 @@ function paintSlider(el) {
             menu.toggleAttribute("data-open");
             return;
         }
-        closeMenus(event.target);
+        // The path, not the target: a click handler may already have removed the target (e.g. the vacancy picker re-renders its list)
+        closeMenus(event.target, event.composedPath());
 
         const opener = event.target.closest("[data-modal-url]");
         if (opener) {

@@ -75,6 +75,7 @@ class PricingInput:
     # Travel only counts when the distance is known (business rule) and the client doesn't pay it
     travel_distance_km: Decimal | None = None  # one way
     transport_type: str = "car"  # car | ov | bicycle
+    remote_days_per_week: Decimal = Decimal(0)  # days worked from home: no commute
     ov_subscription_month: Decimal | None = None  # <-- NEW: for fixed monthly OV costs
     client_pays_travel: bool = False
     # Use a fixed travel cost per hour instead of computing it from km (e.g. €2.13 in the brief)
@@ -83,13 +84,15 @@ class PricingInput:
     proposed_rate: Decimal | None = None  # recruiter's chosen rate for a candidate (optional)
 
     def __post_init__(self):
-        for name in ("salary_month", "hours_per_week", "cost_factor", "margin"):
+        for name in ("salary_month", "hours_per_week", "cost_factor", "margin", "remote_days_per_week"):
             setattr(self, name, D(getattr(self, name)))
         for name in ("travel_distance_km", "travel_per_hour_override", "max_rate", "proposed_rate", "ov_subscription_month"):
             setattr(self, name, _opt(getattr(self, name)))
         self.client_pays_travel = self.client_pays_travel in (True, "true", "on", "1", 1)
         if self.hours_per_week <= 0:
             raise ValueError("hours_per_week must be positive")
+        if self.remote_days_per_week < 0:
+            raise ValueError("remote_days_per_week can't be negative")
         if self.cost_factor <= 0:
             raise ValueError("cost_factor must be positive")
         if not C.MIN_MARGIN <= self.margin <= C.MAX_MARGIN:
@@ -136,13 +139,19 @@ def workdays_per_week(hours_per_week) -> Decimal:
     return min(D(hours_per_week) / C.HOURS_PER_WORKDAY, Decimal(C.MAX_WORKDAYS_PER_WEEK))
 
 
-def travel_cost_per_hour(distance_km, transport_type, hours_per_week, ov_subscription_month=0) -> Decimal:
+def office_days_per_week(hours_per_week, remote_days_per_week=0) -> Decimal:
+    """Days per week the candidate commutes: working days minus remote days."""
+    return max(workdays_per_week(hours_per_week) - D(remote_days_per_week), Decimal(0))
+
+
+def travel_cost_per_hour(distance_km, transport_type, hours_per_week, ov_subscription_month=0,
+                         remote_days_per_week=0) -> Decimal:
     """Converts the static monthly travel allowance to an hourly cost."""
-    workdays = workdays_per_week(hours_per_week)
-    
+    office_days = office_days_per_week(hours_per_week, remote_days_per_week)
+
     monthly_cost = estimate_monthly_travel_cost(
         one_way_distance_km=distance_km or 0,
-        days_worked_per_week=workdays,
+        days_worked_per_week=office_days,
         transport_method=transport_type,
         ov_subscription_cost=ov_subscription_month or 0
     )
@@ -165,76 +174,47 @@ def budget_status(rate, max_rate) -> str:
 def _travel_detail(inp: PricingInput) -> str:
     if inp.travel_per_hour_override is not None:
         return _("fixed amount")
-    
-    workdays = workdays_per_week(inp.hours_per_week)
-
-    if inp.transport_type == "ov":
-        # Get the monthly cost using our Hackathon heuristic
-        monthly_cost = estimate_monthly_travel_cost(
-            inp.travel_distance_km or 0, 
-            workdays, 
-            "ov", 
-            inp.ov_subscription_month or 0
-        )
-        return _("= €%(amount)s / mo (OV subscription)") % {
-            "amount": num(monthly_cost)
-        }
-        
-    # For car / bicycle
-    fte = workdays / Decimal("5")
-    fte_str = num(fte.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
-    
+    office_days = office_days_per_week(inp.hours_per_week, inp.remote_days_per_week)
     monthly_cost = estimate_monthly_travel_cost(
-        inp.travel_distance_km or 0, 
-        workdays, 
-        inp.transport_type, 
-        0
+        inp.travel_distance_km or 0, office_days, inp.transport_type, inp.ov_subscription_month or 0
     )
-    
-    return _("= €%(amount)s / mo (based on %(km)s km, %(fte)s FTE)") % {
+    if inp.transport_type == "ov":
+        return _("= €%(amount)s / mo (OV subscription)") % {"amount": num(monthly_cost)}
+    return _("= €%(amount)s / mo (based on %(km)s km, %(days)s office days / week)") % {
         "amount": num(monthly_cost),
         "km": num(inp.travel_distance_km),
-        "fte": fte_str,
+        "days": num(office_days.quantize(CENT)),
     }
 
+
 def _travel_steps(inp: PricingInput, travel: Decimal) -> list[dict]:
-    """Compact chain for the travel costs dropdown: monthly travel cost → per hour."""
+    """Compact chain for the travel costs dropdown: only the essentials, ending in travel costs / hour."""
     if not inp.travel_known:
         return []
     if inp.travel_per_hour_override is not None:
         return [row("=", _("Travel costs / hour"), travel, detail=_("fixed amount"))]
 
     km = D(inp.travel_distance_km)
-    workdays = workdays_per_week(inp.hours_per_week)
-    monthly = estimate_monthly_travel_cost(km, workdays, inp.transport_type, inp.ov_subscription_month or 0)
+    office_days = office_days_per_week(inp.hours_per_week, inp.remote_days_per_week)
 
-    if inp.transport_type == "ov":
-        flat = km * T.OV_RATE_PER_KM
-        if inp.ov_subscription_month:
-            steps = [row("", _("OV subscription / month"), monthly, detail=_("fixed amount"))]
-        elif flat >= T.NS_FLEX_ALTIJD_VRIJ_MONTH:
-            steps = [row("", _("NS Flex Altijd Vrij / month"), monthly)]
-        else:
-            steps = [
-                row("", _("Distance one way"), f"{num(km)} km", kind="text"),
-                row("×", _("Flat rate / km"), T.OV_RATE_PER_KM),
-                row("=", _("Travel costs / month"), monthly),
-            ]
-    else:  # car / bicycle: tax-free allowance for every return trip
-        fte = workdays / T.FULL_TIME_DAYS_PER_WEEK
-        steps = [
-            row("", _("Distance return trip"), f"{num(km * 2)} km", kind="text",
-                detail=_("%(km)s km × 2") % {"km": num(km)}),
-            row("×", _("Working days / year"), num((T.WORKABLE_DAYS_PER_YEAR_FULL_TIME * fte).quantize(CENT)), kind="text",
-                detail=_("%(days)s × %(fte)s FTE") % {"days": num(T.WORKABLE_DAYS_PER_YEAR_FULL_TIME),
-                                                     "fte": num(fte.quantize(CENT))}),
-            row("×", _("Tax-free rate / km"), T.TAX_FREE_RATE_PER_KM),
-            row("÷", _("Months / year"), num(T.MONTHS_IN_YEAR), kind="text"),
-            row("=", _("Travel costs / month"), monthly),
+    if inp.transport_type == "ov":  # a monthly amount (subscription or capped flat rate)
+        monthly = estimate_monthly_travel_cost(km, office_days, "ov", inp.ov_subscription_month or 0)
+        return [
+            row("", _("Travel costs / month"), monthly),
+            row("÷", _("Hours / month"), num((D(inp.hours_per_week) * 13 / 3).quantize(CENT)), kind="hours"),
+            row("=", _("Travel costs / hour"), travel),
         ]
-    return steps + [
-        row("÷", _("Hours / month"), num((D(inp.hours_per_week) * 13 / 3).quantize(CENT)), kind="hours",
-            detail=_("%(hours)s h × 13 ÷ 3") % {"hours": num(inp.hours_per_week)}),
+
+    # Car / bicycle: tax-free allowance for every return trip on an office day.
+    # Per hour = yearly cost ÷ hours per year (the same as monthly cost ÷ hours per month).
+    days_per_year = T.WORKABLE_DAYS_PER_YEAR_FULL_TIME * office_days / T.FULL_TIME_DAYS_PER_WEEK
+    remote = D(inp.remote_days_per_week)
+    return [
+        row("", _("Distance return trip"), f"{num(km * 2)} km", kind="text"),
+        row("×", _("Office days / year"), num(days_per_year.quantize(CENT)), kind="text",
+            detail=_("excl. %(days)s remote days / week") % {"days": num(remote)} if remote else ""),
+        row("×", _("Tax-free rate / km"), T.TAX_FREE_RATE_PER_KM),
+        row("÷", _("Hours / year"), num(D(inp.hours_per_week) * 52), kind="hours"),
         row("=", _("Travel costs / hour"), travel),
     ]
 
@@ -250,12 +230,12 @@ def calculate(inp: PricingInput) -> PricingResult:
     elif inp.travel_per_hour_override is not None:
         travel = inp.travel_per_hour_override
     else:
-        # <-- UPDATED CALL to match new signature
         travel = travel_cost_per_hour(
-            inp.travel_distance_km, 
-            inp.transport_type, 
-            inp.hours_per_week, 
-            inp.ov_subscription_month
+            inp.travel_distance_km,
+            inp.transport_type,
+            inp.hours_per_week,
+            inp.ov_subscription_month,
+            inp.remote_days_per_week,
         )
         
     travel_in_tariff = Decimal(0) if inp.client_pays_travel else travel

@@ -3,7 +3,7 @@
 //   the cache is only a fallback when offline.
 // - CDN libraries (incl. Tailwind) and fonts (versioned URLs that never change): cache-first.
 // Bump CACHE when changing this file, so old caches are deleted on activate.
-const CACHE = "talentrate-v3";
+const CACHE = "talentrate-v4";
 const SHELL = [
     "{% static 'core/js/app.js' %}",
     "{% static 'core/icons/icon.svg' %}",
@@ -21,8 +21,8 @@ self.addEventListener("activate", (event) => {
     self.clients.claim();
 });
 
-function networkFirst(request) {
-    return fetch(request)
+function networkFirst(request, init) {
+    return fetch(request, init)
         .then((response) => {
             if (response.ok) {
                 const copy = response.clone();
@@ -48,7 +48,10 @@ self.addEventListener("fetch", (event) => {
 
     if (url.origin !== self.location.origin) {
         event.respondWith(cacheFirst(request)); // CDN / fonts
-    } else if (url.pathname.startsWith("/static/") || request.mode === "navigate") {
+    } else if (url.pathname.startsWith("/static/")) {
+        // no-cache: always revalidate, so the browser's HTTP cache never serves a stale script after a change
+        event.respondWith(networkFirst(request, {cache: "no-cache"}));
+    } else if (request.mode === "navigate") {
         event.respondWith(networkFirst(request));
     }
     // Everything else (JSON APIs, modal partials) goes straight to the network.

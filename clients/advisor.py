@@ -6,12 +6,11 @@ Options are ranked purely by least intervention (rule-based).
 
 Advice is per CandidateVacancy (a candidate at one vacancy): each vacancy has its own budget and travel.
 Each option: {"key", "title", "changes": {field: value}, "new_rate", "savings_per_hour", "reason"}
-`changes` keys are Candidate or CandidateVacancy model fields, so clients:apply_tweak can apply them directly.
+`changes` keys are Candidate or CandidateVacancy model fields.
 """
 
 from __future__ import annotations
 
-import json
 from decimal import ROUND_DOWN, Decimal
 
 from django.utils.translation import gettext as _
@@ -40,7 +39,6 @@ def _option(link, key, title, changes, current, reason):
         "key": key,
         "title": title,
         "changes": serialized,
-        "changes_json": json.dumps(serialized),
         "new_rate": str(new_rate),
         "savings_per_hour": str(money(current - new_rate)),
         "fits": new_rate <= link.vacancy.max_rate_per_hour,
@@ -71,7 +69,6 @@ def suggest_tweaks(link) -> list[dict]:
             "key": "increase_margin",
             "title": _("Increase Margin or Salary"),
             "changes": {},
-            "changes_json": "{}",
             "new_rate": str(current),
             "savings_per_hour": "0.00",
             "fits": True,

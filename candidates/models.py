@@ -68,6 +68,7 @@ class Candidate(models.Model):
         "cost_factor": "cost_factor",
         "margin": "margin_per_hour",
         "transport_type": "transport_type",
+        "remote_days_per_week": "remote_days_per_week",
     }
     LINK_PRICING_FIELD_MAP = {
         "travel_distance_km": "travel_distance_km",

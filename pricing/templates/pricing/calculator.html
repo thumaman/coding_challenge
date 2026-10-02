@@ -37,6 +37,14 @@
                     </div>
                 </div>
                 <div class="flex flex-col gap-1">
+                    <label for="id_remote_days_per_week" class="font-medium">{% trans "Remote days / week" %}</label>
+                    <div class="{{ ui.number_box }}">
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_remote_days_per_week" name="remote_days_per_week" value="{{ initial.remote_days_per_week|default:0 }}" min="0" max="5" step="1">
+                        <span class="{{ ui.number_box_unit }}">{% trans "days" %}</span>
+                    </div>
+                    <small class="text-gray-500">{% trans "No travel costs on remote days." %}</small>
+                </div>
+                <div class="flex flex-col gap-1">
                     <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
                     <div class="{{ ui.number_box }}">
                         <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %} ">

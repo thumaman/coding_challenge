@@ -15,7 +15,12 @@
 
 {% block content %}
 <div class="{{ ui.dt_card }}">
-    {# TODO(Ivan): filters (client, open/closed, max rate range) #}
+    {# TODO(Ivan): filters (client, max rate range) #}
+    <form class="mb-4 flex flex-wrap items-end gap-3" id="vacancy-filters">
+        <div class="py-2 text-xs">
+            {% include "core/_toggle.html" with id="id_all" name="all" label=_("Show closed vacancies") attrs='value="1"' %}
+        </div>
+    </form>
     <table id="vacancies" class="display w-full">
         <thead>
             <tr>
@@ -35,8 +40,11 @@
 
 {% block extra_js %}
 <script>
-new DataTable("#vacancies", {
-    ajax: "{% url 'clients:data' %}",
+const filters = document.getElementById("vacancy-filters");
+const dataUrl = () => "{% url 'clients:data' %}?" + new URLSearchParams(new FormData(filters));
+
+const table = new DataTable("#vacancies", {
+    ajax: dataUrl(),
   layout: {topStart: "search", topEnd: {}, bottomStart: {info: true, pageLength: true}, bottomEnd: {paging: {firstLast: false}}},
     columns: [
         {data: "title", render: (d, t, row) => `<a href="${row.urls.detail}">${DataTable.util.escapeHtml(d)}</a>`},
@@ -52,5 +60,7 @@ new DataTable("#vacancies", {
         ])},
     ],
 });
+
+filters.addEventListener("change", () => table.ajax.url(dataUrl()).load());
 </script>
 {% endblock %}
