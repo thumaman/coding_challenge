@@ -212,15 +212,35 @@
         const distanceStatus = document.getElementById("distance-status");
         const paysTravel = forward.querySelector("[name=client_pays_travel]");
         const travelFields = document.getElementById("travel-fields");
+        const budgetInput = forward.querySelector("[data-role=budget]");
         vacancyPicker(vacancySelect);
 
         // Home location, travel means and distance don't apply when the client pays the travel costs
         const syncTravelFields = () => { travelFields.disabled = paysTravel.checked; };
         paysTravel.addEventListener("change", syncTravelFields);
 
+        // Manual travel means: an amount per hour replaces home location, remote days and distance
+        const isManualTravel = () => forward.querySelector("[name=transport_type]:checked").value === "manual";
+        const syncTravelMeans = () => {
+            travelFields.querySelectorAll("[data-travel]").forEach((el) => {
+                el.hidden = (el.dataset.travel === "manual") !== isManualTravel();
+            });
+        };
+        travelFields.addEventListener("change", (event) => { if (event.target.name === "transport_type") syncTravelMeans(); });
+        syncTravelMeans();
+
+        // An empty target budget falls back to the vacancy's maximum (the API does the same): show it as placeholder
+        const syncBudgetPlaceholder = () => {
+            const option = vacancySelect.selectedOptions[0];
+            budgetInput.placeholder = option && option.value ? Number(option.dataset.max).toFixed(2) : T.no_budget;
+        };
+        syncBudgetPlaceholder();
+
         const runForward = debounce(async () => {
+            const data = baseData();
+            if (!isManualTravel()) delete data.travel_per_hour_override;
             try {
-                renderResult((await App.post(forward.dataset.endpoint, baseData())).result);
+                renderResult((await App.post(forward.dataset.endpoint, data)).result);
             } catch (err) { /* e.g. an empty or invalid number while typing */ }
         });
         const runDistance = debounce(() => {
@@ -233,6 +253,7 @@
             // Picking a vacancy applies its default for who pays the travel costs
             paysTravel.checked = Boolean(option && option.dataset.paysTravel === "1");
             syncTravelFields();
+            syncBudgetPlaceholder();
             runDistance();
         });
         homeInput.addEventListener("input", runDistance);

@@ -74,7 +74,7 @@ class PricingInput:
     margin: Decimal = C.DEFAULT_MARGIN
     # Travel only counts when the distance is known (business rule) and the client doesn't pay it
     travel_distance_km: Decimal | None = None  # one way
-    transport_type: str = "car"  # car | ov | bicycle
+    transport_type: str = "car"  # car | ov | bicycle | manual (travel_per_hour_override entered by hand)
     remote_days_per_week: Decimal = Decimal(0)  # days worked from home: no commute
     ov_subscription_month: Decimal | None = None  # <-- NEW: for fixed monthly OV costs
     client_pays_travel: bool = False
@@ -102,7 +102,8 @@ class PricingInput:
     def travel_known(self) -> bool:
         if self.travel_per_hour_override is not None:
             return True
-        return self.travel_distance_km is not None
+        # Manual travel means: only known once an amount per hour is entered, never derived from the distance
+        return self.transport_type != "manual" and self.travel_distance_km is not None
 
 
 @dataclass

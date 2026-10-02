@@ -67,6 +67,17 @@ class SalaryToTariffTests(SimpleTestCase):
                                             remote_days_per_week=5))
             self.assertEqual(result.travel_per_hour, Decimal("0.00"))
 
+    def test_manual_travel_uses_entered_amount(self):
+        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="manual",
+                                        travel_per_hour_override="3.50"))
+        self.assertEqual(result.travel_per_hour, Decimal("3.50"))
+        self.assertEqual(result.travel_steps[-1]["value"], "3.50")
+
+    def test_manual_travel_without_amount_is_unknown(self):
+        result = calculate(PricingInput(salary_month=6000, travel_distance_km=25, transport_type="manual"))
+        self.assertFalse(result.travel_known)  # the distance is not used for manual travel means
+        self.assertEqual(result.travel_in_tariff, Decimal("0.00"))
+
     def test_negative_remote_days(self):
         with self.assertRaises(ValueError):
             PricingInput(salary_month=6000, remote_days_per_week=-1)
@@ -140,6 +151,13 @@ class PricingApiTests(TestCase):
     def test_calculate_endpoint(self):
         response = self.client.post(reverse("pricing:calculate"), json.dumps({"salary_month": 6000}), content_type="application/json")
         self.assertEqual(response.json()["result"]["advised_rate"], "79.23")
+
+    def test_calculate_with_manual_budget_and_no_vacancy(self):
+        response = self.client.post(reverse("pricing:calculate"), json.dumps({"salary_month": 6000, "max_rate": "80"}),
+                                    content_type="application/json")
+        result = response.json()["result"]
+        self.assertEqual(result["budget_status"], "ok")  # €79.23 within €80
+        self.assertEqual(result["room_per_hour"], "0.77")
 
     def test_calculate_rejects_margin_out_of_range(self):
         response = self.client.post(reverse("pricing:calculate"), json.dumps({"salary_month": 6000, "margin": 30}),

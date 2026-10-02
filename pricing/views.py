@@ -71,8 +71,12 @@ def calculator(request):
     vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
     candidate_id = request.GET.get("candidate")
     initial = _initial_from_candidate(candidate_id, request.GET.get("vacancy")) if candidate_id else {}
+    i18n = calculator_i18n()
+    # The calculator can also compare with a manually entered target budget (no vacancy needed)
+    i18n["status"]["unknown"] = _("Choose a vacancy or enter a target budget to compare")
+    i18n["no_budget"] = _("none")
     return render(request, "pricing/calculator.html", {
-        "vacancies": vacancies, "C": C, "i18n": calculator_i18n(), "initial": initial,
+        "vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial,
     })
 
 
@@ -85,7 +89,10 @@ def _payload(request):
 
 @require_POST
 def calculate_api(request):
-    """POST JSON with PricingInput fields (+ optional vacancy_id) -> PricingResult as JSON."""
+    """POST JSON with PricingInput fields (+ optional vacancy_id) -> PricingResult as JSON.
+
+    A max_rate in the payload (a manual target budget) wins over the vacancy's maximum.
+    """
     data = _payload(request)
     if data is None:
         return JsonResponse({"ok": False, "message": "Invalid JSON"}, status=400)

@@ -22,10 +22,19 @@
                 <span class="font-medium" id="vacancy-label">{% trans "Employer / vacancy" %}</span>
                 {% include "pricing/_vacancy_picker.html" with name="vacancy_id" selected=initial.vacancy_id %}
             </div>
+            {# Optional: compare with a budget without a vacancy. Overrides the vacancy's maximum when filled in (placeholder set by calculator.js). #}
+            <div class="flex flex-col gap-1">
+                <label for="id_max_rate" class="font-medium">{% trans "Target budget / hour" %}</label>
+                <div class="{{ ui.number_box }}">
+                    <span class="{{ ui.number_box_unit }}">€</span>
+                    <input type="number" class="{{ ui.number_box_input }}" id="id_max_rate" name="max_rate" data-role="budget" min="0" step="0.01" placeholder="{% trans 'none' %}">
+                </div>
+                <small class="text-gray-500">{% trans "Optional. Leave empty to use the vacancy's maximum." %}</small>
+            </div>
             {% include "core/_toggle.html" with id="id_client_pays_travel" name="client_pays_travel" checked=initial.client_pays_travel label=_("Client pays the travel costs") %}
             {# Not applicable when the client pays the travel costs: disabled (and greyed out) by calculator.js #}
             <fieldset class="flex min-w-0 flex-col gap-3 transition-opacity disabled:cursor-not-allowed disabled:opacity-40 disabled:[&_*]:pointer-events-none" id="travel-fields"{% if initial.client_pays_travel %} disabled{% endif %}>
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1" data-travel="auto">
                     <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
                     <input type="text" id="id_home" name="home_location" data-role="home" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
                 </div>
@@ -34,9 +43,18 @@
                     <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
                         <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
                         <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
+                        <label><input type="radio" class="peer sr-only" name="transport_type" value="manual"><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Manual" %}</span></label>
                     </div>
                 </div>
-                <div class="flex flex-col gap-1">
+                {# Manual travel means: a fixed amount per hour instead of home location, remote days and distance (toggled by calculator.js) #}
+                <div class="flex flex-col gap-1" data-travel="manual" hidden>
+                    <label for="id_travel_per_hour_override" class="font-medium">{% trans "Travel costs / hour" %}</label>
+                    <div class="{{ ui.number_box }}">
+                        <span class="{{ ui.number_box_unit }}">€</span>
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_per_hour_override" name="travel_per_hour_override" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1" data-travel="auto">
                     <label for="id_remote_days_per_week" class="font-medium">{% trans "Remote days / week" %}</label>
                     <div class="{{ ui.number_box }}">
                         <input type="number" class="{{ ui.number_box_input }}" id="id_remote_days_per_week" name="remote_days_per_week" value="{{ initial.remote_days_per_week|default:0 }}" min="0" max="5" step="1">
@@ -44,7 +62,7 @@
                     </div>
                     <small class="text-gray-500">{% trans "No travel costs on remote days." %}</small>
                 </div>
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1" data-travel="auto">
                     <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
                     <div class="{{ ui.number_box }}">
                         <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %} ">
