@@ -117,6 +117,11 @@ UI = {
         "absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
         "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 shadow-lg"
     ),
+    # Same, opening upwards (for result cards at the bottom of a page)
+    "steps_dropdown_up": (
+        "absolute left-0 bottom-full z-30 mb-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
+        "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 shadow-lg"
+    ),
     "step_row": "flex items-baseline gap-2 py-1",
     "step_result_row": "flex items-baseline gap-2 py-1 font-semibold last:mt-1 last:border-t last:border-slate-200 last:pt-2",
     "step_op": "w-3 shrink-0 text-center text-gray-400",

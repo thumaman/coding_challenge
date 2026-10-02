@@ -336,8 +336,8 @@ msgid "Vacancies"
 msgstr "Vacatures"
 
 #: candidates/templates/candidates/form.html:33
-msgid "Click a vacancy to show its tariff above."
-msgstr "Klik op een vacature om het tarief daarvan bovenaan te zien."
+msgid "Click a vacancy to show its tariff below."
+msgstr "Klik op een vacature om het tarief daarvan onderaan te zien."
 
 #: candidates/templates/candidates/form.html:42
 msgid "No vacancies yet. Pick one or more above."
@@ -1273,3 +1273,19 @@ msgstr ""
 "Binnen 10%% van budget: +1<br> Precieze match thuiswerkdagen: +1<br> Minder "
 "thuiswerkdagen dan aangeboden: +0.5<br> Match uren per week: +1<br> &lt; "
 "25km reisafstand: +1"
+
+#: candidates/templates/candidates/form.html
+msgid "No notes yet"
+msgstr "Nog geen notities"
+
+#: candidates/templates/candidates/form.html
+msgid "Add notes"
+msgstr "Notities toevoegen"
+
+#: candidates/templates/candidates/form.html
+msgid "Edit notes"
+msgstr "Notities bewerken"
+
+#: candidates/templates/candidates/form.html
+msgid "Done"
+msgstr "Klaar"

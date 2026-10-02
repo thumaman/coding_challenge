@@ -12,11 +12,9 @@
 {% endblock %}
 
 {% block content %}
-{# Same layout as the calculator (pricing/calculator.html): live tariff on top, inputs in cards below. #}
+{# Inputs in cards, live tariff at the bottom (so nothing is shown before the form is filled in). #}
 {# Inputs carry the Candidate field names; data-field-map translates them for the pricing API in calculator.js. #}
 <div class="flex flex-col gap-5">
-    {% include "pricing/_result_card.html" %}
-
     <form method="post" class="grid gap-5 lg:grid-cols-2" id="forward-form" novalidate autocomplete="off" data-enter-leaves-field
           data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}"
           data-field-map="{{ field_map_json }}"
@@ -30,7 +28,7 @@
             {{ formset.management_form }}
             <div class="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 class="{{ ui.section_label }}" id="vacancy-label">{% trans "Vacancies" %} <span class="text-red-700">*</span></h2>
-                <small class="text-gray-500">{% trans "Click a vacancy to show its tariff above." %}</small>
+                <small class="text-gray-500">{% trans "Click a vacancy to show its tariff below." %}</small>
             </div>
             {% include "pricing/_vacancy_picker.html" with multiple=True %}
             {% for error in formset.non_form_errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
@@ -89,12 +87,29 @@
             </div>
         </div>
 
-        <div class="flex flex-col gap-3 lg:col-span-2 {{ ui.card }}">
+        {# Notes: a one-line preview here, edited in a popup. The textarea stays inside the form (submitted and autosaved). #}
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 lg:col-span-2 {{ ui.card }}">
             <h2 class="{{ ui.section_label }}">{% trans "Notes" %}</h2>
-            {{ form.notes|as_input }}
-            {% for error in form.notes.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+            <p class="min-w-0 flex-1 truncate text-gray-500" id="notes-preview" data-empty="{% trans 'No notes yet' %}">{{ form.notes.value|default_if_none:''|default:_("No notes yet") }}</p>
+            <button type="button" class="{{ ui.btn_secondary }}" id="notes-open"
+                    data-add="{% trans 'Add notes' %}" data-edit="{% trans 'Edit notes' %}">{% if form.notes.value %}{% trans "Edit notes" %}{% else %}{% trans "Add notes" %}{% endif %}</button>
+            {% for error in form.notes.errors %}<small class="w-full text-red-700">{{ error }}</small>{% endfor %}
+            <dialog id="notes-dialog" class="m-auto w-[min(640px,94vw)] rounded-xl p-0 shadow-2xl backdrop:bg-slate-900/45" aria-labelledby="notes-title">
+                <div class="{{ ui.modal_header }}">
+                    <h2 class="{{ ui.modal_title }}" id="notes-title">{% trans "Notes" %}</h2>
+                    <button type="button" class="{{ ui.icon_button }}" data-notes-close aria-label="{% trans 'Close' %}">&times;</button>
+                </div>
+                <div class="{{ ui.modal_content }} [&_textarea]:min-h-60 [&_textarea]:resize-y">
+                    {{ form.notes|as_input }}
+                </div>
+                <div class="{{ ui.modal_footer }}">
+                    <button type="button" class="{{ ui.btn_primary }}" data-notes-close>{% trans "Done" %}</button>
+                </div>
+            </dialog>
         </div>
     </form>
+
+    {% include "pricing/_result_card.html" with drop_up=True %}
 </div>
 
 {{ i18n|json_script:"calc-i18n" }}
@@ -102,6 +117,27 @@
 
 {% block extra_js %}
 <script src="{% static 'pricing/js/calculator.js' %}"></script>
+<script>
+    // Notes popup: the textarea lives in the <dialog>; the card shows its first line
+    (function () {
+        const dialog = document.getElementById("notes-dialog");
+        const textarea = dialog.querySelector("textarea");
+        const preview = document.getElementById("notes-preview");
+        const open = document.getElementById("notes-open");
+        const sync = () => {
+            const text = textarea.value.trim();
+            preview.textContent = text ? text.split("\n")[0] : preview.dataset.empty;
+            open.textContent = text ? open.dataset.edit : open.dataset.add;
+        };
+        open.addEventListener("click", () => { dialog.showModal(); textarea.focus(); });
+        dialog.addEventListener("click", (event) => {
+            if (event.target === dialog || event.target.closest("[data-notes-close]")) dialog.close();
+        });
+        dialog.addEventListener("close", sync);
+        textarea.addEventListener("input", sync);
+        {% if form.notes.errors %}dialog.showModal();{% endif %}
+    })();
+</script>
 {% if not object %}
 {% trans "Draft saved" as t_saved %}
 <script>window.DRAFT_I18N = {saved: "{{ t_saved|escapejs }}"};</script>

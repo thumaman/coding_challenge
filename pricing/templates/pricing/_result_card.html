@@ -1,5 +1,6 @@
 {% load i18n %}
 {# Live result: cost price + travel + margin = advised tariff. Filled in by calculator.js (calculator and candidate form). #}
+{# drop_up=True when the card sits at the bottom of the page: the breakdown dropdowns then open upwards. #}
 <div class="{{ ui.card }}">
     <p class="mb-3.5 flex flex-wrap items-center gap-2"><span id="budget-badge"></span> <span class="text-gray-500" id="room"></span></p>
     <div class="{{ ui.sum_grid }}">
