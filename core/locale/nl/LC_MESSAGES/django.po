@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 14:04+0200\n"
+"POT-Creation-Date: 2026-10-02 10:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,357 +18,472 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin_page/templates/admin_page.html:5
-#: admin_page/templates/admin_page.html:6
-#: admin_page/templates/employees/employee_list.html:4
-#: admin_page/templates/employees/employee_list.html:5
-#: core/context_processors.py:12
-msgid "Employees"
-msgstr "Medewerkers"
+#: candidates/forms.py:57
+msgid "Choose at least one vacancy."
+msgstr "Kies minstens één vacature."
 
-#: admin_page/templates/admin_page.html:9
-#: admin_page/templates/employees/employee_list.html:8 admin_page/views.py:33
-msgid "Add employee"
-msgstr "Medewerker toevoegen"
+#: candidates/forms.py:60
+msgid "Each vacancy can only be added once."
+msgstr "Elke vacature kan maar één keer worden toegevoegd."
 
-#: admin_page/templates/admin_page.html:10
-#: admin_page/templates/admin_page.html:61
-msgid "Switch to card view"
-msgstr "Naar kaartweergave"
-
-#: admin_page/templates/admin_page.html:28
-#: admin_page/templates/admin_page.html:39
-#: admin_page/templates/employees/employee_list.html:16
-#: candidates/templates/candidates/list.html:34
-msgid "Name"
-msgstr "Naam"
-
-#: admin_page/templates/admin_page.html:29
-#: admin_page/templates/admin_page.html:40
-#: admin_page/templates/employees/employee_list.html:17
-msgid "Position"
-msgstr "Functie"
-
-#: admin_page/templates/admin_page.html:30
-#: admin_page/templates/admin_page.html:41
-#: admin_page/templates/employees/employee_list.html:18
-msgid "Office"
-msgstr "Kantoor"
-
-#: admin_page/templates/admin_page.html:31
-#: admin_page/templates/admin_page.html:42
-#: admin_page/templates/employees/employee_list.html:19
-msgid "Start date"
-msgstr "Startdatum"
-
-#: admin_page/templates/admin_page.html:32
-#: admin_page/templates/admin_page.html:43
-#: admin_page/templates/employees/employee_list.html:20
-msgid "Salary"
-msgstr "Salaris"
-
-#: admin_page/templates/admin_page.html:33
-#: admin_page/templates/admin_page.html:44
-#: admin_page/templates/employees/employee_list.html:21
-#: core/templates/core/base.html:87
-msgid "Actions"
-msgstr "Acties"
-
-#: admin_page/templates/admin_page.html:46
-#: admin_page/templates/employees/employee_list.html:34
-#: candidates/templates/candidates/detail.html:8
-#: candidates/templates/candidates/list.html:70
-#: clients/templates/clients/vacancy_detail.html:8
-#: clients/templates/clients/vacancy_list.html:45
-msgid "Edit"
-msgstr "Bewerken"
-
-#: admin_page/templates/admin_page.html:49
-#: admin_page/templates/employees/employee_list.html:39
-#: candidates/templates/candidates/list.html:71
-#: clients/templates/clients/vacancy_list.html:46
-#: core/templates/core/_confirm_delete.html:13
-msgid "Delete"
-msgstr "Verwijderen"
-
-#: admin_page/templates/admin_page.html:61
-msgid "Switch to table view"
-msgstr "Naar tabelweergave"
-
-#: admin_page/templates/employees/employee_form.html:14
-#: core/templates/core/_modal_form.html:28
-msgid "Save"
-msgstr "Opslaan"
-
-#: admin_page/templates/employees/employee_form.html:15
-#: core/templates/core/_confirm_delete.html:12
-#: core/templates/core/_modal_form.html:27
-msgid "Cancel"
-msgstr "Annuleren"
-
-#: admin_page/templates/employees/employee_list.html:35
-msgid "Are you sure you want to delete this employee?"
-msgstr "Weet je zeker dat je deze medewerker wilt verwijderen?"
-
-#: admin_page/views.py:55
-msgid "Edit employee"
-msgstr "Medewerker bewerken"
-
-#: candidates/forms.py:8
-msgid "Personal"
-msgstr "Persoonlijk"
-
-#: candidates/forms.py:9
-msgid "Salary & hours"
-msgstr "Salaris & uren"
-
-#: candidates/forms.py:10 candidates/templates/candidates/detail.html:26
-msgid "Travel"
-msgstr "Reizen"
-
-#: candidates/forms.py:11 pricing/templates/pricing/calculator.html:60
-msgid "Pricing"
-msgstr "Tarief"
-
-#: candidates/forms.py:12
-msgid "Notes"
-msgstr "Notities"
-
-#: candidates/models.py:15
+#: candidates/models.py:16
 msgid "Intake"
 msgstr "Intake"
 
-#: candidates/models.py:16
+#: candidates/models.py:17
 msgid "Available"
 msgstr "Beschikbaar"
 
-#: candidates/models.py:17
+#: candidates/models.py:18 candidates/models.py:132
 msgid "Proposed"
 msgstr "Voorgesteld"
 
-#: candidates/models.py:18
+#: candidates/models.py:19 candidates/models.py:133
 msgid "Placed"
 msgstr "Geplaatst"
 
-#: candidates/models.py:19
+#: candidates/models.py:20
 msgid "Inactive"
 msgstr "Inactief"
 
-#: candidates/models.py:22 pricing/templates/pricing/calculator.html:47
+#: candidates/models.py:23 pricing/templates/pricing/calculator.html:35
 msgid "Car"
 msgstr "Auto"
 
-#: candidates/models.py:23 pricing/templates/pricing/calculator.html:48
+#: candidates/models.py:24 pricing/templates/pricing/calculator.html:36
 msgid "Public transport"
 msgstr "OV"
 
-#: candidates/models.py:26
+#: candidates/models.py:27
 msgid "first name"
 msgstr "voornaam"
 
-#: candidates/models.py:27
+#: candidates/models.py:28
 msgid "last name"
 msgstr "achternaam"
 
-#: candidates/models.py:28
+#: candidates/models.py:29
 msgid "email"
 msgstr "e-mail"
 
-#: candidates/models.py:29
+#: candidates/models.py:30
 msgid "phone"
 msgstr "telefoon"
 
-#: candidates/models.py:30
+#: candidates/models.py:31
 msgid "home location"
 msgstr "woonplaats"
 
-#: candidates/models.py:31
+#: candidates/models.py:32
 msgid "City, postcode or address, used to calculate travel distance"
 msgstr "Plaats, postcode of adres, gebruikt om de reisafstand te berekenen"
 
-#: candidates/models.py:32
+#: candidates/models.py:33
 msgid "desired role"
 msgstr "gewenste functie"
 
-#: candidates/models.py:33
+#: candidates/models.py:34 candidates/models.py:140
 msgid "status"
 msgstr "status"
 
-#: candidates/models.py:36
+#: candidates/models.py:37
 msgid "desired gross salary / month (€)"
 msgstr "gewenst brutosalaris / maand (€)"
 
-#: candidates/models.py:38
+#: candidates/models.py:39
 msgid "desired hours per week"
 msgstr "gewenste uren per week"
 
-#: candidates/models.py:44
+#: candidates/models.py:43
+msgid "travel means"
+msgstr "vervoersmiddel"
+
+#: candidates/models.py:45
+msgid "remote days / week"
+msgstr "thuiswerkdagen / week"
+
+#: candidates/models.py:46
+msgid "Used for matching only"
+msgstr "Alleen gebruikt voor matching"
+
+#: candidates/models.py:50
+msgid "cost price factor"
+msgstr "kostprijsfactor"
+
+#: candidates/models.py:52
+msgid "margin / hour (€)"
+msgstr "marge / uur (€)"
+
+#: candidates/models.py:57 clients/models.py:45
+msgid "vacancies"
+msgstr "vacatures"
+
+#: candidates/models.py:59
+msgid "notes"
+msgstr "notities"
+
+#: candidates/models.py:79
+msgid "candidate"
+msgstr "kandidaat"
+
+#: candidates/models.py:80
+msgid "candidates"
+msgstr "kandidaten"
+
+#: candidates/models.py:131
+msgid "Considered"
+msgstr "In overweging"
+
+#: candidates/models.py:134
+msgid "Rejected"
+msgstr "Afgewezen"
+
+#: candidates/models.py:138 clients/models.py:44
+msgid "vacancy"
+msgstr "vacature"
+
+#: candidates/models.py:143
 msgid "travel distance one way (km)"
 msgstr "reisafstand enkele reis (km)"
 
-#: candidates/models.py:45
+#: candidates/models.py:144
 msgid ""
 "Calculated automatically from the home location and the vacancy location"
 msgstr "Wordt automatisch berekend op basis van woonplaats en vacaturelocatie"
 
-#: candidates/models.py:47
-msgid "travel means"
-msgstr "vervoersmiddel"
+#: candidates/models.py:147 clients/models.py:37
+msgid "client pays travel costs"
+msgstr "opdrachtgever betaalt reiskosten"
 
-#: candidates/models.py:49
-msgid "remote days / week"
-msgstr "thuiswerkdagen / week"
+#: candidates/models.py:148
+msgid ""
+"Travel costs are then left out of the tariff (defaults to the vacancy's "
+"setting)"
+msgstr ""
+"Reiskosten worden dan niet in het tarief meegenomen (standaard volgens de "
+"vacature)"
 
-#: candidates/models.py:50
-msgid "Used for matching only"
-msgstr "Alleen gebruikt voor matching"
-
-#: candidates/models.py:54
-msgid "cost price factor"
-msgstr "kostprijsfactor"
-
-#: candidates/models.py:56
-msgid "margin / hour (€)"
-msgstr "marge / uur (€)"
-
-#: candidates/models.py:60
+#: candidates/models.py:151
 msgid "proposed tariff / hour (€)"
 msgstr "voorgesteld tarief / uur (€)"
 
-#: candidates/models.py:61
+#: candidates/models.py:152
 msgid "Leave empty to use the advised tariff."
 msgstr "Laat leeg om het geadviseerde tarief te gebruiken."
 
-#: candidates/models.py:66 clients/models.py:41
-msgid "vacancy"
-msgstr "vacature"
+#: candidates/models.py:159
+msgid "candidate vacancy"
+msgstr "kandidaat-vacature"
 
-#: candidates/models.py:68
-msgid "notes"
-msgstr "notities"
+#: candidates/models.py:160
+msgid "candidate vacancies"
+msgstr "kandidaat-vacatures"
 
-#: candidates/models.py:84
-msgid "candidate"
-msgstr "kandidaat"
+#: candidates/models.py:192
+msgid "candidate draft"
+msgstr "kandidaatconcept"
 
-#: candidates/models.py:85
-msgid "candidates"
-msgstr "kandidaten"
+#: candidates/models.py:193
+msgid "candidate drafts"
+msgstr "kandidaatconcepten"
 
-#: candidates/templates/candidates/detail.html:16
+#: candidates/models.py:198 clients/models.py:67 core/models.py:21
+msgid "Untitled draft"
+msgstr "Naamloos concept"
+
+#: candidates/templates/candidates/_link_row.html:16 pricing/views.py:57
+msgid "max"
+msgstr "max"
+
+#: candidates/templates/candidates/_link_row.html:17
+msgid "Advised tariff for this vacancy"
+msgstr "Geadviseerd tarief voor deze vacature"
+
+#: candidates/templates/candidates/_link_row.html:18
+msgid "Remove vacancy"
+msgstr "Vacature verwijderen"
+
+#: candidates/templates/candidates/_link_row.html:26 pricing/engine.py:219
+msgid "Distance one way"
+msgstr "Afstand enkele reis"
+
+#: candidates/templates/candidates/_link_row.html:28
+msgid "automatic"
+msgstr "automatisch"
+
+#: candidates/templates/candidates/_link_row.html:33
+msgid "Proposed tariff"
+msgstr "Voorgesteld tarief"
+
+#: candidates/templates/candidates/_link_row.html:36
+msgid "advised"
+msgstr "geadviseerd"
+
+#: candidates/templates/candidates/_link_row.html:40
+msgid "Client pays travel"
+msgstr "Opdrachtgever betaalt reis"
+
+#: candidates/templates/candidates/detail.html:8
+#: candidates/templates/candidates/list.html:74
+#: clients/templates/clients/client_list.html:73
+#: clients/templates/clients/vacancy_detail.html:8
+#: clients/templates/clients/vacancy_list.html:50
+msgid "Edit"
+msgstr "Bewerken"
+
+#: candidates/templates/candidates/detail.html:18
+msgid "Not linked to a vacancy yet."
+msgstr "Nog niet gekoppeld aan een vacature."
+
+#: candidates/templates/candidates/detail.html:18
+msgid "Add a vacancy"
+msgstr "Vacature toevoegen"
+
+#: candidates/templates/candidates/detail.html:21
 msgid "Profile"
 msgstr "Profiel"
 
-#: candidates/templates/candidates/detail.html:18
-#: candidates/templates/candidates/list.html:14
-#: candidates/templates/candidates/list.html:36
-#: clients/templates/clients/vacancy_list.html:23
+#: candidates/templates/candidates/detail.html:23
+#: candidates/templates/candidates/list.html:19
+#: candidates/templates/candidates/list.html:38
+#: clients/templates/clients/vacancy_list.html:28
 msgid "Status"
 msgstr "Status"
 
-#: candidates/templates/candidates/detail.html:19
+#: candidates/templates/candidates/detail.html:24
 msgid "Email"
 msgstr "E-mail"
 
-#: candidates/templates/candidates/detail.html:20
+#: candidates/templates/candidates/detail.html:25
 msgid "Phone"
 msgstr "Telefoon"
 
-#: candidates/templates/candidates/detail.html:21
-#: pricing/templates/pricing/calculator.html:41
+#: candidates/templates/candidates/detail.html:26
+#: pricing/templates/pricing/calculator.html:29
 msgid "Home location"
 msgstr "Woonplaats"
 
-#: candidates/templates/candidates/detail.html:22
-#: candidates/templates/candidates/list.html:20
-#: candidates/templates/candidates/list.html:40
-msgid "Vacancy"
-msgstr "Vacature"
-
-#: candidates/templates/candidates/detail.html:23
-#: candidates/templates/candidates/list.html:37
+#: candidates/templates/candidates/detail.html:27
+#: candidates/templates/candidates/list.html:39
 msgid "Salary / month"
 msgstr "Salaris / maand"
 
-#: candidates/templates/candidates/detail.html:24
+#: candidates/templates/candidates/detail.html:28
 #: clients/templates/clients/vacancy_detail.html:14
 msgid "Hours / week"
 msgstr "Uren / week"
 
-#: candidates/templates/candidates/detail.html:25
-#: candidates/templates/candidates/list.html:39 clients/matching.py:59
-#: clients/templates/clients/vacancy_list.html:22
+#: candidates/templates/candidates/detail.html:29
+#: candidates/templates/candidates/list.html:41 clients/matching.py:55
+#: clients/templates/clients/vacancy_detail.html:28
+#: clients/templates/clients/vacancy_list.html:27
 msgid "Remote days"
 msgstr "Thuiswerkdagen"
 
-#: candidates/templates/candidates/detail.html:26
-msgid "unknown"
-msgstr "onbekend"
+#: candidates/templates/candidates/detail.html:30
+#: candidates/templates/candidates/form.html:63
+#: pricing/templates/pricing/calculator.html:33
+msgid "Travel means"
+msgstr "Vervoersmiddel"
 
-#: candidates/templates/candidates/detail.html:27 clients/advisor.py:97
-msgid "Client pays travel costs"
-msgstr "Opdrachtgever betaalt reiskosten"
+#: candidates/templates/candidates/detail.html:34
+msgid "Note"
+msgstr "Notitie"
 
-#: candidates/templates/candidates/detail.html:27
-msgid "Yes"
-msgstr "Ja"
-
-#: candidates/templates/candidates/detail.html:27
-msgid "No"
-msgstr "Nee"
-
-#: candidates/templates/candidates/list.html:4
-#: candidates/templates/candidates/list.html:5 core/context_processors.py:9
-msgid "Candidates"
-msgstr "Kandidaten"
-
-#: candidates/templates/candidates/list.html:8
-msgid "Add candidate"
-msgstr "Kandidaat toevoegen"
-
-#: candidates/templates/candidates/list.html:16
-#: candidates/templates/candidates/list.html:22
-msgid "All"
-msgstr "Alle"
-
-#: candidates/templates/candidates/list.html:27
-msgid "Over budget only"
-msgstr "Alleen boven budget"
-
-#: candidates/templates/candidates/list.html:35
-msgid "Role"
-msgstr "Functie"
-
-#: candidates/templates/candidates/list.html:38
-#: clients/templates/clients/vacancy_list.html:21
-msgid "Hours"
-msgstr "Uren"
-
-#: candidates/templates/candidates/list.html:41
-msgid "Advised rate"
-msgstr "Geadviseerd tarief"
-
-#: candidates/views.py:64
-msgid "New candidate"
-msgstr "Nieuwe kandidaat"
-
-#: candidates/views.py:65
-msgid "Candidate added."
-msgstr "Kandidaat toegevoegd."
-
-#: candidates/views.py:69
+#: candidates/templates/candidates/form.html:4
+#: candidates/templates/candidates/form.html:5
 msgid "Edit candidate"
 msgstr "Kandidaat bewerken"
 
-#: candidates/views.py:70
+#: candidates/templates/candidates/form.html:4
+#: candidates/templates/candidates/form.html:5
+msgid "New candidate"
+msgstr "Nieuwe kandidaat"
+
+#: candidates/templates/candidates/form.html:5
+#: clients/templates/clients/vacancy_form.html:5
+msgid "draft"
+msgstr "concept"
+
+#: candidates/templates/candidates/form.html:9
+#: clients/templates/clients/client_form.html:8
+#: clients/templates/clients/vacancy_form.html:9
+#: core/templates/core/_confirm_delete.html:13
+#: core/templates/core/_modal_form.html:27
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: candidates/templates/candidates/form.html:10
+#: clients/templates/clients/vacancy_form.html:10
+msgid "Save as draft"
+msgstr "Opslaan als concept"
+
+#: candidates/templates/candidates/form.html:11
+#: clients/templates/clients/client_form.html:9
+#: clients/templates/clients/vacancy_form.html:11
+#: core/templates/core/_modal_form.html:28
+msgid "Save"
+msgstr "Opslaan"
+
+#: candidates/templates/candidates/form.html:11
+msgid "Save candidate"
+msgstr "Kandidaat opslaan"
+
+#: candidates/templates/candidates/form.html:32
+#: clients/templates/clients/vacancy_list.html:4
+#: clients/templates/clients/vacancy_list.html:5 core/context_processors.py:8
+msgid "Vacancies"
+msgstr "Vacatures"
+
+#: candidates/templates/candidates/form.html:33
+msgid "Click a vacancy to show its tariff above."
+msgstr "Klik op een vacature om het tarief daarvan bovenaan te zien."
+
+#: candidates/templates/candidates/form.html:42
+msgid "No vacancies yet. Pick one or more above."
+msgstr "Nog geen vacatures. Kies er hierboven een of meer."
+
+#: candidates/templates/candidates/form.html:48
+msgid "Personal"
+msgstr "Persoonlijk"
+
+#: candidates/templates/candidates/form.html:60
+msgid "Travel"
+msgstr "Reizen"
+
+#: candidates/templates/candidates/form.html:71
+msgid "The travel distance is calculated per vacancy, from the home location."
+msgstr "De reisafstand wordt per vacature berekend vanaf de woonplaats."
+
+#: candidates/templates/candidates/form.html:77
+msgid "Salary & hours"
+msgstr "Salaris & uren"
+
+#: candidates/templates/candidates/form.html:78
+#: pricing/templates/pricing/calculator.html:52
+msgid "Desired gross salary / month"
+msgstr "Gewenst brutosalaris / maand"
+
+#: candidates/templates/candidates/form.html:80
+#: pricing/templates/pricing/calculator.html:53
+msgid "Desired working hours / week"
+msgstr "Gewenste werkuren / week"
+
+#: candidates/templates/candidates/form.html:84
+#: pricing/templates/pricing/calculator.html:56
+msgid "Pricing"
+msgstr "Tarief"
+
+#: candidates/templates/candidates/form.html:85 pricing/engine.py:283
+#: pricing/engine.py:294 pricing/engine.py:335 pricing/engine.py:348
+#: pricing/templates/pricing/calculator.html:57
+#: pricing/templates/pricing/calculator.html:79
+msgid "Cost price factor"
+msgstr "Kostprijsfactor"
+
+#: candidates/templates/candidates/form.html:86
+#: pricing/templates/pricing/calculator.html:58
+msgid "Includes vacation days and other secondary employment conditions."
+msgstr "Inclusief vakantiedagen en overige secundaire arbeidsvoorwaarden."
+
+#: candidates/templates/candidates/form.html:88 pricing/engine.py:271
+#: pricing/engine.py:333 pricing/engine.py:343
+#: pricing/templates/pricing/calculator.html:59
+#: pricing/templates/pricing/calculator.html:78
+msgid "Margin / hour"
+msgstr "Marge / uur"
+
+#: candidates/templates/candidates/form.html:94
+msgid "Notes"
+msgstr "Notities"
+
+#: candidates/templates/candidates/form.html:107
+#: clients/templates/clients/vacancy_form.html:78
+msgid "Draft saved"
+msgstr "Concept opgeslagen"
+
+#: candidates/templates/candidates/list.html:4
+#: candidates/templates/candidates/list.html:5 core/context_processors.py:7
+msgid "Candidates"
+msgstr "Kandidaten"
+
+#: candidates/templates/candidates/list.html:9
+#: clients/templates/clients/vacancy_list.html:9
+msgid "Drafts"
+msgstr "Concepten"
+
+#: candidates/templates/candidates/list.html:13
+msgid "Add candidate"
+msgstr "Kandidaat toevoegen"
+
+#: candidates/templates/candidates/list.html:21
+#: candidates/templates/candidates/list.html:27
+#: clients/templates/clients/client_list.html:19
+#: clients/templates/clients/client_list.html:25
+msgid "All"
+msgstr "Alle"
+
+#: candidates/templates/candidates/list.html:25
+#: clients/templates/clients/vacancy_form.html:24
+msgid "Vacancy"
+msgstr "Vacature"
+
+#: candidates/templates/candidates/list.html:36
+#: clients/templates/clients/vacancy_detail.html:25
+msgid "Name"
+msgstr "Naam"
+
+#: candidates/templates/candidates/list.html:37
+#: clients/templates/clients/vacancy_detail.html:26
+msgid "Role"
+msgstr "Functie"
+
+#: candidates/templates/candidates/list.html:40
+#: clients/templates/clients/vacancy_list.html:26
+msgid "Hours"
+msgstr "Uren"
+
+#: candidates/templates/candidates/list.html:42
+msgid "Vacancies & advised rate"
+msgstr "Vacatures & geadviseerd tarief"
+
+#: candidates/templates/candidates/list.html:73
+#: clients/templates/clients/vacancy_list.html:49
+#: core/templates/core/base.html:94
+msgid "Actions"
+msgstr "Acties"
+
+#: candidates/templates/candidates/list.html:75
+#: clients/templates/clients/client_list.html:73
+#: clients/templates/clients/vacancy_list.html:51
+#: core/templates/core/_confirm_delete.html:14
+#: core/templates/core/_drafts.html:22
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: candidates/views.py:143
+msgid "Candidate added."
+msgstr "Kandidaat toegevoegd."
+
+#: candidates/views.py:149
 msgid "Candidate saved."
 msgstr "Kandidaat opgeslagen."
 
-#: candidates/views.py:75
+#: candidates/views.py:156
+msgid "Draft candidates"
+msgstr "Conceptkandidaten"
+
+#: candidates/views.py:157
+msgid "No drafts. Unfinished new candidates are saved here automatically."
+msgstr ""
+"Geen concepten. Onafgemaakte nieuwe kandidaten worden hier automatisch "
+"bewaard."
+
+#: candidates/views.py:169
 msgid "Delete candidate"
 msgstr "Kandidaat verwijderen"
 
-#: candidates/views.py:76
+#: candidates/views.py:170
 msgid "Candidate deleted."
 msgstr "Kandidaat verwijderd."
 
@@ -392,6 +507,10 @@ msgid ""
 msgstr ""
 "Verlaag onze marge naar €%(margin)s/uur; de voorwaarden van de kandidaat "
 "blijven gelijk."
+
+#: clients/advisor.py:97
+msgid "Client pays travel costs"
+msgstr "Opdrachtgever betaalt reiskosten"
 
 #: clients/advisor.py:99
 #, python-format
@@ -429,143 +548,215 @@ msgstr "Het maximumsalaris moet hoger zijn dan het minimumsalaris."
 msgid "At most 5 days."
 msgstr "Maximaal 5 dagen."
 
-#: clients/matching.py:57
+#: clients/matching.py:54
 msgid "Budget fit"
 msgstr "Past binnen budget"
 
-#: clients/matching.py:58
-msgid "Salary in range"
-msgstr "Salaris binnen bandbreedte"
-
-#: clients/matching.py:60
+#: clients/matching.py:56 clients/templates/clients/vacancy_form.html:39
 msgid "Location"
 msgstr "Locatie"
 
-#: clients/matching.py:61
-msgid "Role / skills"
-msgstr "Functie / vaardigheden"
+#: clients/matching.py:57 clients/templates/clients/vacancy_form.html:52
+#: pricing/engine.py:278 pricing/engine.py:353
+msgid "Hours per week"
+msgstr "Uren per week"
 
-#: clients/models.py:8
+#: clients/models.py:11
 msgid "name"
 msgstr "naam"
 
-#: clients/models.py:9
+#: clients/models.py:12
 msgid "industry"
 msgstr "branche"
 
-#: clients/models.py:10 clients/models.py:26
+#: clients/models.py:13 clients/models.py:29
 msgid "city"
 msgstr "plaats"
 
-#: clients/models.py:11
+#: clients/models.py:14
 msgid "contact name"
 msgstr "contactpersoon"
 
-#: clients/models.py:12
+#: clients/models.py:15
 msgid "contact email"
 msgstr "e-mail contactpersoon"
 
-#: clients/models.py:22
+#: clients/models.py:25
 msgid "client"
 msgstr "opdrachtgever"
 
-#: clients/models.py:23
+#: clients/models.py:26
 msgid "title"
 msgstr "functietitel"
 
-#: clients/models.py:24
+#: clients/models.py:27
 msgid "address / postcode"
 msgstr "adres / postcode"
 
-#: clients/models.py:25
+#: clients/models.py:28
 msgid "Work location, used to calculate travel distance"
 msgstr "Werklocatie, gebruikt om de reisafstand te berekenen"
 
-#: clients/models.py:27
+#: clients/models.py:30
 msgid "max client rate / hour (€)"
 msgstr "max. opdrachtgeverstarief / uur (€)"
 
-#: clients/models.py:28
+#: clients/models.py:31
 msgid "hours per week"
 msgstr "uren per week"
 
-#: clients/models.py:29
+#: clients/models.py:32
 msgid "remote days allowed"
 msgstr "toegestane thuiswerkdagen"
 
-#: clients/models.py:30
+#: clients/models.py:33
 msgid "min salary / month (€)"
 msgstr "min. salaris / maand (€)"
 
-#: clients/models.py:31
+#: clients/models.py:34
 msgid "max salary / month (€)"
 msgstr "max. salaris / maand (€)"
 
-#: clients/models.py:32
+#: clients/models.py:35
 msgid "skills / keywords"
 msgstr "vaardigheden / trefwoorden"
 
-#: clients/models.py:32
+#: clients/models.py:35
 msgid "Comma separated"
 msgstr "Gescheiden door komma’s"
 
-#: clients/models.py:34
-msgid "client pays travel costs"
-msgstr "opdrachtgever betaalt reiskosten"
-
-#: clients/models.py:35
+#: clients/models.py:38
 msgid "Travel costs are then left out of the tariff"
 msgstr "Reiskosten worden dan niet in het tarief meegenomen"
 
-#: candidates/models.py
-msgid "Travel costs are then left out of the tariff (defaults to the vacancy's setting)"
-msgstr "Reiskosten worden dan niet in het tarief meegenomen (standaard volgens de vacature)"
-
-#: clients/models.py:37
+#: clients/models.py:40
 msgid "open"
 msgstr "open"
 
-#: clients/models.py:42
-msgid "vacancies"
-msgstr "vacatures"
+#: clients/models.py:62
+msgid "vacancy draft"
+msgstr "vacatureconcept"
 
-#: clients/templates/clients/_advisor_panel.html:4
+#: clients/models.py:63
+msgid "vacancy drafts"
+msgstr "vacatureconcepten"
+
+#: clients/templates/clients/_advisor_panel.html:5
 msgid "Advisor: fit the client budget"
 msgstr "Adviseur: binnen het budget van de opdrachtgever blijven"
 
-#: clients/templates/clients/_advisor_panel.html:7
+#: clients/templates/clients/_advisor_panel.html:8
 #, python-format
 msgid "Current rate €%(rate)s exceeds the client maximum of €%(max)s. Options:"
 msgstr ""
 "Het huidige tarief van €%(rate)s is hoger dan het maximum van de "
 "opdrachtgever (€%(max)s). Opties:"
 
-#: clients/templates/clients/_advisor_panel.html:19
+#: clients/templates/clients/_advisor_panel.html:20
 msgid "Apply"
 msgstr "Toepassen"
 
-#: clients/templates/clients/_advisor_panel.html:24
-msgid "Within budget, no tweaks needed."
-msgstr "Binnen budget, geen aanpassingen nodig."
+#: clients/templates/clients/_advisor_panel.html:25
+msgid "No single tweak brings this tariff within budget."
+msgstr "Geen enkele aanpassing brengt dit tarief binnen het budget."
+
+#: clients/templates/clients/client_form.html:4
+#: clients/templates/clients/client_form.html:5
+msgid "Edit client"
+msgstr "Opdrachtgever bewerken"
+
+#: clients/templates/clients/client_form.html:4
+#: clients/templates/clients/client_form.html:5
+#: clients/templates/clients/vacancy_form.html:29
+msgid "New client"
+msgstr "Nieuwe opdrachtgever"
+
+#: clients/templates/clients/client_form.html:9
+msgid "Save client"
+msgstr "Opdrachtgever opslaan"
+
+#: clients/templates/clients/client_form.html:20
+msgid "Company"
+msgstr "Bedrijf"
+
+#: clients/templates/clients/client_form.html:27
+msgid "Contact"
+msgstr "Contact"
 
 #: clients/templates/clients/client_list.html:4
-#: clients/templates/clients/client_list.html:5 core/context_processors.py:11
+#: clients/templates/clients/client_list.html:5 core/context_processors.py:9
 msgid "Clients"
 msgstr "Opdrachtgevers"
 
-#: clients/templates/clients/client_list.html:21
+#: clients/templates/clients/client_list.html:8
+msgid "Add client"
+msgstr "Opdrachtgever toevoegen"
+
+#: clients/templates/clients/client_list.html:14
+msgid "Search"
+msgstr "Zoeken"
+
+#: clients/templates/clients/client_list.html:15
+msgid "Name, industry, city, contact or vacancy"
+msgstr "Naam, branche, plaats, contact of vacature"
+
+#: clients/templates/clients/client_list.html:17
+msgid "Industry"
+msgstr "Branche"
+
+#: clients/templates/clients/client_list.html:23
+#: clients/templates/clients/vacancy_list.html:24
+msgid "City"
+msgstr "Plaats"
+
+#: clients/templates/clients/client_list.html:30
+msgid "With open vacancies only"
+msgstr "Alleen met open vacatures"
+
+#: clients/templates/clients/client_list.html:59
+#: clients/templates/clients/vacancy_list.html:48
+msgid "Open"
+msgstr "Open"
+
+#: clients/templates/clients/client_list.html:59
+#: clients/templates/clients/vacancy_list.html:48
+msgid "Closed"
+msgstr "Gesloten"
+
+#: clients/templates/clients/client_list.html:62
+msgid "No vacancies yet."
+msgstr "Nog geen vacatures."
+
+#: clients/templates/clients/client_list.html:65
+#: clients/templates/clients/client_list.html:73
+#: clients/templates/clients/vacancy_list.html:13
+msgid "Add vacancy"
+msgstr "Vacature toevoegen"
+
+#: clients/templates/clients/client_list.html:69
+msgid "No clients match these filters."
+msgstr "Geen opdrachtgevers gevonden met deze filters."
+
+#: clients/templates/clients/client_list.html:69
 msgid "No clients yet."
 msgstr "Nog geen opdrachtgevers."
+
+#: clients/templates/clients/client_list.html:73
+#, python-format
+msgid "%%(shown)s of %%(total)s clients"
+msgstr "%%(shown)s van %%(total)s opdrachtgevers"
 
 #: clients/templates/clients/vacancy_detail.html:13
 msgid "Max client rate"
 msgstr "Max. opdrachtgeverstarief"
 
 #: clients/templates/clients/vacancy_detail.html:15
+#: clients/templates/clients/vacancy_form.html:54
 msgid "Remote days allowed"
 msgstr "Toegestane thuiswerkdagen"
 
 #: clients/templates/clients/vacancy_detail.html:16
+#: clients/templates/clients/vacancy_form.html:59
 msgid "Salary range"
 msgstr "Salarisbandbreedte"
 
@@ -573,82 +764,137 @@ msgstr "Salarisbandbreedte"
 msgid "Best matching candidates"
 msgstr "Best passende kandidaten"
 
-#: clients/templates/clients/vacancy_detail.html:32
-msgid "No candidates yet."
-msgstr "Nog geen kandidaten."
+#: clients/templates/clients/vacancy_detail.html:27
+msgid "Score"
+msgstr "Score"
 
-#: clients/templates/clients/vacancy_list.html:4
-#: clients/templates/clients/vacancy_list.html:5 core/context_processors.py:10
-msgid "Vacancies"
-msgstr "Vacatures"
+#: clients/templates/clients/vacancy_detail.html:29
+msgid "Advised rate"
+msgstr "Geadviseerd tarief"
 
-#: clients/templates/clients/vacancy_list.html:8
-msgid "Add vacancy"
-msgstr "Vacature toevoegen"
+#: clients/templates/clients/vacancy_detail.html:37
+msgid "Considered for this vacancy"
+msgstr "Overwogen voor deze vacature"
 
-#: clients/templates/clients/vacancy_list.html:17
-msgid "Title"
-msgstr "Functietitel"
-
-#: clients/templates/clients/vacancy_list.html:18
-msgid "Client"
-msgstr "Opdrachtgever"
-
-#: clients/templates/clients/vacancy_list.html:19
-msgid "City"
-msgstr "Plaats"
-
-#: clients/templates/clients/vacancy_list.html:20
-msgid "Max rate"
-msgstr "Max. tarief"
-
-#: clients/templates/clients/vacancy_list.html:43
-msgid "Open"
-msgstr "Open"
-
-#: clients/templates/clients/vacancy_list.html:43
-msgid "Closed"
-msgstr "Gesloten"
-
-#: clients/views.py:52
-msgid "New vacancy"
-msgstr "Nieuwe vacature"
-
-#: clients/views.py:53
-msgid "Vacancy added."
-msgstr "Vacature toegevoegd."
-
-#: clients/views.py:59
+#: clients/templates/clients/vacancy_form.html:4
+#: clients/templates/clients/vacancy_form.html:5
 msgid "Edit vacancy"
 msgstr "Vacature bewerken"
 
-#: clients/views.py:60
+#: clients/templates/clients/vacancy_form.html:4
+#: clients/templates/clients/vacancy_form.html:5
+msgid "New vacancy"
+msgstr "Nieuwe vacature"
+
+#: clients/templates/clients/vacancy_form.html:11
+msgid "Save vacancy"
+msgstr "Vacature opslaan"
+
+#: clients/templates/clients/vacancy_form.html:35
+msgid "Open for candidates"
+msgstr "Open voor kandidaten"
+
+#: clients/templates/clients/vacancy_form.html:42
+#: pricing/templates/pricing/calculator.html:25
+msgid "Client pays the travel costs"
+msgstr "Opdrachtgever betaalt de reiskosten"
+
+#: clients/templates/clients/vacancy_form.html:43
+msgid "Default for candidates; can be changed per candidate."
+msgstr "Standaard voor kandidaten; per kandidaat aan te passen."
+
+#: clients/templates/clients/vacancy_form.html:49
+msgid "Budget & hours"
+msgstr "Budget & uren"
+
+#: clients/templates/clients/vacancy_form.html:50
+msgid "Max client rate / hour"
+msgstr "Max. opdrachtgeverstarief / uur"
+
+#: clients/templates/clients/vacancy_form.html:68
+msgid "Skills / keywords"
+msgstr "Vaardigheden / trefwoorden"
+
+#: clients/templates/clients/vacancy_list.html:22
+msgid "Title"
+msgstr "Functietitel"
+
+#: clients/templates/clients/vacancy_list.html:23
+msgid "Client"
+msgstr "Opdrachtgever"
+
+#: clients/templates/clients/vacancy_list.html:25
+msgid "Max rate"
+msgstr "Max. tarief"
+
+#: clients/views.py:74
+msgid "Vacancy added."
+msgstr "Vacature toegevoegd."
+
+#: clients/views.py:86
 msgid "Vacancy saved."
 msgstr "Vacature opgeslagen."
 
-#: clients/views.py:65
+#: clients/views.py:91
 msgid "Delete vacancy"
 msgstr "Vacature verwijderen"
 
-#: clients/views.py:66
+#: clients/views.py:92
 msgid "Vacancy deleted."
 msgstr "Vacature verwijderd."
 
-#: clients/views.py:116
+#: clients/views.py:99
+msgid "Draft vacancies"
+msgstr "Conceptvacatures"
+
+#: clients/views.py:100
+msgid "No drafts. Unfinished new vacancies are saved here automatically."
+msgstr "Geen concepten. Onafgemaakte nieuwe vacatures worden hier automatisch bewaard."
+
+#: clients/views.py:161
+msgid "Client added."
+msgstr "Opdrachtgever toegevoegd."
+
+#: clients/views.py:165
+msgid "Client saved."
+msgstr "Opdrachtgever opgeslagen."
+
+#: clients/views.py:170
+msgid "Delete client"
+msgstr "Opdrachtgever verwijderen"
+
+#: clients/views.py:171
+msgid "Client deleted."
+msgstr "Opdrachtgever verwijderd."
+
+#: clients/views.py:177
+#, python-format
+msgid "Its %(count)s vacancies are deleted too."
+msgstr "De %(count)s vacatures worden ook verwijderd."
+
+#: clients/views.py:210
 #, python-format
 msgid "Tweak applied to %(name)s."
 msgstr "Aanpassing toegepast op %(name)s."
 
-#: core/context_processors.py:7 core/templates/core/base.html:8
-#: core/templates/core/dashboard.html:4 core/templates/core/dashboard.html:5
-msgid "Dashboard"
-msgstr "Dashboard"
-
-#: core/context_processors.py:8 pricing/templates/pricing/calculator.html:4
+#: core/context_processors.py:10 pricing/templates/pricing/calculator.html:4
 msgid "Calculator"
 msgstr "Calculator"
 
+#: core/drafts.py:56
+msgid "Draft saved."
+msgstr "Concept opgeslagen."
+
+#: core/drafts.py:96
+msgid "Delete draft"
+msgstr "Concept verwijderen"
+
+#: core/drafts.py:97
+msgid "Draft deleted."
+msgstr "Concept verwijderd."
+
 #: core/templates/core/_confirm_delete.html:6
+#: core/templates/core/_drafts.html:7 core/templates/core/_drafts.html:31
 #: core/templates/core/_modal_form.html:7
 msgid "Close"
 msgstr "Sluiten"
@@ -662,49 +908,30 @@ msgstr ""
 "Weet je zeker dat je <strong>%(name)s</strong> wilt verwijderen? Dit kan "
 "niet ongedaan worden gemaakt."
 
-#: core/templates/core/base.html:43
+#: core/templates/core/_drafts.html:18
+#, python-format
+msgid "edited %(when)s ago"
+msgstr "%(when)s geleden bewerkt"
+
+#: core/templates/core/_drafts.html:21
+msgid "Continue"
+msgstr "Verder gaan"
+
+#: core/templates/core/base.html:50
 msgid "Log out"
 msgstr "Uitloggen"
 
-#: core/templates/core/base.html:50
+#: core/templates/core/base.html:57
 msgid "Toggle menu"
 msgstr "Menu in-/uitklappen"
 
-#: core/templates/core/base.html:87
+#: core/templates/core/base.html:94
 msgid "Could not load the form."
 msgstr "Het formulier kon niet worden geladen."
 
-#: core/templates/core/base.html:87
+#: core/templates/core/base.html:94
 msgid "Something went wrong. Please try again."
 msgstr "Er ging iets mis. Probeer het opnieuw."
-
-#: core/templates/core/dashboard.html:8
-msgid "Open calculator"
-msgstr "Calculator openen"
-
-#: core/templates/core/dashboard.html:15
-msgid "Open vacancies"
-msgstr "Open vacatures"
-
-#: core/templates/core/dashboard.html:19
-msgid "Active candidates"
-msgstr "Actieve kandidaten"
-
-#: core/templates/core/dashboard.html:23
-msgid "Over client budget"
-msgstr "Boven budget opdrachtgever"
-
-#: core/templates/core/dashboard.html:27
-msgid "Average margin / hour"
-msgstr "Gemiddelde marge / uur"
-
-#: core/templates/core/dashboard.html:33
-msgid "Recently added candidates"
-msgstr "Recent toegevoegde kandidaten"
-
-#: core/templates/core/dashboard.html:45
-msgid "No candidates yet. Run `manage.py seed_demo` for demo data."
-msgstr "Nog geen kandidaten. Voer `manage.py seed_demo` uit voor demodata."
 
 #: core/templates/registration/login.html:6
 #: core/templates/registration/login.html:25
@@ -727,108 +954,168 @@ msgstr "Gebruikersnaam"
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: pricing/engine.py:152
+#: pricing/engine.py:167 pricing/engine.py:205 pricing/engine.py:214
 msgid "fixed amount"
 msgstr "vast bedrag"
 
-#: pricing/engine.py:154
+#: pricing/engine.py:179
 #, python-format
-msgid "%(km)s km × 2 × %(days)s days × €%(rate)s ÷ %(hours)s h"
-msgstr "%(km)s km × 2 × %(days)s dagen × €%(rate)s ÷ %(hours)s u"
+msgid "= €%(amount)s / mo (OV subscription)"
+msgstr "= €%(amount)s / mnd (OV-abonnement)"
 
-#: pricing/engine.py:179 pricing/engine.py:196 pricing/engine.py:235
-#: pricing/engine.py:238
-msgid "Cost price / hour"
-msgstr "Kostprijs / uur"
+#: pricing/engine.py:194
+#, python-format
+msgid "= €%(amount)s / mo (based on %(km)s km, %(fte)s FTE)"
+msgstr "= €%(amount)s / mnd (op basis van %(km)s km, %(fte)s fte)"
 
-#: pricing/engine.py:181
+#: pricing/engine.py:205 pricing/engine.py:238 pricing/engine.py:270
 msgid "Travel costs / hour"
 msgstr "Reiskosten / uur"
 
-#: pricing/engine.py:182 pricing/engine.py:234
-#: pricing/templates/pricing/calculator.html:63
-#: pricing/templates/pricing/calculator.html:93
-msgid "Margin / hour"
-msgstr "Marge / uur"
+#: pricing/engine.py:214
+msgid "OV subscription / month"
+msgstr "OV-abonnement / maand"
 
-#: pricing/engine.py:182
+#: pricing/engine.py:216
+msgid "NS Flex Altijd Vrij / month"
+msgstr "NS Flex Altijd Vrij / maand"
+
+#: pricing/engine.py:220
+msgid "Flat rate / km"
+msgstr "Vast tarief / km"
+
+#: pricing/engine.py:221 pricing/engine.py:233
+msgid "Travel costs / month"
+msgstr "Reiskosten / maand"
+
+#: pricing/engine.py:226
+msgid "Distance return trip"
+msgstr "Afstand heen en terug"
+
+#: pricing/engine.py:227
+#, python-format
+msgid "%(km)s km × 2"
+msgstr "%(km)s km × 2"
+
+#: pricing/engine.py:228
+msgid "Working days / year"
+msgstr "Werkdagen / jaar"
+
+#: pricing/engine.py:229
+#, python-format
+msgid "%(days)s × %(fte)s FTE"
+msgstr "%(days)s × %(fte)s fte"
+
+#: pricing/engine.py:231
+msgid "Tax-free rate / km"
+msgstr "Belastingvrije vergoeding / km"
+
+#: pricing/engine.py:232
+msgid "Months / year"
+msgstr "Maanden / jaar"
+
+#: pricing/engine.py:236
+msgid "Hours / month"
+msgstr "Uren / maand"
+
+#: pricing/engine.py:237
+#, python-format
+msgid "%(hours)s h × 13 ÷ 3"
+msgstr "%(hours)s u × 13 ÷ 3"
+
+#: pricing/engine.py:268 pricing/engine.py:285 pricing/engine.py:295
+#: pricing/engine.py:334 pricing/engine.py:344 pricing/engine.py:347
+#: pricing/templates/pricing/calculator.html:69
+msgid "Cost price / hour"
+msgstr "Kostprijs / uur"
+
+#: pricing/engine.py:271
 msgid "Advised tariff / hour"
 msgstr "Geadviseerd tarief / uur"
 
-#: pricing/engine.py:185 pricing/engine.py:190 pricing/engine.py:193
-#: pricing/engine.py:237 pricing/engine.py:240 pricing/engine.py:243
+#: pricing/engine.py:274 pricing/engine.py:279 pricing/engine.py:282
+#: pricing/engine.py:346 pricing/engine.py:349 pricing/engine.py:352
+#: pricing/templates/pricing/calculator.html:70
 msgid "Gross hourly wage"
 msgstr "Bruto uurloon"
 
-#: pricing/engine.py:186 pricing/engine.py:242
+#: pricing/engine.py:275 pricing/engine.py:291 pricing/engine.py:351
 msgid "Gross salary / month"
 msgstr "Brutosalaris / maand"
 
-#: pricing/engine.py:187
+#: pricing/engine.py:276
 msgid "Month → week"
 msgstr "Maand → week"
 
-#: pricing/engine.py:188 pricing/engine.py:244
+#: pricing/engine.py:277 pricing/engine.py:353
 #, python-format
 msgid "= €%(amount)s / week"
 msgstr "= €%(amount)s / week"
 
-#: pricing/engine.py:189 pricing/engine.py:244
-msgid "Hours per week"
-msgstr "Uren per week"
-
-#: pricing/engine.py:192 pricing/engine.py:232
-#: pricing/templates/pricing/_calculator_panel.html:7
-#: pricing/templates/pricing/calculator.html:69
+#: pricing/engine.py:281 pricing/engine.py:341
+#: pricing/templates/pricing/_calculator_panel.html:26
+#: pricing/templates/pricing/_result_card.html:6
 msgid "Cost price"
 msgstr "Kostprijs"
 
-#: pricing/engine.py:194 pricing/engine.py:239
-#: pricing/templates/pricing/calculator.html:61
-#: pricing/templates/pricing/calculator.html:94
-msgid "Cost price factor"
-msgstr "Kostprijsfactor"
-
-#: pricing/engine.py:195
+#: pricing/engine.py:284
 msgid "includes vacation days and other employment conditions"
 msgstr "inclusief vakantiedagen en overige arbeidsvoorwaarden"
 
-#: pricing/engine.py:198 pricing/templates/pricing/_calculator_panel.html:16
-#: pricing/templates/pricing/calculator.html:78
+#: pricing/engine.py:287 pricing/templates/pricing/_calculator_panel.html:37
+#: pricing/templates/pricing/_result_card.html:17
 msgid "Advised tariff"
 msgstr "Geadviseerd tarief"
 
-#: pricing/engine.py:233 pricing/templates/pricing/calculator.html:92
+#: pricing/engine.py:292 pricing/engine.py:336
+msgid "Hourly wage"
+msgstr "Uurloon"
+
+#: pricing/engine.py:293
+#, python-format
+msgid "× 3 ÷ 13 ÷ %(hours)s h"
+msgstr "× 3 ÷ 13 ÷ %(hours)s u"
+
+#: pricing/engine.py:332 pricing/engine.py:342
+#: pricing/templates/pricing/calculator.html:77
 msgid "Client tariff / hour"
 msgstr "Opdrachtgeverstarief / uur"
 
-#: pricing/engine.py:245
-msgid "Week → month"
-msgstr "Week → maand"
-
-#: pricing/engine.py:246 pricing/templates/pricing/calculator.html:100
+#: pricing/engine.py:337 pricing/engine.py:355
+#: pricing/templates/pricing/calculator.html:71
 msgid "Max gross salary / month"
 msgstr "Max. brutosalaris / maand"
 
-#: pricing/engine.py:246
+#: pricing/engine.py:338
+#, python-format
+msgid "× %(hours)s h × 13 ÷ 3"
+msgstr "× %(hours)s u × 13 ÷ 3"
+
+#: pricing/engine.py:354
+msgid "Week → month"
+msgstr "Week → maand"
+
+#: pricing/engine.py:355
 msgid "excl. travel costs"
 msgstr "excl. reiskosten"
 
-#: pricing/templates/pricing/_calculator_panel.html:11
-#: pricing/templates/pricing/calculator.html:73
-msgid "Travel costs"
-msgstr "Reiskosten"
+#: pricing/templates/pricing/_calculator_panel.html:12
+msgid "distance unknown"
+msgstr "afstand onbekend"
 
-#: pricing/templates/pricing/_calculator_panel.html:14
-#: pricing/templates/pricing/calculator.html:76
-msgid "Margin"
-msgstr "Marge"
+#: pricing/templates/pricing/_calculator_panel.html:12
+msgid "client pays travel"
+msgstr "opdrachtgever betaalt reis"
 
-#: pricing/templates/pricing/_calculator_panel.html:20 pricing/views.py:42
+#: pricing/templates/pricing/_calculator_panel.html:16
+msgid "Open in calculator"
+msgstr "Openen in calculator"
+
+#: pricing/templates/pricing/_calculator_panel.html:20 pricing/views.py:43
 msgid "Within the client's budget"
 msgstr "Binnen het budget van de opdrachtgever"
 
-#: pricing/templates/pricing/_calculator_panel.html:20 pricing/views.py:44
+#: pricing/templates/pricing/_calculator_panel.html:20 pricing/views.py:45
 msgid "Over the client's budget"
 msgstr "Boven het budget van de opdrachtgever"
 
@@ -849,15 +1136,33 @@ msgstr "max. opdrachtgever"
 msgid "proposed"
 msgstr "voorgesteld"
 
-#: pricing/templates/pricing/_calculator_panel.html:27
-#: pricing/templates/pricing/calculator.html:83
-#: pricing/templates/pricing/calculator.html:105
-msgid "How it is calculated"
-msgstr "Zo wordt het berekend"
+#: pricing/templates/pricing/_calculator_panel.html:26
+#: pricing/templates/pricing/_result_card.html:6
+msgid "How is the cost price calculated?"
+msgstr "Hoe wordt de kostprijs berekend?"
 
-#: pricing/templates/pricing/_calculator_panel.html:29
-msgid "Open in calculator"
-msgstr "Openen in calculator"
+#: pricing/templates/pricing/_calculator_panel.html:31
+#: pricing/templates/pricing/_result_card.html:11
+msgid "Travel costs"
+msgstr "Reiskosten"
+
+#: pricing/templates/pricing/_calculator_panel.html:31
+#: pricing/templates/pricing/_result_card.html:11
+msgid "How are the travel costs calculated?"
+msgstr "Hoe worden de reiskosten berekend?"
+
+#: pricing/templates/pricing/_calculator_panel.html:35
+#: pricing/templates/pricing/_result_card.html:15
+msgid "Margin"
+msgstr "Marge"
+
+#: pricing/templates/pricing/_vacancy_picker.html:7 pricing/views.py:55
+msgid "No vacancy"
+msgstr "Geen vacature"
+
+#: pricing/templates/pricing/_vacancy_picker.html:23
+msgid "Search vacancy, client or city"
+msgstr "Zoek op vacature, klant of plaats"
 
 #: pricing/templates/pricing/calculator.html:5
 msgid "Tariff calculator"
@@ -871,111 +1176,188 @@ msgstr "Tarief berekenen"
 msgid "Calculate max salary"
 msgstr "Maximumsalaris berekenen"
 
-#: pricing/templates/pricing/calculator.html:16
-msgid "Employer"
-msgstr "Opdrachtgever"
+#: pricing/templates/pricing/calculator.html:20
+msgid "Employer & travel"
+msgstr "Werkgever & reizen"
 
-#: pricing/templates/pricing/calculator.html:18
+#: pricing/templates/pricing/calculator.html:22
 msgid "Employer / vacancy"
 msgstr "Opdrachtgever / vacature"
 
-#: pricing/templates/pricing/calculator.html:20
-msgid "— choose a vacancy —"
-msgstr "— kies een vacature —"
-
-#: pricing/templates/pricing/calculator.html:33
-msgid "Client pays the travel costs"
-msgstr "Opdrachtgever betaalt de reiskosten"
-
-#: pricing/templates/pricing/calculator.html:36
-msgid "Candidate"
-msgstr "Kandidaat"
-
-#: pricing/templates/pricing/calculator.html:37
-msgid "Desired gross salary / month"
-msgstr "Gewenst brutosalaris / maand"
-
-#: pricing/templates/pricing/calculator.html:38
-msgid "Desired working hours / week"
-msgstr "Gewenste werkuren / week"
-
-#: pricing/templates/pricing/calculator.html:42
+#: pricing/templates/pricing/calculator.html:30
 msgid "e.g. Utrecht or 3511 AB"
 msgstr "bijv. Utrecht of 3511 AB"
 
-#: pricing/templates/pricing/calculator.html:45
-msgid "Travel means"
-msgstr "Vervoersmiddel"
-
-#: pricing/templates/pricing/calculator.html:52
+#: pricing/templates/pricing/calculator.html:40
 msgid "Travel distance one way"
 msgstr "Reisafstand enkele reis"
 
-#: pricing/templates/pricing/calculator.html:54
+#: pricing/templates/pricing/calculator.html:42
 msgid "calculated automatically"
 msgstr "wordt automatisch berekend"
 
-#: pricing/templates/pricing/calculator.html:57 pricing/views.py:52
+#: pricing/templates/pricing/calculator.html:45 pricing/views.py:58
 msgid "Choose a vacancy and enter the home location to calculate the distance."
 msgstr "Kies een vacature en vul de woonplaats in om de afstand te berekenen."
 
-#: pricing/templates/pricing/calculator.html:62
-msgid "Includes vacation days and other secondary employment conditions."
-msgstr "Inclusief vakantiedagen en overige secundaire arbeidsvoorwaarden."
+#: pricing/templates/pricing/calculator.html:51
+msgid "Candidate"
+msgstr "Kandidaat"
 
-#: pricing/templates/pricing/calculator.html:91
-msgid "What the client pays"
-msgstr "Wat de opdrachtgever betaalt"
-
-#: pricing/templates/pricing/calculator.html:95
-msgid "Working hours / week"
-msgstr "Werkuren / week"
-
-#: pricing/templates/pricing/calculator.html:102
+#: pricing/templates/pricing/calculator.html:67
 msgid ""
 "Indicative. Travel costs are excluded until a concrete candidate is known."
 msgstr ""
 "Indicatief. Reiskosten worden pas meegenomen als er een concrete kandidaat "
 "is."
 
-#: pricing/views.py:43
+#: pricing/templates/pricing/calculator.html:71
+msgid "How is the salary calculated?"
+msgstr "Hoe wordt het salaris berekend?"
+
+#: pricing/templates/pricing/calculator.html:76
+msgid "What the client pays"
+msgstr "Wat de opdrachtgever betaalt"
+
+#: pricing/templates/pricing/calculator.html:80
+msgid "Working hours / week"
+msgstr "Werkuren / week"
+
+#: pricing/views.py:44
 msgid "More than 10% below the client's maximum: too cheap?"
 msgstr "Meer dan 10% onder het maximum van de opdrachtgever: te goedkoop?"
 
-#: pricing/views.py:45
+#: pricing/views.py:46
 msgid "Choose a vacancy to compare with the client's budget"
 msgstr ""
 "Kies een vacature om te vergelijken met het budget van de opdrachtgever"
 
-#: pricing/views.py:47
+#: pricing/views.py:48
 #, python-format
 msgid "Room: %(amount)s / hour"
 msgstr "Ruimte: %(amount)s / uur"
 
-#: pricing/views.py:48
+#: pricing/views.py:49
 msgid "Calculating distance…"
 msgstr "Afstand berekenen…"
 
-#: pricing/views.py:49
+#: pricing/views.py:50
 #, python-format
 msgid "Route distance from %(from)s to %(to)s."
 msgstr "Routeafstand van %(from)s naar %(to)s."
 
-#: pricing/views.py:50
+#: pricing/views.py:51
 msgid "Estimated distance (route service unavailable)."
 msgstr "Geschatte afstand (routeservice niet beschikbaar)."
 
-#: pricing/views.py:51
+#: pricing/views.py:52
 msgid "Location not found: enter the distance yourself."
 msgstr "Locatie niet gevonden: vul de afstand zelf in."
 
-#: pricing/views.py:103
+#: pricing/views.py:53
+msgid "Choose a vacancy"
+msgstr "Kies een vacature"
+
+#: pricing/views.py:54
+msgid "Add a vacancy…"
+msgstr "Vacature toevoegen…"
+
+#: pricing/views.py:56
+msgid "No vacancies found"
+msgstr "Geen vacatures gevonden"
+
+#: pricing/views.py:118
 msgid "Enter both locations."
 msgstr "Vul beide locaties in."
 
-#: pricing/views.py:106
+#: pricing/views.py:121
 msgid "Location not found."
 msgstr "Locatie niet gevonden."
+
+#~ msgid "Employees"
+#~ msgstr "Medewerkers"
+
+#~ msgid "Add employee"
+#~ msgstr "Medewerker toevoegen"
+
+#~ msgid "Switch to card view"
+#~ msgstr "Naar kaartweergave"
+
+#~ msgid "Position"
+#~ msgstr "Functie"
+
+#~ msgid "Office"
+#~ msgstr "Kantoor"
+
+#~ msgid "Start date"
+#~ msgstr "Startdatum"
+
+#~ msgid "Salary"
+#~ msgstr "Salaris"
+
+#~ msgid "Switch to table view"
+#~ msgstr "Naar tabelweergave"
+
+#~ msgid "Are you sure you want to delete this employee?"
+#~ msgstr "Weet je zeker dat je deze medewerker wilt verwijderen?"
+
+#~ msgid "Edit employee"
+#~ msgstr "Medewerker bewerken"
+
+#~ msgid "unknown"
+#~ msgstr "onbekend"
+
+#~ msgid "Yes"
+#~ msgstr "Ja"
+
+#~ msgid "No"
+#~ msgstr "Nee"
+
+#~ msgid "Over budget only"
+#~ msgstr "Alleen boven budget"
+
+#~ msgid "Salary in range"
+#~ msgstr "Salaris binnen bandbreedte"
+
+#~ msgid "Role / skills"
+#~ msgstr "Functie / vaardigheden"
+
+#~ msgid "Within budget, no tweaks needed."
+#~ msgstr "Binnen budget, geen aanpassingen nodig."
+
+#~ msgid "Dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "Open calculator"
+#~ msgstr "Calculator openen"
+
+#~ msgid "Active candidates"
+#~ msgstr "Actieve kandidaten"
+
+#~ msgid "Over client budget"
+#~ msgstr "Boven budget opdrachtgever"
+
+#~ msgid "Average margin / hour"
+#~ msgstr "Gemiddelde marge / uur"
+
+#~ msgid "Recently added candidates"
+#~ msgstr "Recent toegevoegde kandidaten"
+
+#~ msgid "No candidates yet. Run `manage.py seed_demo` for demo data."
+#~ msgstr "Nog geen kandidaten. Voer `manage.py seed_demo` uit voor demodata."
+
+#, python-format
+#~ msgid "%(km)s km × 2 × %(days)s days × €%(rate)s ÷ %(hours)s h"
+#~ msgstr "%(km)s km × 2 × %(days)s dagen × €%(rate)s ÷ %(hours)s u"
+
+#~ msgid "How it is calculated"
+#~ msgstr "Zo wordt het berekend"
+
+#~ msgid "Employer"
+#~ msgstr "Opdrachtgever"
+
+#~ msgid "— choose a vacancy —"
+#~ msgstr "— kies een vacature —"
 
 #~ msgid "unknown yet, not included"
 #~ msgstr "nog onbekend, niet meegenomen"
@@ -986,165 +1368,3 @@ msgstr "Locatie niet gevonden."
 
 #~ msgid "paid by client"
 #~ msgstr "betaald door opdrachtgever"
-
-#: pricing/engine.py
-msgid "Hourly wage"
-msgstr "Uurloon"
-
-#: pricing/engine.py
-#, python-format
-msgid "× 3 ÷ 13 ÷ %(hours)s h"
-msgstr "× 3 ÷ 13 ÷ %(hours)s u"
-
-#: pricing/templates/pricing/_calculator_panel.html pricing/templates/pricing/calculator.html
-msgid "How is the cost price calculated?"
-msgstr "Hoe wordt de kostprijs berekend?"
-
-#: pricing/templates/pricing/calculator.html
-msgid "How is the salary calculated?"
-msgstr "Hoe wordt het salaris berekend?"
-
-#: pricing/engine.py
-#, python-format
-msgid "× %(hours)s h × 13 ÷ 3"
-msgstr "× %(hours)s u × 13 ÷ 3"
-
-#: pricing/templates/pricing/calculator.html
-msgid "Employer & travel"
-msgstr "Werkgever & reizen"
-
-#: pricing/engine.py
-msgid "How are the travel costs calculated?"
-msgstr "Hoe worden de reiskosten berekend?"
-
-#: pricing/engine.py
-msgid "OV subscription / month"
-msgstr "OV-abonnement / maand"
-
-#: pricing/engine.py
-msgid "NS Flex Altijd Vrij / month"
-msgstr "NS Flex Altijd Vrij / maand"
-
-#: pricing/engine.py
-msgid "Distance one way"
-msgstr "Afstand enkele reis"
-
-#: pricing/engine.py
-msgid "Flat rate / km"
-msgstr "Vast tarief / km"
-
-#: pricing/engine.py
-msgid "Travel costs / month"
-msgstr "Reiskosten / maand"
-
-#: pricing/engine.py
-msgid "Distance return trip"
-msgstr "Afstand heen en terug"
-
-#: pricing/engine.py
-#, python-format
-msgid "%(km)s km × 2"
-msgstr "%(km)s km × 2"
-
-#: pricing/engine.py
-msgid "Working days / year"
-msgstr "Werkdagen / jaar"
-
-#: pricing/engine.py
-#, python-format
-msgid "%(days)s × %(fte)s FTE"
-msgstr "%(days)s × %(fte)s fte"
-
-#: pricing/engine.py
-msgid "Tax-free rate / km"
-msgstr "Belastingvrije vergoeding / km"
-
-#: pricing/engine.py
-msgid "Months / year"
-msgstr "Maanden / jaar"
-
-#: pricing/engine.py
-msgid "Hours / month"
-msgstr "Uren / maand"
-
-#: pricing/engine.py
-#, python-format
-msgid "%(hours)s h × 13 ÷ 3"
-msgstr "%(hours)s u × 13 ÷ 3"
-#: clients/templates/clients/vacancy_detail.html
-msgid "Score"
-msgstr "Score"
-
-#: pricing/templates/pricing/calculator.html pricing/views.py
-msgid "No vacancy"
-msgstr "Geen vacature"
-
-#: pricing/templates/pricing/calculator.html pricing/views.py
-msgid "Search vacancy, client or city"
-msgstr "Zoek op vacature, klant of plaats"
-
-#: pricing/templates/pricing/calculator.html pricing/views.py
-msgid "Choose a vacancy"
-msgstr "Kies een vacature"
-
-#: pricing/templates/pricing/calculator.html pricing/views.py
-msgid "No vacancies found"
-msgstr "Geen vacatures gevonden"
-
-#: pricing/templates/pricing/calculator.html pricing/views.py
-msgid "max"
-msgstr "max"
-#: candidates/models.py candidates/templates/candidates/_drafts.html
-msgid "Untitled draft"
-msgstr "Naamloos concept"
-
-msgid "candidate draft"
-msgstr "kandidaatconcept"
-
-msgid "candidate drafts"
-msgstr "kandidaatconcepten"
-
-#: candidates/views.py
-msgid "Draft saved."
-msgstr "Concept opgeslagen."
-
-msgid "Delete draft"
-msgstr "Concept verwijderen"
-
-msgid "Draft deleted."
-msgstr "Concept verwijderd."
-
-#: candidates/templates/candidates/form.html
-msgid "draft"
-msgstr "concept"
-
-msgid "Save as draft"
-msgstr "Opslaan als concept"
-
-msgid "Save candidate"
-msgstr "Kandidaat opslaan"
-
-msgid "Draft saved"
-msgstr "Concept opgeslagen"
-
-#: candidates/templates/candidates/list.html
-msgid "Drafts"
-msgstr "Concepten"
-
-#: candidates/templates/candidates/_drafts.html
-msgid "Draft candidates"
-msgstr "Conceptkandidaten"
-
-#, python-format
-msgid "edited %(when)s ago"
-msgstr "%(when)s geleden bewerkt"
-
-msgid "Continue"
-msgstr "Verder gaan"
-
-msgid "No drafts. Unfinished new candidates are saved here automatically."
-msgstr "Geen concepten. Onafgemaakte nieuwe kandidaten worden hier automatisch bewaard."
-
-#: candidates/templates/candidates/detail.html
-msgid "Note"
-msgstr "Notitie"

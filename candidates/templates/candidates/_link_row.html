@@ -1,0 +1,48 @@
+{% load i18n l10n ui %}
+{# One vacancy the candidate is considered for: a CandidateVacancyFormSet form (candidates/form.html). #}
+{# Also rendered from formset.empty_form into a <template> that calculator.js clones (vacancy is then empty #}
+{# and the data-slot texts are filled in from the picked option). Removing a row ticks DELETE and hides it. #}
+{% with deleted=form.DELETE.value %}
+<div class="rounded-lg border border-slate-200 p-3.5 transition data-active:border-blue-600 data-active:ring-2 data-active:ring-blue-600/25"
+     data-link-row data-location="{{ vacancy.location }}" data-max="{{ vacancy.max_rate_per_hour|unlocalize }}"{% if deleted %} hidden{% endif %}>
+    {{ form.id }}
+    <input type="hidden" name="{{ form.vacancy.html_name }}" value="{{ form.vacancy.value|default_if_none:'' }}" data-field="vacancy">
+    <input type="checkbox" class="hidden" name="{{ form.DELETE.html_name }}" data-field="delete"{% if deleted %} checked{% endif %}>
+    <div class="flex items-start gap-3">
+        <div class="flex min-w-0 flex-1 flex-col">
+            <span class="truncate font-medium" data-slot="title">{{ vacancy.title }}</span>
+            <span class="truncate text-xs text-gray-500" data-slot="subtitle">{% if vacancy %}{{ vacancy.client.name }} · {{ vacancy.location }}{% endif %}</span>
+        </div>
+        <span class="{{ ui.combo_pill }}" data-slot="max">{% if vacancy %}{% trans "max" %} €{{ vacancy.max_rate_per_hour|floatformat:2 }}{% endif %}</span>
+        <span class="{{ ui.badge.unknown }}" data-slot="tariff" title="{% trans 'Advised tariff for this vacancy' %}">–</span>
+        <button type="button" class="{{ ui.icon_button }} -my-1" data-remove aria-label="{% trans 'Remove vacancy' %}">&times;</button>
+    </div>
+    <div class="mt-3 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="flex flex-col gap-1">
+            <label for="{{ form.status.id_for_label }}" class="font-medium">{{ form.status.label|capfirst }}</label>
+            {{ form.status|as_input }}
+        </div>
+        <div class="flex flex-col gap-1">
+            <label for="{{ form.travel_distance_km.id_for_label }}" class="font-medium">{% trans "Distance one way" %}</label>
+            <div class="{{ ui.number_box }} transition-opacity data-dimmed:opacity-40" data-distance-box>
+                <input type="number" class="{{ ui.number_box_input }}" id="{{ form.travel_distance_km.id_for_label }}" name="{{ form.travel_distance_km.html_name }}" data-field="distance" value="{{ form.travel_distance_km.value|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'automatic' %}">
+                <span class="{{ ui.number_box_unit }}">km</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1">
+            <label for="{{ form.proposed_rate.id_for_label }}" class="font-medium">{% trans "Proposed tariff" %}</label>
+            <div class="{{ ui.number_box }}">
+                <span class="{{ ui.number_box_unit }}">€</span>
+                <input type="number" class="{{ ui.number_box_input }}" id="{{ form.proposed_rate.id_for_label }}" name="{{ form.proposed_rate.html_name }}" data-field="proposed" value="{{ form.proposed_rate.value|default_if_none:''|unlocalize }}" min="0" step="0.01" placeholder="{% trans 'advised' %}">
+            </div>
+        </div>
+        <div class="pb-2">
+            {% trans "Client pays travel" as pays_label %}
+            {% include "core/_toggle.html" with id=form.client_pays_travel.id_for_label name=form.client_pays_travel.html_name checked=form.client_pays_travel.value label=pays_label attrs='data-field="pays"' %}
+        </div>
+    </div>
+    <small class="mt-1.5 block text-gray-500" data-slot="distance-status"></small>
+    {% for field in form %}{% for error in field.errors %}<small class="block text-red-700">{{ field.label|capfirst }}: {{ error }}</small>{% endfor %}{% endfor %}
+    {% for error in form.non_field_errors %}<small class="block text-red-700">{{ error }}</small>{% endfor %}
+</div>
+{% endwith %}

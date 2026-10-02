@@ -1,0 +1,26 @@
+{% load i18n l10n %}
+{# Searchable vacancy picker (calculator.js: vacancyPicker), grouped by client. The page puts a label with id="vacancy-label" above it. #}
+{# The hidden <select> holds the options (and, in single mode, the value). With multiple=True (candidate form) #}
+{# picking adds a vacancy row instead; the select then has no name and is never submitted. #}
+{# Context: vacancies, name (single mode), selected (single mode: the selected vacancy pk), multiple #}
+<select {% if not multiple %}name="{{ name }}" data-role="vacancy" {% endif %}id="id_vacancy" class="sr-only" tabindex="-1" aria-hidden="true">
+    <option value="">{% trans "No vacancy" %}</option>
+    {% regroup vacancies by client as by_client %}
+    {% for group in by_client %}
+        <optgroup label="{{ group.grouper.name }}">
+            {% for v in group.list %}
+                <option value="{{ v.pk }}"{% if not multiple and v.pk == selected %} selected{% endif %} data-title="{{ v.title }}" data-client="{{ v.client.name }}" data-location="{{ v.location }}" data-max="{{ v.max_rate_per_hour|unlocalize }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">{{ v.client.name }} · {{ v.title }}</option>
+            {% endfor %}
+        </optgroup>
+    {% endfor %}
+</select>
+<details class="group/combo relative" id="vacancy-combo" data-dropdown{% if multiple %} data-multiple{% endif %}>
+    <summary class="{{ ui.combo_trigger }}" aria-labelledby="vacancy-label" aria-haspopup="listbox">
+        <span class="flex min-w-0 flex-1 items-center gap-3" id="vacancy-combo-value"></span>
+        <svg class="size-4 shrink-0 text-gray-400 transition group-open/combo:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </summary>
+    <div class="{{ ui.combo_panel }}">
+        <input type="search" class="{{ ui.combo_search }}" id="vacancy-combo-search" placeholder="{% trans 'Search vacancy, client or city' %}" autocomplete="off" aria-controls="vacancy-combo-list">
+        <div class="{{ ui.combo_list }}" id="vacancy-combo-list" role="listbox" aria-labelledby="vacancy-label"{% if multiple %} aria-multiselectable="true"{% endif %}></div>
+    </div>
+</details>

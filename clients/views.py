@@ -1,25 +1,32 @@
 import json
 
+from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, UpdateView
 
-from candidates.models import Candidate
-from core.modals import ModalDeleteMixin, ModalFormMixin
+from candidates.models import Candidate, CandidateVacancy
+from core.drafts import DraftCreateMixin, DraftDeleteView, draft_autosave_view, draft_list_view
+from core.modals import ModalDeleteMixin
+from pricing import constants as C
 
 from . import matching
 from .advisor import suggest_tweaks
-from .forms import VacancyForm
-from .models import Client, Vacancy
+from .forms import ClientForm, VacancyForm
+from .models import Client, Vacancy, VacancyDraft
 
 
 # ---------- Vacancies ----------
 
 def vacancy_list(request):
-    return render(request, "clients/vacancy_list.html", {"clients": Client.objects.all()})
+    return render(request, "clients/vacancy_list.html", {
+        "clients": Client.objects.all(),
+        "draft_count": request.user.vacancy_drafts.count(),
+    })
 
 
 def vacancy_data(request):
@@ -46,17 +53,36 @@ def vacancy_data(request):
     return JsonResponse({"data": rows})
 
 
-class VacancyCreateView(ModalFormMixin, CreateView):
+class VacancyFormMixin:
+    """Full-page vacancy form, in the same style as the candidate page."""
+
     model = Vacancy
     form_class = VacancyForm
-    modal_title = _("New vacancy")
+    template_name = "clients/vacancy_form.html"
+    success_message = ""
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(C=C, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, self.success_message)
+        return redirect("clients:detail", pk=self.object.pk)
+
+
+class VacancyCreateView(DraftCreateMixin, VacancyFormMixin, CreateView):
     success_message = _("Vacancy added.")
+    draft_model = VacancyDraft
+    draft_redirect_url = "clients:vacancy_list"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if client := self.request.GET.get("client"):  # "+ Vacancy" on the clients page, or back from "+ New client"
+            initial["client"] = client
+        return initial
 
 
-class VacancyUpdateView(ModalFormMixin, UpdateView):
-    model = Vacancy
-    form_class = VacancyForm
-    modal_title = _("Edit vacancy")
+class VacancyUpdateView(VacancyFormMixin, UpdateView):
     success_message = _("Vacancy saved.")
 
 
@@ -66,11 +92,27 @@ class VacancyDeleteView(ModalDeleteMixin, DeleteView):
     success_message = _("Vacancy deleted.")
 
 
+vacancy_draft_autosave = draft_autosave_view(VacancyDraft)
+
+vacancy_draft_list = draft_list_view(
+    "vacancy_drafts",
+    heading=_("Draft vacancies"),
+    empty_text=_("No drafts. Unfinished new vacancies are saved here automatically."),
+    continue_url=reverse_lazy("clients:create"),
+    delete_url_name="clients:draft_delete",
+)
+
+
+class VacancyDraftDeleteView(DraftDeleteView):
+    drafts_attr = "vacancy_drafts"
+
+
 def vacancy_detail(request, pk):
     vacancy = get_object_or_404(Vacancy.objects.select_related("client"), pk=pk)
-    candidates = Candidate.objects.exclude(status__in=[Candidate.Status.INACTIVE, Candidate.Status.PLACED])
+    candidates = (Candidate.objects.exclude(status__in=[Candidate.Status.INACTIVE, Candidate.Status.PLACED])
+                  .prefetch_related("links__vacancy__client"))
     ranked = [
-        {"candidate": c, "score": s, "pricing": c.pricing_for(vacancy)}
+        {"candidate": c, "score": s, "pricing": c.pricing_for(vacancy), "link": c.link_for(vacancy)}
         for c, s in matching.rank_candidates(vacancy, candidates)
     ]
     return render(request, "clients/vacancy_detail.html", {
@@ -81,30 +123,88 @@ def vacancy_detail(request, pk):
 # ---------- Clients (companies) ----------
 
 def client_list(request):
-    # TODO(Ivan): full Client CRUD with the same DataTable + modal pattern as vacancies
-    return render(request, "clients/client_list.html", {"clients": Client.objects.prefetch_related("vacancies")})
+    clients = Client.objects.prefetch_related("vacancies")
+    return render(request, "clients/client_list.html", {
+        "clients": clients,
+        "industries": sorted({c.industry for c in clients if c.industry}),
+        "cities": sorted({c.city for c in clients if c.city}),
+    })
+
+
+class ClientFormMixin:
+    """Full-page client form. ?next= returns to where "+ New client" was clicked (e.g. the vacancy form)."""
+
+    model = Client
+    form_class = ClientForm
+    template_name = "clients/client_form.html"
+    success_message = ""
+
+    def next_url(self):
+        url = self.request.POST.get("next") or self.request.GET.get("next")
+        if url and url_has_allowed_host_and_scheme(url, {self.request.get_host()}):
+            return url
+        return None
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(next=self.next_url(), **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        messages.success(self.request, self.success_message)
+        if url := self.next_url():
+            separator = "&" if "?" in url else "?"
+            return redirect(f"{url}{separator}client={self.object.pk}")
+        return redirect("clients:client_list")
+
+
+class ClientCreateView(ClientFormMixin, CreateView):
+    success_message = _("Client added.")
+
+
+class ClientUpdateView(ClientFormMixin, UpdateView):
+    success_message = _("Client saved.")
+
+
+class ClientDeleteView(ModalDeleteMixin, DeleteView):
+    model = Client
+    modal_title = _("Delete client")
+    success_message = _("Client deleted.")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        count = self.object.vacancies.count()
+        if count:
+            context["warning"] = _("Its %(count)s vacancies are deleted too.") % {"count": count}
+        return context
 
 
 # ---------- AI advisor ----------
 
 def advisor_panel_context(candidate):
-    return {"candidate": candidate, "options": suggest_tweaks(candidate)}
+    """Candidate detail: one entry per vacancy the candidate is considered for, with advisor options."""
+    links = list(candidate.links.all())
+    return {"candidate": candidate, "links": [{"link": link, "options": suggest_tweaks(link)} for link in links]}
 
 
 @require_POST
-def apply_tweak(request, candidate_pk):
-    """POST {"changes": {field: value}} -> apply to the candidate."""
-    candidate = get_object_or_404(Candidate.objects.select_related("vacancy"), pk=candidate_pk)
+def apply_tweak(request, link_pk):
+    """POST {"changes": {field: value}} -> apply to the candidate and/or its link to the vacancy."""
+    link = get_object_or_404(CandidateVacancy.objects.select_related("candidate", "vacancy"), pk=link_pk)
+    candidate = link.candidate
     try:
         changes = json.loads(request.POST.get("changes") or request.body or "{}")
         changes = changes.get("changes", changes)
     except json.JSONDecodeError:
         return JsonResponse({"ok": False, "message": "Invalid changes"}, status=400)
-    allowed = set(Candidate.PRICING_FIELD_MAP.values())
-    if not set(changes) <= allowed:
-        return JsonResponse({"ok": False, "message": f"Field not allowed: {set(changes) - allowed}"}, status=400)
+    candidate_fields = set(Candidate.PRICING_FIELD_MAP.values())
+    link_fields = set(Candidate.LINK_PRICING_FIELD_MAP.values())
+    if not set(changes) <= candidate_fields | link_fields:
+        unknown = set(changes) - candidate_fields - link_fields
+        return JsonResponse({"ok": False, "message": f"Field not allowed: {unknown}"}, status=400)
     for field, value in changes.items():
-        setattr(candidate, field, Candidate._meta.get_field(field).to_python(value))
-    candidate.proposed_rate = None  # the advised tariff is recalculated from the new terms
+        target = link if field in link_fields else candidate
+        setattr(target, field, target._meta.get_field(field).to_python(value))
+    link.proposed_rate = None  # the advised tariff is recalculated from the new terms
     candidate.save()
+    link.save()
     return JsonResponse({"ok": True, "message": _("Tweak applied to %(name)s.") % {"name": candidate.full_name}})

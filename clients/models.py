@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from core.models import DraftBase
 
 
 class Client(models.Model):
@@ -48,3 +51,23 @@ class Vacancy(models.Model):
     def location(self):
         """Work location for the travel distance (address + city, falling back to the client's city)."""
         return ", ".join(part for part in (self.address, self.city or self.client.city) if part)
+
+
+class VacancyDraft(DraftBase):
+    """An unfinished "new vacancy" form (see core/drafts.py)."""
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="vacancy_drafts")
+
+    class Meta(DraftBase.Meta):
+        verbose_name = _("vacancy draft")
+        verbose_name_plural = _("vacancy drafts")
+
+    @property
+    def title(self):
+        return self.data.get("title", "").strip() or str(_("Untitled draft"))
+
+    @property
+    def subtitle(self):
+        client_id = str(self.data.get("client", ""))
+        client = Client.objects.filter(pk=client_id).first() if client_id.isdigit() else None
+        return client.name if client else ""

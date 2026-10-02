@@ -146,3 +146,15 @@ class PricingApiTests(TestCase):
         candidate = Candidate.objects.create(first_name="Sanne", last_name="Smit", expected_salary_month=5100)
         response = self.client.get(reverse("pricing:calculator"), {"candidate": candidate.pk})
         self.assertContains(response, 'value="5100.00"')
+
+    def test_calculator_prefills_candidate_at_a_vacancy(self):
+        from candidates.models import Candidate, CandidateVacancy
+        from clients.models import Client, Vacancy
+        company = Client.objects.create(name="ACME")
+        first, second = (Vacancy.objects.create(client=company, title=t, max_rate_per_hour=90) for t in ("A", "B"))
+        candidate = Candidate.objects.create(first_name="Sanne", last_name="Smit", expected_salary_month=5100)
+        CandidateVacancy.objects.create(candidate=candidate, vacancy=first, travel_distance_km=10)
+        CandidateVacancy.objects.create(candidate=candidate, vacancy=second, travel_distance_km=33)
+        response = self.client.get(reverse("pricing:calculator"), {"candidate": candidate.pk, "vacancy": second.pk})
+        self.assertEqual(response.context["initial"]["vacancy_id"], second.pk)
+        self.assertContains(response, 'value="33.0"')

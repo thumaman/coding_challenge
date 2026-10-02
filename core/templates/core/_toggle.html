@@ -1,0 +1,8 @@
+{# Toggle switch for a checkbox. Context: id, name, checked, label; optional attrs (extra attributes on the input). #}
+<div class="flex items-center gap-2">
+    <label class="relative inline-flex cursor-pointer">
+        <input type="checkbox" class="peer sr-only" id="{{ id }}" name="{{ name }}"{% if checked %} checked{% endif %}{% if attrs %} {{ attrs }}{% endif %}>
+        <span class="h-5.5 w-9.5 rounded-full bg-slate-300 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600/40 after:absolute after:left-0.75 after:top-0.75 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
+    </label>
+    <label for="{{ id }}" class="font-medium">{{ label }}</label>
+</div>

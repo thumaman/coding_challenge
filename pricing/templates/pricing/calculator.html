@@ -20,36 +20,9 @@
             <h2 class="{{ ui.section_label }}">{% trans "Employer & travel" %}</h2>
             <div class="flex flex-col gap-1">
                 <span class="font-medium" id="vacancy-label">{% trans "Employer / vacancy" %}</span>
-                {# The hidden <select> holds the value; calculator.js draws the searchable picker on top of it #}
-                <select name="vacancy_id" id="id_vacancy" data-role="vacancy" class="sr-only" tabindex="-1" aria-hidden="true">
-                    <option value="">{% trans "No vacancy" %}</option>
-                    {% regroup vacancies by client as by_client %}
-                    {% for group in by_client %}
-                        <optgroup label="{{ group.grouper.name }}">
-                            {% for v in group.list %}
-                                <option value="{{ v.pk }}"{% if v.pk == initial.vacancy_id %} selected{% endif %} data-title="{{ v.title }}" data-client="{{ v.client.name }}" data-location="{{ v.location }}" data-max="{{ v.max_rate_per_hour|unlocalize }}" data-pays-travel="{{ v.client_pays_travel|yesno:'1,0' }}">{{ v.client.name }} · {{ v.title }}</option>
-                            {% endfor %}
-                        </optgroup>
-                    {% endfor %}
-                </select>
-                <details class="group/combo relative" id="vacancy-combo" data-dropdown>
-                    <summary class="{{ ui.combo_trigger }}" aria-labelledby="vacancy-label" aria-haspopup="listbox">
-                        <span class="flex min-w-0 flex-1 items-center gap-3" id="vacancy-combo-value"></span>
-                        <svg class="size-4 shrink-0 text-gray-400 transition group-open/combo:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                    </summary>
-                    <div class="{{ ui.combo_panel }}">
-                        <input type="search" class="{{ ui.combo_search }}" id="vacancy-combo-search" placeholder="{% trans 'Search vacancy, client or city' %}" autocomplete="off" aria-controls="vacancy-combo-list">
-                        <div class="{{ ui.combo_list }}" id="vacancy-combo-list" role="listbox" aria-labelledby="vacancy-label"></div>
-                    </div>
-                </details>
+                {% include "pricing/_vacancy_picker.html" with name="vacancy_id" selected=initial.vacancy_id %}
             </div>
-            <div class="flex items-center gap-2">
-                <label class="relative inline-flex cursor-pointer">
-                    <input type="checkbox" class="peer sr-only" id="id_client_pays_travel" name="client_pays_travel"{% if initial.client_pays_travel %} checked{% endif %}>
-                    <span class="h-5.5 w-9.5 rounded-full bg-slate-300 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600/40 after:absolute after:left-0.75 after:top-0.75 after:size-4 after:rounded-full after:bg-white after:transition peer-checked:after:translate-x-4"></span>
-                </label>
-                <label for="id_client_pays_travel" class="font-medium">{% trans "Client pays the travel costs" %}</label>
-            </div>
+            {% include "core/_toggle.html" with id="id_client_pays_travel" name="client_pays_travel" checked=initial.client_pays_travel label=_("Client pays the travel costs") %}
             {# Not applicable when the client pays the travel costs: disabled (and greyed out) by calculator.js #}
             <fieldset class="flex min-w-0 flex-col gap-3 transition-opacity disabled:cursor-not-allowed disabled:opacity-40 disabled:[&_*]:pointer-events-none" id="travel-fields"{% if initial.client_pays_travel %} disabled{% endif %}>
                 <div class="flex flex-col gap-1">

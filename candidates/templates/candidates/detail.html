@@ -10,31 +10,31 @@
 
 {% block content %}
 {# TODO(Vidic): nicer profile layout. Pricing panel = Teun, advisor panel = Ivan. #}
-{# Same layout as the calculator: the tariff sum on top (full width), the details in cards below. #}
+{# One tariff card per vacancy the candidate is considered for (on top), the profile below. #}
 <div class="flex flex-col gap-5">
-    {% include "pricing/_calculator_panel.html" %}
-    <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
-        <div class="{{ ui.card }}">
-            <h2 class="{{ ui.h2 }}">{% trans "Profile" %}</h2>
-            <table class="{{ ui.kv_table }}">
-                <!-- <tr><td>{% trans "Status" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_status_display }}</td></tr> -->
-                <tr><td>{% trans "Email" %}</td><td class="{{ ui.kv_value }}">{{ candidate.email|default:"—" }}</td></tr>
-                <tr><td>{% trans "Phone" %}</td><td class="{{ ui.kv_value }}">{{ candidate.phone|default:"—" }}</td></tr>
-                <tr><td>{% trans "Home location" %}</td><td class="{{ ui.kv_value }}">{{ candidate.city|default:"—" }}</td></tr>
-                <tr><td>{% trans "Vacancy" %}</td><td class="{{ ui.kv_value }}">{% if candidate.vacancy %}<a href="{% url 'clients:detail' candidate.vacancy.pk %}">{{ candidate.vacancy }}</a>{% else %}—{% endif %}</td></tr>
-                <tr><td>{% trans "Salary / month" %}</td><td class="{{ ui.kv_value }}">€{{ candidate.expected_salary_month }}</td></tr>
-                <tr><td>{% trans "Hours / week" %}</td><td class="{{ ui.kv_value }}">{{ candidate.hours_per_week }}</td></tr>
-                <tr><td>{% trans "Remote days" %}</td><td class="{{ ui.kv_value }}">{{ candidate.remote_days_per_week }}</td></tr>
-                <tr><td>{% trans "Travel" %}</td><td class="{{ ui.kv_value }}">{% if candidate.travel_distance_km is not None %}{{ candidate.travel_distance_km }} km · {{ candidate.get_transport_type_display }}{% else %}{% trans "unknown" %}{% endif %}</td></tr>
-            </table>
-            {% if candidate.notes %}
-                <div class="mt-5 border-t border-slate-200 pt-4">
-                    <h3 class="mb-1.5 {{ ui.section_label }}">{% trans "Note" %}</h3>
-                    <p class="text-gray-500">{{ candidate.notes|linebreaksbr }}</p>
-                </div>
-            {% endif %}
-        </div>
-        {% if candidate.vacancy %}{% include "clients/_advisor_panel.html" %}{% endif %}
+    {% for entry in links %}
+        {% include "pricing/_calculator_panel.html" with link=entry.link options=entry.options %}
+    {% empty %}
+        <div class="{{ ui.card }} text-gray-500">{% trans "Not linked to a vacancy yet." %} <a href="{% url 'candidates:update' candidate.pk %}">{% trans "Add a vacancy" %}</a></div>
+    {% endfor %}
+    <div class="{{ ui.card }}">
+        <h2 class="{{ ui.h2 }}">{% trans "Profile" %}</h2>
+        <table class="{{ ui.kv_table }}">
+            <!-- <tr><td>{% trans "Status" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_status_display }}</td></tr> -->
+            <tr><td>{% trans "Email" %}</td><td class="{{ ui.kv_value }}">{{ candidate.email|default:"—" }}</td></tr>
+            <tr><td>{% trans "Phone" %}</td><td class="{{ ui.kv_value }}">{{ candidate.phone|default:"—" }}</td></tr>
+            <tr><td>{% trans "Home location" %}</td><td class="{{ ui.kv_value }}">{{ candidate.city|default:"—" }}</td></tr>
+            <tr><td>{% trans "Salary / month" %}</td><td class="{{ ui.kv_value }}">€{{ candidate.expected_salary_month }}</td></tr>
+            <tr><td>{% trans "Hours / week" %}</td><td class="{{ ui.kv_value }}">{{ candidate.hours_per_week }}</td></tr>
+            <tr><td>{% trans "Remote days" %}</td><td class="{{ ui.kv_value }}">{{ candidate.remote_days_per_week }}</td></tr>
+            <tr><td>{% trans "Travel means" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_transport_type_display }}</td></tr>
+        </table>
+        {% if candidate.notes %}
+            <div class="mt-5 border-t border-slate-200 pt-4">
+                <h3 class="mb-1.5 {{ ui.section_label }}">{% trans "Note" %}</h3>
+                <p class="text-gray-500">{{ candidate.notes|linebreaksbr }}</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

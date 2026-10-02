@@ -5,11 +5,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.models import DraftBase
 from pricing import constants as C
 from pricing.engine import PricingInput, calculate
 from pricing.travel import route_distance_km
-
-_UNSET = object()
 
 
 class Candidate(models.Model):
@@ -40,17 +39,8 @@ class Candidate(models.Model):
         _("desired hours per week"), default=40, validators=[MinValueValidator(1), MaxValueValidator(60)]
     )
 
-    # Travel: the distance is calculated automatically from home location → vacancy location.
-    # Travel only counts in the price when the distance is known (business rule).
-    travel_distance_km = models.DecimalField(
-        _("travel distance one way (km)"), max_digits=6, decimal_places=1, null=True, blank=True,
-        help_text=_("Calculated automatically from the home location and the vacancy location"),
-    )
+    # Travel: distance and who pays it depend on the vacancy, so they live on CandidateVacancy
     transport_type = models.CharField(_("travel means"), max_length=10, choices=Transport.choices, default=Transport.CAR)
-    client_pays_travel = models.BooleanField(
-        _("client pays travel costs"), default=False,
-        help_text=_("Travel costs are then left out of the tariff (defaults to the vacancy's setting)"),
-    )
     remote_days_per_week = models.PositiveSmallIntegerField(
         _("remote days / week"), default=0, validators=[MaxValueValidator(5)],
         help_text=_("Used for matching only"),
@@ -62,27 +52,25 @@ class Candidate(models.Model):
         _("margin / hour (€)"), max_digits=6, decimal_places=2, default=Decimal("10.00"),
         validators=[MinValueValidator(C.MIN_MARGIN), MaxValueValidator(C.MAX_MARGIN)],
     )
-    proposed_rate = models.DecimalField(
-        _("proposed tariff / hour (€)"), max_digits=7, decimal_places=2, null=True, blank=True,
-        help_text=_("Leave empty to use the advised tariff."),
-    )
 
-    vacancy = models.ForeignKey(
-        "clients.Vacancy", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="candidates", verbose_name=_("vacancy"),
+    vacancies = models.ManyToManyField(
+        "clients.Vacancy", through="CandidateVacancy", related_name="candidates", verbose_name=_("vacancies"),
     )
     notes = models.TextField(_("notes"), blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # pricing.engine.PricingInput field -> Candidate model field (used by the AI advisor to apply tweaks)
+    # pricing.engine.PricingInput field -> model field (used by the AI advisor to apply tweaks).
+    # Travel distance and who pays it are stored per vacancy, on CandidateVacancy.
     PRICING_FIELD_MAP = {
         "salary_month": "expected_salary_month",
         "hours_per_week": "hours_per_week",
         "cost_factor": "cost_factor",
         "margin": "margin_per_hour",
-        "travel_distance_km": "travel_distance_km",
         "transport_type": "transport_type",
+    }
+    LINK_PRICING_FIELD_MAP = {
+        "travel_distance_km": "travel_distance_km",
         "client_pays_travel": "client_pays_travel",
     }
 
@@ -98,35 +86,94 @@ class Candidate(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
 
-    def pricing_input(self, vacancy=_UNSET, **overrides) -> PricingInput:
-        """Build the engine input from this candidate; overrides use PricingInput field names."""
-        vacancy = self.vacancy if vacancy is _UNSET else vacancy
+    def pricing_input(self, link=None, vacancy=None, **overrides) -> PricingInput:
+        """Build the engine input for this candidate at a vacancy; overrides use PricingInput field names.
+
+        With a link (CandidateVacancy) its travel distance, travel toggle and proposed tariff are used. For a
+        vacancy the candidate isn't linked to (matching), the vacancy's travel default applies and travel is unknown.
+        """
+        vacancy = link.vacancy if link else vacancy
         data = {engine: getattr(self, model) for engine, model in self.PRICING_FIELD_MAP.items()}
-        if vacancy != self.vacancy:
-            # Pricing against another vacancy (matching): that vacancy's default applies
+        if link:
+            data.update({engine: getattr(link, model) for engine, model in self.LINK_PRICING_FIELD_MAP.items()})
+        else:
             data["client_pays_travel"] = bool(vacancy and vacancy.client_pays_travel)
         data.update(
             max_rate=vacancy.max_rate_per_hour if vacancy else None,
-            proposed_rate=self.proposed_rate,
+            proposed_rate=link.proposed_rate if link else None,
         )
         data.update(overrides)
         return PricingInput(**data)
 
-    def refresh_travel_distance(self):
-        """Recalculate the one-way distance home → vacancy location (keeps the old value if lookup fails)."""
-        if not (self.city and self.vacancy and self.vacancy.location):
-            return
-        result = route_distance_km(self.city, self.vacancy.location)
-        if result:
-            self.travel_distance_km = result["km"]
+    def link_for(self, vacancy):
+        """This candidate's CandidateVacancy for `vacancy` (uses prefetched links when available)."""
+        return next((link for link in self.links.all() if link.vacancy_id == vacancy.pk), None)
 
     def pricing_for(self, vacancy):
-        return calculate(self.pricing_input(vacancy=vacancy))
+        link = self.link_for(vacancy)
+        return link.pricing if link else calculate(self.pricing_input(vacancy=vacancy))
+
+    def distance_to(self, vacancy):
+        """One-way km to the vacancy: the stored distance when linked, otherwise looked up (cached)."""
+        link = self.link_for(vacancy)
+        if link and link.travel_distance_km is not None:
+            return link.travel_distance_km
+        if self.city and vacancy.location:
+            result = route_distance_km(self.city, vacancy.location)
+            return result["km"] if result else None
+        return None
+
+
+class CandidateVacancy(models.Model):
+    """A candidate considered for a vacancy. Holds everything about the pair that changes the tariff."""
+
+    class Status(models.TextChoices):
+        CONSIDERED = "considered", _("Considered")
+        PROPOSED = "proposed", _("Proposed")
+        PLACED = "placed", _("Placed")
+        REJECTED = "rejected", _("Rejected")
+
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name="links")
+    vacancy = models.ForeignKey(
+        "clients.Vacancy", on_delete=models.CASCADE, related_name="candidate_links", verbose_name=_("vacancy"),
+    )
+    status = models.CharField(_("status"), max_length=20, choices=Status.choices, default=Status.CONSIDERED)
+    # Travel only counts in the price when the distance is known (business rule)
+    travel_distance_km = models.DecimalField(
+        _("travel distance one way (km)"), max_digits=6, decimal_places=1, null=True, blank=True,
+        help_text=_("Calculated automatically from the home location and the vacancy location"),
+    )
+    client_pays_travel = models.BooleanField(
+        _("client pays travel costs"), default=False,
+        help_text=_("Travel costs are then left out of the tariff (defaults to the vacancy's setting)"),
+    )
+    proposed_rate = models.DecimalField(
+        _("proposed tariff / hour (€)"), max_digits=7, decimal_places=2, null=True, blank=True,
+        help_text=_("Leave empty to use the advised tariff."),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+        constraints = [models.UniqueConstraint(fields=["candidate", "vacancy"], name="unique_candidate_vacancy")]
+        verbose_name = _("candidate vacancy")
+        verbose_name_plural = _("candidate vacancies")
+
+    def __str__(self):
+        return f"{self.candidate} → {self.vacancy}"
+
+    def refresh_travel_distance(self):
+        """Recalculate the one-way distance home → vacancy location (keeps the old value if lookup fails)."""
+        if not (self.candidate.city and self.vacancy.location):
+            return
+        result = route_distance_km(self.candidate.city, self.vacancy.location)
+        if result:
+            self.travel_distance_km = result["km"]
 
     @property
     def pricing(self):
         if not hasattr(self, "_pricing_cache"):
-            self._pricing_cache = calculate(self.pricing_input())
+            self._pricing_cache = calculate(self.candidate.pricing_input(link=self))
         return self._pricing_cache
 
     def save(self, *args, **kwargs):
@@ -136,23 +183,20 @@ class Candidate(models.Model):
         super().save(*args, **kwargs)
 
 
-class CandidateDraft(models.Model):
+class CandidateDraft(DraftBase):
     """An unfinished "new candidate" form. Kept apart from Candidate so drafts never enter the candidate pool."""
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="candidate_drafts")
-    data = models.JSONField(default=dict)  # raw form values: {field name: value}
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        ordering = ["-updated_at"]
+    class Meta(DraftBase.Meta):
         verbose_name = _("candidate draft")
         verbose_name_plural = _("candidate drafts")
-
-    def __str__(self):
-        return self.title
 
     @property
     def title(self):
         name = f"{self.data.get('first_name', '')} {self.data.get('last_name', '')}".strip()
         return name or str(_("Untitled draft"))
+
+    @property
+    def subtitle(self):
+        return self.data.get("desired_role", "")

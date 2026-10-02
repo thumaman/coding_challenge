@@ -15,19 +15,22 @@ from .travel import route_distance_km
 INPUT_FIELDS = set(PricingInput.__dataclass_fields__)
 
 
-def _initial_from_candidate(candidate_id):
-    candidate = Candidate.objects.select_related("vacancy").filter(pk=candidate_id).first()
+def _initial_from_candidate(candidate_id, vacancy_id=None):
+    """Calculator prefill for ?candidate=<id>[&vacancy=<id>]: the candidate at that vacancy (default: the first one)."""
+    candidate = Candidate.objects.prefetch_related("links__vacancy").filter(pk=candidate_id).first()
     if not candidate:
         return {}
+    links = list(candidate.links.all())
+    link = next((l for l in links if str(l.vacancy_id) == str(vacancy_id)), links[0] if links else None)
     return {
         "candidate": candidate,
-        "vacancy_id": candidate.vacancy_id,
-        "client_pays_travel": candidate.client_pays_travel,
+        "vacancy_id": link.vacancy_id if link else None,
+        "client_pays_travel": link.client_pays_travel if link else False,
         "salary_month": candidate.expected_salary_month,
         "hours_per_week": candidate.hours_per_week,
         "home_location": candidate.city,
         "transport_type": candidate.transport_type,
-        "travel_distance_km": candidate.travel_distance_km,
+        "travel_distance_km": link.travel_distance_km if link else None,
         "cost_factor": candidate.cost_factor,
         "margin": candidate.margin_per_hour,
     }
@@ -48,6 +51,7 @@ def calculator_i18n():
         "distance_estimate": _("Estimated distance (route service unavailable)."),
         "distance_failed": _("Location not found: enter the distance yourself."),
         "vacancy_placeholder": _("Choose a vacancy"),
+        "vacancy_add": _("Add a vacancy…"),
         "no_vacancy": _("No vacancy"),
         "no_results": _("No vacancies found"),
         "max": _("max"),
@@ -58,7 +62,8 @@ def calculator_i18n():
 def calculator(request):
     # TODO(Teun): proposed vs. max tariff bar with the −10% band
     vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
-    initial = _initial_from_candidate(request.GET.get("candidate")) if request.GET.get("candidate") else {}
+    candidate_id = request.GET.get("candidate")
+    initial = _initial_from_candidate(candidate_id, request.GET.get("vacancy")) if candidate_id else {}
     return render(request, "pricing/calculator.html", {
         "vacancies": vacancies, "C": C, "i18n": calculator_i18n(), "initial": initial,
     })

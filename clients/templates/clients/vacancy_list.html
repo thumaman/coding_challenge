@@ -5,7 +5,12 @@
 {% block heading %}{% trans "Vacancies" %}{% endblock %}
 
 {% block page_actions %}
-    <button class="{{ ui.btn_primary }}" data-modal-url="{% url 'clients:create' %}" data-table="#vacancies">+ {% trans "Add vacancy" %}</button>
+    {# Unfinished "new vacancy" forms (VacancyDraft): not part of the table below #}
+    <button class="relative {{ ui.btn_secondary }}" data-modal-url="{% url 'clients:drafts' %}" data-reload title="{% trans 'Drafts' %}" aria-label="{% trans 'Drafts' %}">
+        {% include "core/_icon.html" with name="draft" %}
+        {% if draft_count %}<span class="absolute -right-1.5 -top-1.5 min-w-5 rounded-full bg-blue-600 px-1.5 text-center text-xs font-semibold leading-5 text-white">{{ draft_count }}</span>{% endif %}
+    </button>
+    <a class="{{ ui.btn_primary }}" href="{% url 'clients:create' %}">+ {% trans "Add vacancy" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -42,7 +47,7 @@ new DataTable("#vacancies", {
         {data: "remote"},
         {data: "is_open", render: (d) => d ? `<span class="${App.badgeClass("ok")}">{% trans "Open" %}</span>` : `<span class="${App.badgeClass("unknown")}">{% trans "Closed" %}</span>`},
       {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
-            {label: "{% trans "Edit" %}", url: row.urls.update, table: "#vacancies"},
+            {label: "{% trans "Edit" %}", href: row.urls.update},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#vacancies", danger: true},
         ])},
     ],

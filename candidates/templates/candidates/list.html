@@ -28,9 +28,6 @@
                 {% for v in vacancies %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
             </select>
         </label>
-        <label class="flex items-center gap-2 py-2 text-xs text-gray-500">
-            <input type="checkbox" name="over" value="1" class="{{ ui.checkbox }}"> {% trans "Over budget only" %}
-        </label>
     </form>
 
     <table id="candidates" class="display w-full">
@@ -42,8 +39,7 @@
                 <th>{% trans "Salary / month" %}</th>
                 <th>{% trans "Hours" %}</th>
                 <th>{% trans "Remote days" %}</th>
-                <th>{% trans "Vacancy" %}</th>
-                <th>{% trans "Advised rate" %}</th>
+                <th>{% trans "Vacancies & advised rate" %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -68,9 +64,12 @@ const table = new DataTable("#candidates", {
         {data: "salary", render: (d, t) => t === "display" ? App.formatEuro(d) : Number(d)},
         {data: "hours"},
         {data: "remote"},
-        {data: "vacancy", render: (d) => esc(d) || "—"},
-        {data: "rate", render: (d, t, row) => t !== "display" ? Number(d) :
-            `<span class="${App.badgeClass(row.budget_status)}" title="${row.max_rate ? 'max ' + App.formatEuro(row.max_rate) : ''}">${App.formatEuro(d)}</span>`},
+        // One line per vacancy the candidate is considered for, with the advised rate for that vacancy
+        {data: "links", orderable: false, render: (links, t) => t !== "display" ? links.map((l) => l.vacancy).join(" ") :
+            (links.map((l) => `<div class="flex items-center justify-between gap-3 py-0.5">
+                <a class="truncate" href="${l.url}" title="${esc(l.status)}">${esc(l.vacancy)}</a>
+                <span class="${App.badgeClass(l.budget_status)}" title="max ${App.formatEuro(l.max_rate)}">${App.formatEuro(l.rate)}</span>
+            </div>`).join("") || "—")},
       {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", href: row.urls.update},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},

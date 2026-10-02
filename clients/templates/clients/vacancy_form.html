@@ -1,0 +1,91 @@
+{% extends "core/base.html" %}
+{% load i18n static l10n ui %}
+
+{% block title %}{% if object %}{% trans "Edit vacancy" %}{% else %}{% trans "New vacancy" %}{% endif %}{% endblock %}
+{% block heading %}{% if object %}{% trans "Edit vacancy" %} <span class="text-gray-500">· {{ object.title }}</span>{% else %}{% trans "New vacancy" %}{% if draft %} <span class="text-gray-500">· {% trans "draft" %}</span>{% endif %}{% endif %}{% endblock %}
+
+{% block page_actions %}
+    <span class="text-xs text-gray-500" id="draft-status" aria-live="polite"></span>
+    <a class="{{ ui.btn_secondary }}" href="{% if object %}{% url 'clients:detail' object.pk %}{% else %}{% url 'clients:vacancy_list' %}{% endif %}">{% trans "Cancel" %}</a>
+    {% if not object %}<button type="submit" form="vacancy-form" name="action" value="draft" class="{{ ui.btn_secondary }}" formnovalidate>{% trans "Save as draft" %}</button>{% endif %}
+    <button type="submit" form="vacancy-form" class="{{ ui.btn_primary }}">{% if object %}{% trans "Save" %}{% else %}{% trans "Save vacancy" %}{% endif %}</button>
+{% endblock %}
+
+{% block content %}
+{# Same page style as the candidate form (candidates/form.html): cards in two columns. #}
+<form method="post" class="grid gap-5 lg:grid-cols-2" id="vacancy-form" novalidate autocomplete="off" data-enter-leaves-field
+      {% if not object %}data-autosave="{% url 'clients:draft_autosave' %}"{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="draft" value="{{ draft.pk|default_if_none:'' }}">
+    {% if form.non_field_errors %}<div class="text-red-700 lg:col-span-2">{{ form.non_field_errors }}</div>{% endif %}
+
+    <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-3 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Vacancy" %}</h2>
+            <div class="flex flex-col gap-1">
+                <div class="flex items-baseline justify-between gap-2">
+                    <label for="id_client" class="font-medium">{{ form.client.label|capfirst }} <span class="text-red-700">*</span></label>
+                    {# Comes back here (draft kept by autosave) with the new client picked #}
+                    {% if not object %}<a class="text-[13px]" href="{% url 'clients:client_create' %}" id="new-client-link">+ {% trans "New client" %}</a>{% endif %}
+                </div>
+                {{ form.client|as_input }}
+                {% for error in form.client.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+            </div>
+            {% include "core/_field.html" with field=form.title %}
+            {% include "core/_toggle.html" with id="id_is_open" name="is_open" checked=form.is_open.value label=_("Open for candidates") %}
+        </div>
+
+        <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Location" %}</h2>
+            {% include "core/_field.html" with field=form.address %}
+            {% include "core/_field.html" with field=form.city %}
+            {% include "core/_toggle.html" with id="id_client_pays_travel" name="client_pays_travel" checked=form.client_pays_travel.value label=_("Client pays the travel costs") %}
+            <small class="-mt-2 text-gray-500">{{ form.client_pays_travel.help_text }} {% trans "Default for candidates; can be changed per candidate." %}</small>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-5">
+        <div class="flex flex-col gap-3 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Budget & hours" %}</h2>
+            {% include "pricing/_slider.html" with name="max_rate_per_hour" label=_("Max client rate / hour") min=30 max=200 hard_max=1000 step=1 value=form.max_rate_per_hour.value|default:100 unit_before="€" %}
+            {% for error in form.max_rate_per_hour.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+            {% include "pricing/_slider.html" with name="hours_per_week" label=_("Hours per week") min=1 max=40 hard_max=60 step=1 value=form.hours_per_week.value|default:40 unit_after="h" %}
+            {% for error in form.hours_per_week.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+            {% include "pricing/_slider.html" with name="remote_days_allowed" label=_("Remote days allowed") min=0 max=5 hard_max=5 step=1 value=form.remote_days_allowed.value|default:0 %}
+            {% for error in form.remote_days_allowed.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
+        </div>
+
+        <div class="flex flex-1 flex-col gap-3 {{ ui.card }}">
+            <h2 class="{{ ui.section_label }}">{% trans "Salary range" %}</h2>
+            <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                {% include "core/_field.html" with field=form.min_salary %}
+                {% include "core/_field.html" with field=form.max_salary %}
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-3 lg:col-span-2 {{ ui.card }}">
+        <h2 class="{{ ui.section_label }}">{% trans "Skills / keywords" %}</h2>
+        {{ form.skills|as_input }}
+        <small class="text-gray-500">{{ form.skills.help_text }}</small>
+        {% for error in form.skills.errors %}<small class="text-red-700">{{ error }}</small>{% endfor %}
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+{% if not object %}
+{% trans "Draft saved" as t_saved %}
+<script>window.DRAFT_I18N = {saved: "{{ t_saved|escapejs }}"};</script>
+<script src="{% static 'core/js/draft.js' %}"></script>
+<script>
+// "+ New client": save the draft first, then come back to it (?draft=<id> in the URL) with the new client picked
+document.getElementById("new-client-link").addEventListener("click", async (event) => {
+    event.preventDefault();
+    const link = event.currentTarget;
+    await window.Draft.save();
+    location.href = `${link.pathname}?next=${encodeURIComponent(location.pathname + location.search)}`;
+});
+</script>
+{% endif %}
+{% endblock %}

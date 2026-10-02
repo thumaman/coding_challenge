@@ -10,7 +10,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
-from candidates.models import Candidate
+from candidates.models import Candidate, CandidateVacancy
 from clients.models import Client, Vacancy
 from pricing.travel import offline_distance_km
 
@@ -76,23 +76,29 @@ class Command(BaseCommand):
             ))
 
         for _ in range(candidates):
-            vacancy = rng.choice(vacancies + [None])
+            # Every candidate is considered for 1-3 vacancies
+            linked = rng.sample(vacancies, rng.choice([1, 1, 2, 2, 3]))
             city = rng.choice(CITIES)
-            Candidate.objects.create(
+            candidate = Candidate.objects.create(
                 first_name=rng.choice(FIRST), last_name=rng.choice(LAST),
                 email=f"candidate{rng.randint(100, 999)}@example.com", phone=f"06{rng.randint(10000000, 99999999)}",
                 city=city,
-                desired_role=vacancy.title if vacancy and rng.random() < 0.8 else rng.choice(VACANCIES)[0],
+                desired_role=linked[0].title if rng.random() < 0.8 else rng.choice(VACANCIES)[0],
                 status=rng.choice(Candidate.Status.values[:3]),
                 expected_salary_month=Decimal(rng.randrange(3200, 9500, 100)),
                 hours_per_week=rng.choice([32, 36, 40, 40, 40]),
-                # Offline estimate so seeding needs no network; the form recalculates via the routing API
-                travel_distance_km=offline_distance_km(city, vacancy.location) if vacancy else None,
                 transport_type=rng.choice(["car", "car", "ov"]),
-                client_pays_travel=bool(vacancy and vacancy.client_pays_travel),
                 remote_days_per_week=rng.choice([0, 1, 2, 2, 3]),
-                vacancy=vacancy, notes=rng.choice(NOTES),
+                notes=rng.choice(NOTES),
             )
+            for vacancy in linked:
+                CandidateVacancy.objects.create(
+                    candidate=candidate, vacancy=vacancy,
+                    status=rng.choice(CandidateVacancy.Status.values[:2]),
+                    # Offline estimate so seeding needs no network; the form recalculates via the routing API
+                    travel_distance_km=offline_distance_km(city, vacancy.location),
+                    client_pays_travel=vacancy.client_pays_travel,
+                )
 
         self.stdout.write(self.style.SUCCESS(
             f"Seeded {len(clients)} clients, {len(vacancies)} vacancies, {candidates} candidates."

@@ -4,21 +4,104 @@
 {% block title %}{% trans "Clients" %}{% endblock %}
 {% block heading %}{% trans "Clients" %}{% endblock %}
 
+{% block page_actions %}
+    <a class="{{ ui.btn_primary }}" href="{% url 'clients:client_create' %}">+ {% trans "Add client" %}</a>
+{% endblock %}
+
 {% block content %}
-{# TODO(Ivan): replace with a DataTable + modal CRUD (copy vacancy_list.html) #}
-<div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+{# Filtering happens in the browser (few clients): every card carries what the filters look at in data-* attributes. #}
+<form class="mb-5 flex flex-wrap items-end gap-3 {{ ui.card }}" id="client-filters" role="search">
+    <label class="flex min-w-60 flex-1 flex-col gap-1 text-xs text-gray-500">{% trans "Search" %}
+        <input type="search" name="q" class="{{ ui.input }}" placeholder="{% trans 'Name, industry, city, contact or vacancy' %}" autocomplete="off">
+    </label>
+    <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Industry" %}
+        <select name="industry" class="{{ ui.input }}">
+            <option value="">{% trans "All" %}</option>
+            {% for industry in industries %}<option value="{{ industry }}">{{ industry }}</option>{% endfor %}
+        </select>
+    </label>
+    <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "City" %}
+        <select name="city" class="{{ ui.input }}">
+            <option value="">{% trans "All" %}</option>
+            {% for city in cities %}<option value="{{ city }}">{{ city }}</option>{% endfor %}
+        </select>
+    </label>
+    <div class="py-2 text-xs">
+        {% include "core/_toggle.html" with id="id_open_only" name="open" label=_("With open vacancies only") %}
+    </div>
+    <span class="ml-auto py-2 text-xs text-gray-500" id="client-count" aria-live="polite"></span>
+</form>
+
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" id="client-cards">
     {% for client in clients %}
-        <div class="{{ ui.card }}">
-            <h2 class="{{ ui.h2 }}">{{ client.name }}</h2>
-            <p class="mb-2 text-gray-500">{{ client.industry }} · {{ client.city }}</p>
-            <ul class="list-disc space-y-1 pl-5">
+        <div class="flex flex-col gap-3 {{ ui.card }}" data-client-card
+             data-search="{{ client.name|lower }} {{ client.industry|lower }} {{ client.city|lower }} {{ client.contact_name|lower }} {{ client.contact_email|lower }}{% for v in client.vacancies.all %} {{ v.title|lower }}{% endfor %}"
+             data-industry="{{ client.industry }}" data-city="{{ client.city }}"
+             data-open="{% for v in client.vacancies.all %}{% if v.is_open %}1{% endif %}{% endfor %}">
+            <div class="flex items-start gap-3">
+                <div class="min-w-0 flex-1">
+                    <h2 class="truncate text-base font-bold"><a class="text-gray-800" href="{% url 'clients:client_update' client.pk %}">{{ client.name }}</a></h2>
+                    <p class="text-gray-500">{{ client.industry|default:"—" }} · {{ client.city|default:"—" }}</p>
+                </div>
+                <div data-actions data-edit="{% url 'clients:client_update' client.pk %}" data-delete="{% url 'clients:client_delete' client.pk %}" data-add-vacancy="{% url 'clients:create' %}?client={{ client.pk }}"></div>
+            </div>
+            {% if client.contact_name or client.contact_email %}
+                <p class="text-gray-500">
+                    {{ client.contact_name }}{% if client.contact_name and client.contact_email %} · {% endif %}
+                    {% if client.contact_email %}<a href="mailto:{{ client.contact_email }}">{{ client.contact_email }}</a>{% endif %}
+                </p>
+            {% endif %}
+            <ul class="divide-y divide-slate-200 border-t border-slate-200">
                 {% for v in client.vacancies.all %}
-                    <li><a href="{% url 'clients:detail' v.pk %}">{{ v.title }}</a> (max €{{ v.max_rate_per_hour }})</li>
+                    <li class="flex items-center gap-2 py-2">
+                        <a class="min-w-0 flex-1 truncate" href="{% url 'clients:detail' v.pk %}">{{ v.title }}</a>
+                        <span class="text-xs text-gray-500 tabular-nums">max €{{ v.max_rate_per_hour }}</span>
+                        <span class="{% if v.is_open %}{{ ui.badge.ok }}{% else %}{{ ui.badge.unknown }}{% endif %}">{% if v.is_open %}{% trans "Open" %}{% else %}{% trans "Closed" %}{% endif %}</span>
+                    </li>
+                {% empty %}
+                    <li class="py-2 text-gray-500">{% trans "No vacancies yet." %}</li>
                 {% endfor %}
             </ul>
+            <a class="mt-auto self-start text-[13px]" href="{% url 'clients:create' %}?client={{ client.pk }}">+ {% trans "Add vacancy" %}</a>
         </div>
-    {% empty %}
-        <p class="text-gray-500">{% trans "No clients yet." %}</p>
     {% endfor %}
 </div>
+<p class="text-gray-500" id="client-empty" hidden>{% if clients %}{% trans "No clients match these filters." %}{% else %}{% trans "No clients yet." %}{% endif %}</p>
+{% endblock %}
+
+{% block extra_js %}
+{% trans "Edit" as t_edit %}{% trans "Add vacancy" as t_add_vacancy %}{% trans "Delete" as t_delete %}{% trans "%(shown)s of %(total)s clients" as t_count %}
+<script>
+const filters = document.getElementById("client-filters");
+const cards = [...document.querySelectorAll("[data-client-card]")];
+
+document.querySelectorAll("[data-actions]").forEach((el) => {
+    el.innerHTML = App.rowMenu([
+        {label: "{{ t_edit|escapejs }}", href: el.dataset.edit},
+        {label: "{{ t_add_vacancy|escapejs }}", href: el.dataset.addVacancy},
+        {label: "{{ t_delete|escapejs }}", url: el.dataset.delete, reload: true, danger: true},
+    ]);
+});
+
+function applyFilters() {
+    const f = Object.fromEntries(new FormData(filters));
+    const words = (f.q || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    cards.forEach((card) => {
+        const match = words.every((w) => card.dataset.search.includes(w))
+            && (!f.industry || card.dataset.industry === f.industry)
+            && (!f.city || card.dataset.city === f.city)
+            && (!f.open || card.dataset.open !== "");
+        card.hidden = !match;
+        if (match) shown += 1;
+    });
+    document.getElementById("client-empty").hidden = shown > 0;
+    document.getElementById("client-count").textContent =
+        "{{ t_count|escapejs }}".replace("%(shown)s", shown).replace("%(total)s", cards.length);
+}
+
+filters.addEventListener("input", applyFilters);
+filters.addEventListener("submit", (event) => event.preventDefault());
+applyFilters();
+</script>
 {% endblock %}

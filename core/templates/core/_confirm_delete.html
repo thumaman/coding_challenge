@@ -7,6 +7,7 @@
     </div>
     <div class="{{ ui.modal_content }}">
         <p>{% blocktrans with name=object %}Are you sure you want to delete <strong>{{ name }}</strong>? This cannot be undone.{% endblocktrans %}</p>
+        {% if warning %}<p class="mt-2 font-medium text-red-700">{{ warning }}</p>{% endif %}
     </div>
     <div class="{{ ui.modal_footer }}">
         <button type="button" class="{{ ui.btn_secondary }}" data-modal-close>{% trans "Cancel" %}</button>

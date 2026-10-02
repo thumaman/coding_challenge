@@ -1,11 +1,11 @@
-// New-candidate page: keeps unfinished work as a draft (see CandidateDraft).
+// New-candidate and new-vacancy pages: keep unfinished work as a draft (see core/drafts.py).
 // Saves shortly after typing stops, and once more when the tab is hidden, closed or left
 // (keepalive lets that last request finish after the page is gone).
 // Nothing is saved until the recruiter changes something; submitting the form skips the final save.
 (function () {
     "use strict";
 
-    const form = document.getElementById("forward-form");
+    const form = document.querySelector("form[data-autosave]");
     const url = form && form.dataset.autosave;
     if (!url) return;
     const draftInput = form.querySelector("[name=draft]");
@@ -64,5 +64,6 @@
     form.addEventListener("change", () => { dirty = true; save(); });
     form.addEventListener("submit", () => { submitting = true; clearTimeout(timer); });
     window.addEventListener("pagehide", save);
+    window.Draft = {save: () => { dirty = true; return save(); }}; // e.g. before leaving via a link
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") save(); });
 })();

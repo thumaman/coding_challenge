@@ -36,13 +36,9 @@ def _location_points(candidate, vacancy):
     if candidate.city and vacancy.city and candidate.city.strip().lower() == vacancy.city.strip().lower():
         return 1
 
-    if candidate.travel_distance_km is None and candidate.city and vacancy.location:
-        candidate.refresh_travel_distance()
-        if candidate.travel_distance_km is not None and candidate.pk:
-            type(candidate).objects.filter(pk=candidate.pk).update(travel_distance_km=candidate.travel_distance_km)
-
-    if candidate.travel_distance_km is not None:
-        return 1 if candidate.travel_distance_km <= CLOSE_KM else 0
+    distance = candidate.distance_to(vacancy)
+    if distance is not None:
+        return 1 if distance <= CLOSE_KM else 0
 
     return 0
 

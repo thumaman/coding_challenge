@@ -117,7 +117,7 @@ function paintSlider(el) {
         });
     }
 
-    // Row action menu (3 dots): App.rowMenu([{label, url, table, danger}]); {label, href} is a plain link
+    // Row action menu (3 dots): App.rowMenu([{label, url, table, reload, danger}]); {label, href} is a plain link
     function rowMenu(items) {
         const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
         return `<div class="group/menu relative inline-block" data-row-menu>
@@ -129,7 +129,7 @@ function paintSlider(el) {
                     return i.href
                         ? `<a role="menuitem" class="${cls}" href="${esc(i.href)}">${esc(i.label)}</a>`
                         : `<button type="button" role="menuitem" class="${cls}"
-                            data-modal-url="${esc(i.url)}" ${i.table ? `data-table="${esc(i.table)}"` : ""}>${esc(i.label)}</button>`;
+                            data-modal-url="${esc(i.url)}" ${i.table ? `data-table="${esc(i.table)}"` : ""} ${i.reload ? "data-reload" : ""}>${esc(i.label)}</button>`;
                 }).join("")}
             </div>
         </div>`;
@@ -237,6 +237,16 @@ function paintSlider(el) {
             input.value = clamped;
             input.dispatchEvent(new Event("input", {bubbles: true}));
         }
+    });
+
+    // Slider <-> number box (pricing/_slider.html): the number box is the named input, the slider mirrors it
+    document.querySelectorAll("input[type=range][data-sync]").forEach((range) => {
+        const number = document.getElementById(range.dataset.sync);
+        range.addEventListener("input", () => {
+            number.value = range.value;
+            number.dispatchEvent(new Event("input", {bubbles: true}));
+        });
+        number.addEventListener("input", () => { range.value = number.value; });
     });
 
     // <form data-enter-leaves-field>: Enter in a field only leaves that field instead of submitting the form

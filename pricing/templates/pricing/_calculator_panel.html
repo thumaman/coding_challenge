@@ -1,15 +1,26 @@
 {% load i18n ui %}
-{# Pricing panel for a candidate (included on candidates/detail.html). Owner: Teun. #}
+{# Tariff card for one vacancy a candidate is considered for (candidates/detail.html). Owner: Teun. #}
+{# Context: link (CandidateVacancy), options (advisor options for this link, see clients/advisor.py). #}
 {# TODO(Teun): make this interactive (sliders + "Save to candidate" that POSTs and calls App.toast). #}
-{% with p=candidate.pricing %}
+{% with p=link.pricing vacancy=link.vacancy %}
 <div class="{{ ui.card }}">
+    <div class="mb-3.5 flex flex-wrap items-start gap-x-4 gap-y-2">
+        <div class="min-w-0">
+            <h2 class="text-base font-bold"><a href="{% url 'clients:detail' vacancy.pk %}">{{ vacancy.title }}</a></h2>
+            <p class="text-gray-500">
+                {{ vacancy.client.name }} · {{ vacancy.location|default:"—" }} ·
+                {% if link.travel_distance_km is not None %}{{ link.travel_distance_km }} km{% else %}{% trans "distance unknown" %}{% endif %}{% if link.client_pays_travel %} · {% trans "client pays travel" %}{% endif %}
+            </p>
+        </div>
+        <span class="{{ ui.badge.unknown }}">{{ link.get_status_display }}</span>
+        <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ link.candidate_id }}&amp;vacancy={{ vacancy.pk }}">{% trans "Open in calculator" %}</a>
+    </div>
     <p class="mb-3.5 flex flex-wrap items-center gap-2">
         <span class="{{ p.budget_status|badge }}">
             {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum: too cheap?" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
         </span>
         {% if p.max_rate %}<span class="text-gray-500">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
-        {% if candidate.proposed_rate %}<span class="text-gray-500">· {% trans "proposed" %} €{{ candidate.proposed_rate }}</span>{% endif %}
-        <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ candidate.pk }}">{% trans "Open in calculator" %}</a>
+        {% if link.proposed_rate %}<span class="text-gray-500">· {% trans "proposed" %} €{{ link.proposed_rate }}</span>{% endif %}
     </p>
     <div class="{{ ui.sum_grid }}">
         {% trans "Cost price" as label %}{% trans "How is the cost price calculated?" as hint %}
@@ -25,5 +36,6 @@
         <div class="{{ ui.sum_op }}">=</div>
         <div class="{{ ui.sum_total }}"><span class="{{ ui.sum_total_label }}">{% trans "Advised tariff" %}</span><strong class="{{ ui.sum_total_value }}">€{{ p.advised_rate }}</strong></div>
     </div>
+    {% if p.budget_status == "over" or options %}{% include "clients/_advisor_panel.html" %}{% endif %}
 </div>
 {% endwith %}

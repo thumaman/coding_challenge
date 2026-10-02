@@ -5,7 +5,7 @@
 {% block heading %}{{ vacancy.title }} <span class="text-gray-500">· {{ vacancy.client.name }}</span>{% endblock %}
 
 {% block page_actions %}
-    <button class="{{ ui.btn_edit }}" data-modal-url="{% url 'clients:update' vacancy.pk %}" data-reload>{% trans "Edit" %}</button>
+    <a class="{{ ui.btn_edit }}" href="{% url 'clients:update' vacancy.pk %}">{% trans "Edit" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -32,7 +32,10 @@
         <tbody>
             {% for row in ranked %}
                 <tr>
-                    <td><a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a></td>
+                    <td>
+                        <a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a>
+                        {% if row.link %}<span class="ml-1.5 {{ ui.badge.unknown }}" title="{% trans 'Considered for this vacancy' %}">{{ row.link.get_status_display }}</span>{% endif %}
+                    </td>
                     <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
                     <td data-order="{{ row.score.total|stringformat:'s' }}">{{ row.score.total|floatformat:"-1" }}</td>
                     <td>{{ row.candidate.remote_days_per_week }}</td>
