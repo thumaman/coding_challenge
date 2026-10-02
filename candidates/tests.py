@@ -11,7 +11,7 @@ from clients.models import Client, Vacancy
 from .models import Candidate, CandidateDraft, CandidateVacancy
 
 CANDIDATE = {
-    "first_name": "Sanne", "last_name": "de Vries", "status": "intake", "expected_salary_month": "6000",
+    "first_name": "Sanne", "last_name": "de Vries", "expected_salary_month": "6000",
     "hours_per_week": "40", "transport_type": "car", "remote_days_per_week": "0", "cost_factor": "2.0",
     "margin_per_hour": "10",
 }

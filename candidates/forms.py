@@ -11,7 +11,7 @@ class CandidateForm(forms.ModelForm):
     class Meta:
         model = Candidate
         fields = [
-            "first_name", "last_name", "email", "phone", "city", "desired_role", "status",
+            "first_name", "last_name", "email", "phone", "city", "desired_role",
             "expected_salary_month", "hours_per_week", "transport_type", "remote_days_per_week",
             "cost_factor", "margin_per_hour", "notes",
         ]

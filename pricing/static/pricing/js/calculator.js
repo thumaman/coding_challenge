@@ -46,7 +46,7 @@
     // ---- Searchable vacancy picker over the hidden <select> ----
     // Single mode (calculator): the <select> stays the source of truth: picking an option sets its value and fires
     // "change". Multiple mode (candidate form): picking calls onPick(option), isPicked(value) marks options already
-    // picked, and the list stays open to pick more.
+    // picked. Either way the list closes after a pick.
     function vacancyPicker(select, {multiple = false, isPicked = null, onPick = null} = {}) {
         const combo = document.getElementById("vacancy-combo");
         const valueBox = document.getElementById("vacancy-combo-value");
@@ -103,14 +103,10 @@
         function pick(value) {
             if (multiple) {
                 if (!isPicked(value)) onPick(select.querySelector(`option[value="${CSS.escape(value)}"]`));
-                const index = active;
-                renderList();
-                setActive(index);
-                search.focus();
-                return;
+            } else {
+                select.value = value;
+                select.dispatchEvent(new Event("change", {bubbles: true}));
             }
-            select.value = value;
-            select.dispatchEvent(new Event("change", {bubbles: true}));
             combo.open = false;
             renderValue();
             combo.querySelector("summary").focus();
