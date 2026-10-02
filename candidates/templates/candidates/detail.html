@@ -17,7 +17,7 @@
         <div class="{{ ui.card }}">
             <h2 class="{{ ui.h2 }}">{% trans "Profile" %}</h2>
             <table class="{{ ui.kv_table }}">
-                <tr><td>{% trans "Status" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_status_display }}</td></tr>
+                <!-- <tr><td>{% trans "Status" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_status_display }}</td></tr> -->
                 <tr><td>{% trans "Email" %}</td><td class="{{ ui.kv_value }}">{{ candidate.email|default:"—" }}</td></tr>
                 <tr><td>{% trans "Phone" %}</td><td class="{{ ui.kv_value }}">{{ candidate.phone|default:"—" }}</td></tr>
                 <tr><td>{% trans "Home location" %}</td><td class="{{ ui.kv_value }}">{{ candidate.city|default:"—" }}</td></tr>

@@ -16,12 +16,12 @@
 {% block content %}
 <div class="{{ ui.dt_card }}">
     <form class="mb-4 flex flex-wrap items-end gap-3" id="candidate-filters">
-        <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Status" %}
-            <select name="status" class="{{ ui.input }}">
-                <option value="">{% trans "All" %}</option>
-                {% for value, label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-            </select>
-        </label>
+        <!-- <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Status" %} -->
+        <!--     <select name="status" class="{{ ui.input }}"> -->
+        <!--         <option value="">{% trans "All" %}</option> -->
+        <!--         {% for value, label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %} -->
+        <!--     </select> -->
+        <!-- </label> -->
         <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Vacancy" %}
             <select name="vacancy" class="{{ ui.input }}">
                 <option value="">{% trans "All" %}</option>
@@ -37,8 +37,8 @@
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
-                <th>{% trans "Role" %}</th>
-                <th>{% trans "Status" %}</th>
+                <!-- <th>{% trans "Role" %}</th> -->
+                <!-- <th>{% trans "Status" %}</th> -->
                 <th>{% trans "Salary / month" %}</th>
                 <th>{% trans "Hours" %}</th>
                 <th>{% trans "Remote days" %}</th>
@@ -63,8 +63,8 @@ const table = new DataTable("#candidates", {
   order: [],
     columns: [
         {data: "name", render: (d, t, row) => `<a href="${row.urls.detail}">${esc(d)}</a>`},
-        {data: "role", render: (d) => esc(d)},
-        {data: "status"},
+        <!-- {data: "role", render: (d) => esc(d)}, -->
+        <!-- {data: "status"}, -->
         {data: "salary", render: (d, t) => t === "display" ? App.formatEuro(d) : Number(d)},
         {data: "hours"},
         {data: "remote"},
