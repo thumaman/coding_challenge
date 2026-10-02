@@ -16,12 +16,18 @@ INPUT_FIELDS = set(PricingInput.__dataclass_fields__)
 
 
 def _initial_from_candidate(candidate_id, vacancy_id=None):
-    """Calculator prefill for ?candidate=<id>[&vacancy=<id>]: the candidate at that vacancy (default: the first one)."""
+    """Calculator prefill for ?candidate=<id>[&vacancy=<id>]: the candidate at that vacancy (default: the first one).
+
+    A vacancy the candidate isn't linked to is not prefilled, rather than swapped for another of their vacancies.
+    """
     candidate = Candidate.objects.prefetch_related("links__vacancy").filter(pk=candidate_id).first()
     if not candidate:
         return {}
     links = list(candidate.links.all())
-    link = next((l for l in links if str(l.vacancy_id) == str(vacancy_id)), links[0] if links else None)
+    if vacancy_id:
+        link = next((l for l in links if str(l.vacancy_id) == str(vacancy_id)), None)
+    else:
+        link = links[0] if links else None
     return {
         "candidate": candidate,
         "vacancy_id": link.vacancy_id if link else None,

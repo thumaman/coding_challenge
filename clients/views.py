@@ -109,8 +109,8 @@ class VacancyDraftDeleteView(DraftDeleteView):
 
 def vacancy_detail(request, pk):
     vacancy = get_object_or_404(Vacancy.objects.select_related("client"), pk=pk)
-    candidates = (Candidate.objects.exclude(status__in=[Candidate.Status.INACTIVE, Candidate.Status.PLACED])
-                  .prefetch_related("links__vacancy__client"))
+    # Only candidates linked to this vacancy: their tariff comes from the link (travel distance, proposed rate)
+    candidates = Candidate.objects.filter(links__vacancy=vacancy).prefetch_related("links__vacancy__client")
     ranked = [
         {"candidate": c, "score": s, "pricing": c.pricing_for(vacancy), "link": c.link_for(vacancy)}
         for c, s in matching.rank_candidates(vacancy, candidates)

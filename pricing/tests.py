@@ -174,3 +174,14 @@ class PricingApiTests(TestCase):
         response = self.client.get(reverse("pricing:calculator"), {"candidate": candidate.pk, "vacancy": second.pk})
         self.assertEqual(response.context["initial"]["vacancy_id"], second.pk)
         self.assertContains(response, 'value="33.0"')
+
+    def test_calculator_does_not_swap_in_another_vacancy(self):
+        from candidates.models import Candidate, CandidateVacancy
+        from clients.models import Client, Vacancy
+        company = Client.objects.create(name="ACME")
+        linked, unlinked = (Vacancy.objects.create(client=company, title=t, max_rate_per_hour=90) for t in ("A", "B"))
+        candidate = Candidate.objects.create(first_name="Sanne", last_name="Smit", expected_salary_month=5100)
+        CandidateVacancy.objects.create(candidate=candidate, vacancy=linked, travel_distance_km=10)
+        response = self.client.get(reverse("pricing:calculator"), {"candidate": candidate.pk, "vacancy": unlinked.pk})
+        self.assertIsNone(response.context["initial"]["vacancy_id"])
+        self.assertIsNone(response.context["initial"]["travel_distance_km"])

@@ -48,6 +48,15 @@ class AdvisorTests(TestCase):
         response = self.client.get(reverse("clients:detail", args=[self.vacancy.pk]))
         self.assertEqual(response.context["ranked"][0]["link"], self.link)
 
+    def test_vacancy_detail_lists_only_linked_candidates(self):
+        other = Vacancy.objects.create(client=self.vacancy.client, title="Analyst", max_rate_per_hour=80)
+        outsider = Candidate.objects.create(first_name="C", last_name="D", expected_salary_month=4000)
+        CandidateVacancy.objects.create(candidate=outsider, vacancy=other, travel_distance_km=5)
+        Candidate.objects.create(first_name="E", last_name="F", expected_salary_month=4000)  # no vacancy at all
+        response = self.client.get(reverse("clients:detail", args=[self.vacancy.pk]))
+        self.assertEqual([row["candidate"] for row in response.context["ranked"]], [self.candidate])
+        self.assertEqual(response.context["ranked"][0]["pricing"].final_rate, self.link.pricing.final_rate)
+
     def test_match_score_range(self):
         result = score(self.candidate, self.vacancy)
         self.assertTrue(0 <= result["total"] <= MAX_SCORE)
