@@ -1,7 +1,7 @@
 {% load i18n %}
 {# Advisor (owner: Ivan), shown inside a vacancy's tariff card when it is over budget or well under it. #}
 {# Context: link (CandidateVacancy), p (its pricing), options (from clients.advisor.suggest_tweaks). #}
-<div class="mt-5 border-t border-slate-200 pt-4">
+<div class="mt-5 border-t-2 border-gray-400 pt-4">
     <h3 class="flex items-center gap-2 font-bold">{% include "core/_icon.html" with name="spark" %} {% trans "Advisor Insights" %}</h3>
     {% if options %}
         {% if options.0.key == "increase_margin" %}
