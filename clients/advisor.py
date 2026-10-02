@@ -1,9 +1,8 @@
-"""AI advisor: proposes tweaks when a candidate is over the client's budget (owner: Ivan).
+"""Advisor: proposes tweaks when a candidate is over the client's budget (owner: Ivan).
 
-1. A deterministic solver (always works) uses pricing.engine to find the change per lever that
-   brings the rate within max_rate_per_hour, plus a combined option.
-2. Optional: when ANTHROPIC_API_KEY is set, Claude ranks the options and explains them in
-   recruiter-friendly language. Any failure falls back to the rule-based ranking, so the demo never breaks.
+A deterministic solver (always works) uses pricing.engine to find the change per lever that
+brings the rate within max_rate_per_hour, plus a combined option. 
+Options are ranked purely by least intervention (rule-based).
 
 Each option: {"key", "title", "changes": {field: value}, "new_rate", "savings_per_hour", "reason"}
 `changes` keys are Candidate model fields, so clients:apply_tweak can apply them directly.
@@ -12,16 +11,11 @@ Each option: {"key", "title", "changes": {field: value}, "new_rate", "savings_pe
 from __future__ import annotations
 
 import json
-import logging
-import os
 from decimal import ROUND_DOWN, Decimal
 
-from django.conf import settings
 from django.utils.translation import gettext as _
 
 from pricing.engine import C, calculate, money
-
-logger = logging.getLogger(__name__)
 
 # The advisor never suggests a margin below this, even though recruiters may go lower by hand
 MARGIN_FLOOR = Decimal("5.00")
@@ -63,12 +57,31 @@ def suggest_tweaks(candidate, vacancy=None) -> list[dict]:
     vacancy = vacancy or candidate.vacancy
     if vacancy is None:
         return []
+        
     max_rate = vacancy.max_rate_per_hour
     current = _rate(candidate, vacancy)
+    
+    # ---------------------------------------------------------------------
+    # NEW: Suggestion when the price is much lower than the client's budget
+    # ---------------------------------------------------------------------
+    # E.g., If current rate is more than 10% below the client's max budget
+    if current < (max_rate * Decimal("0.9")):
+        return [{
+            "key": "increase_margin",
+            "title": _("Increase Margin or Salary"),
+            "changes": {},
+            "changes_json": "{}",
+            "new_rate": str(current),
+            "savings_per_hour": "0.00",
+            "fits": True,
+            "reason": _("Advised price is significantly lower than the client offer; consider increasing the margin or the candidate's salary."),
+        }]
+        
+    # If the price is perfectly fine, suggest nothing
     if current <= max_rate:
         return []
+        
     pricing = calculate(candidate.pricing_input(vacancy=vacancy, proposed_rate=None))
-
     options = []
 
     # Lever 1: salary
@@ -112,52 +125,9 @@ def suggest_tweaks(candidate, vacancy=None) -> list[dict]:
                                % {"margin": MARGIN_FLOOR, "salary": combined_salary}))
 
     options = [o for o in options if o["fits"]]
+    
     # Rule-based ranking: smallest change to the candidate's package first
     preference = {"client_travel": 0, "margin": 1, "transport": 2, "combined": 3, "salary": 4}
     options.sort(key=lambda o: preference.get(o["key"], 9))
-    return _rank_with_claude(candidate, vacancy, options) if options else options
-
-
-def _rank_with_claude(candidate, vacancy, options):
-    """Optional AI layer. Returns options re-ordered with an `ai_explanation` each, or unchanged on any error."""
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        return options
-    try:
-        import anthropic
-        from pydantic import BaseModel
-
-        class RankedOption(BaseModel):
-            key: str
-            explanation: str
-
-        class Ranking(BaseModel):
-            options: list[RankedOption]
-
-        prompt = (
-            "You advise a recruiter during an intake conversation. The candidate's advised hourly rate is "
-            f"above the client's maximum of €{vacancy.max_rate_per_hour}. Rank these tweak options from most to "
-            "least acceptable for both the candidate and the recruitment agency, and give each a 1-2 sentence "
-            "explanation the recruiter can say out loud. Use the option keys as given.\n\n"
-            f"Candidate role: {candidate.desired_role}\n"
-            f"Candidate notes (what they care about): {candidate.notes or '-'}\n"
-            f"Options: {[{k: o[k] for k in ('key', 'title', 'changes', 'new_rate', 'reason')} for o in options]}"
-        )
-        client = anthropic.Anthropic(timeout=20.0)
-        response = client.messages.parse(
-            model=settings.ANTHROPIC_MODEL,
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}],
-            output_format=Ranking,
-        )
-        ranking = response.parsed_output
-        if ranking is None:
-            return options
-        by_key = {o["key"]: o for o in options}
-        ranked = []
-        for item in ranking.options:
-            if item.key in by_key:
-                ranked.append({**by_key.pop(item.key), "ai_explanation": item.explanation})
-        return ranked + list(by_key.values())
-    except Exception:  # noqa: BLE001 - the demo must never break on the AI layer
-        logger.exception("Claude ranking failed, falling back to rule-based ranking")
-        return options
+    
+    return options

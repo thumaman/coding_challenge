@@ -1,23 +1,32 @@
 {% load i18n %}
 {# AI advisor panel (owner: Ivan). Context: candidate, options (from clients.advisor.suggest_tweaks). #}
 <div class="{{ ui.card }}">
-    <h2 class="flex items-center gap-2 {{ ui.h2 }}">{% include "core/_icon.html" with name="spark" %} {% trans "Advisor: fit the client budget" %}</h2>
+    <h2 class="flex items-center gap-2 {{ ui.h2 }}">
+        {% include "core/_icon.html" with name="spark" %} 
+        {% trans "Advisor Insights" %}
+    </h2>
+    
     {% if options %}
-        <p class="text-gray-500">
-            {% blocktrans with rate=candidate.pricing.final_rate max=candidate.vacancy.max_rate_per_hour %}Current rate €{{ rate }} exceeds the client maximum of €{{ max }}. Options:{% endblocktrans %}
-        </p>
+        {% if options.0.key == "increase_margin" %}
+            <p class="text-gray-500">
+                {% blocktrans with rate=candidate.pricing.final_rate max=candidate.vacancy.max_rate_per_hour %}Current rate €{{ rate }} is significantly below the client maximum of €{{ max }}.{% endblocktrans %}
+            </p>
+        {% else %}
+            <p class="text-gray-500">
+                {% blocktrans with rate=candidate.pricing.final_rate max=candidate.vacancy.max_rate_per_hour %}Current rate €{{ rate }} exceeds the client maximum of €{{ max }}. Options to lower it:{% endblocktrans %}
+            </p>
+        {% endif %}
+        
         {% for option in options %}
-            <div class="mt-3 flex items-center justify-between gap-4 border-t border-slate-200 pt-3">
+            <div class="mt-3 border-t border-slate-200 pt-3">
                 <div>
-                    <strong>{{ option.title }}</strong> → €{{ option.new_rate }}
-                    <span class="text-gray-500">(−€{{ option.savings_per_hour }}/h)</span>
-                    <div class="text-gray-500">{{ option.ai_explanation|default:option.reason }}</div>
+                    <strong>{{ option.title }}</strong> 
+                    {% if option.key != "increase_margin" %}
+                        → €{{ option.new_rate }}
+                        <span class="text-gray-500">(−€{{ option.savings_per_hour }}/h)</span>
+                    {% endif %}
+                    <div class="mt-1 text-gray-500">{{ option.reason }}</div>
                 </div>
-                <form method="post" action="{% url 'clients:apply_tweak' candidate.pk %}" data-ajax data-reload>
-                    {% csrf_token %}
-                    <input type="hidden" name="changes" value="{{ option.changes_json }}">
-                    <button type="submit" class="{{ ui.btn_primary_sm }}">{% trans "Apply" %}</button>
-                </form>
             </div>
         {% endfor %}
     {% else %}
