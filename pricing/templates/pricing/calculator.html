@@ -34,10 +34,6 @@
             {% include "core/_toggle.html" with id="id_client_pays_travel" name="client_pays_travel" checked=initial.client_pays_travel label=_("Client pays the travel costs") %}
             {# Not applicable when the client pays the travel costs: disabled (and greyed out) by calculator.js #}
             <fieldset class="flex min-w-0 flex-col gap-3 transition-opacity disabled:cursor-not-allowed disabled:opacity-40 disabled:[&_*]:pointer-events-none" id="travel-fields"{% if initial.client_pays_travel %} disabled{% endif %}>
-                <div class="flex flex-col gap-1" data-travel="auto">
-                    <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
-                    <input type="text" id="id_home" name="home_location" data-role="home" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
-                </div>
                 <div class="flex flex-col items-start gap-1">
                     <span class="font-medium">{% trans "Travel means" %}</span>
                     <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
@@ -45,6 +41,10 @@
                         <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
                         <label><input type="radio" class="peer sr-only" name="transport_type" value="manual"><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Manual" %}</span></label>
                     </div>
+                </div>
+                <div class="flex flex-col gap-1" data-travel="auto">
+                    <label for="id_home" class="font-medium">{% trans "Home location" %}</label>
+                    <input type="text" id="id_home" name="home_location" data-role="home" class="{{ ui.input }}" value="{{ initial.home_location|default:'' }}" placeholder="{% trans 'e.g. Utrecht or 3511 AB' %}">
                 </div>
                 {# Manual travel means: a fixed amount per hour instead of home location, remote days and distance (toggled by calculator.js) #}
                 <div class="flex flex-col gap-1" data-travel="manual" hidden>
