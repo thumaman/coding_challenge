@@ -22,6 +22,7 @@ class Candidate(models.Model):
     class Transport(models.TextChoices):
         CAR = "car", _("Car")
         OV = "ov", _("Public transport")
+        MANUAL = "manual", _("Manual")
 
     # Personal
     first_name = models.CharField(_("first name"), max_length=100)
@@ -44,6 +45,11 @@ class Candidate(models.Model):
     remote_days_per_week = models.PositiveSmallIntegerField(
         _("remote days / week"), default=0, validators=[MaxValueValidator(5)],
         help_text=_("Used for matching only"),
+    )
+    # Manual travel means: a fixed amount per hour instead of one calculated from the distance
+    travel_per_hour_override = models.DecimalField(
+        _("travel costs / hour (€)"), max_digits=6, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(0)],
     )
 
     # Pricing (vacation days and other employment conditions are included in the cost price factor)
@@ -69,6 +75,7 @@ class Candidate(models.Model):
         "margin": "margin_per_hour",
         "transport_type": "transport_type",
         "remote_days_per_week": "remote_days_per_week",
+        "travel_per_hour_override": "travel_per_hour_override",
     }
     LINK_PRICING_FIELD_MAP = {
         "travel_distance_km": "travel_distance_km",

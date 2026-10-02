@@ -12,17 +12,25 @@ class CandidateForm(forms.ModelForm):
         model = Candidate
         fields = [
             "first_name", "last_name", "email", "phone", "city", "desired_role",
-            "expected_salary_month", "hours_per_week", "transport_type", "remote_days_per_week",
-            "cost_factor", "margin_per_hour", "notes",
+            "expected_salary_month", "hours_per_week", "transport_type", "travel_per_hour_override",
+            "remote_days_per_week", "cost_factor", "margin_per_hour", "notes",
         ]
         widgets = {
             "notes": forms.Textarea(attrs={"rows": 3, "wide": True}),
             "margin_per_hour": forms.NumberInput(attrs={"min": C.MIN_MARGIN, "max": C.MAX_MARGIN, "step": "0.5"}),
             "cost_factor": forms.NumberInput(attrs={"step": "0.05"}),
             "remote_days_per_week": forms.NumberInput(attrs={"min": 0, "max": 5}),
+            "travel_per_hour_override": forms.NumberInput(attrs={"min": 0, "step": "0.01", "placeholder": "0.00"}),
             # Hooks for calculator.js on the candidate page (live distance + tariff)
             "city": forms.TextInput(attrs={"data-role": "home"}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        # The amount per hour only applies to the manual travel means (the field is hidden for the others)
+        if cleaned.get("transport_type") != Candidate.Transport.MANUAL:
+            cleaned["travel_per_hour_override"] = None
+        return cleaned
 
 
 class CandidateVacancyForm(forms.ModelForm):

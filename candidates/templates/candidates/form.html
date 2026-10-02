@@ -64,8 +64,12 @@
                         {% endfor %}
                     </div>
                 </div>
+                {# Manual travel means: a fixed amount per hour instead of the distance per vacancy (toggled by calculator.js) #}
+                <div class="flex flex-col" data-travel="manual"{% if form.transport_type.value != "manual" %} hidden{% endif %}>
+                    {% include "core/_field.html" with field=form.travel_per_hour_override %}
+                </div>
                 {% include "core/_field.html" with field=form.remote_days_per_week %}
-                <small class="text-gray-500">{% trans "The travel distance is calculated per vacancy, from the home location." %}</small>
+                <small class="text-gray-500" data-travel="auto"{% if form.transport_type.value == "manual" %} hidden{% endif %}>{% trans "The travel distance is calculated per vacancy, from the home location." %}</small>
             </div>
         </div>
 

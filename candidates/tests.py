@@ -137,6 +137,18 @@ class CandidateCrudTests(TestCase):
         self.assertTrue(response.json()["ok"])
         self.assertFalse(Candidate.objects.exists())
 
+    def test_manual_travel_uses_entered_amount_per_hour(self):
+        data = {**CANDIDATE, "transport_type": "manual", "travel_per_hour_override": "3.50",
+                **links({"vacancy": self.vacancy.pk, "travel_distance_km": "50"})}
+        self.client.post(reverse("candidates:create"), data)
+        link = CandidateVacancy.objects.get()
+        self.assertEqual(link.candidate.travel_per_hour_override, Decimal("3.50"))
+        self.assertEqual(link.pricing.travel_in_tariff, Decimal("3.50"))  # not calculated from the 50 km
+
+    def test_travel_amount_dropped_for_other_travel_means(self):
+        self.client.post(reverse("candidates:create"), {**self.valid, "travel_per_hour_override": "3.50"})
+        self.assertIsNone(Candidate.objects.get().travel_per_hour_override)
+
     def test_margin_must_be_between_0_and_25(self):
         response = self.client.post(reverse("candidates:create"), {**self.valid, "margin_per_hour": "30"})
         self.assertIn("margin_per_hour", response.context["form"].errors)

@@ -173,8 +173,22 @@
             if (!name.startsWith(`${linkRows && linkRows.dataset.prefix}-`)) data[fieldMap[name] || name] = value;
         });
         delete data.home_location;
+        if (!isManualTravel()) delete data.travel_per_hour_override;
         return data;
     }
+
+    // Manual travel means: an amount per hour replaces the fields used to calculate the travel costs
+    function isManualTravel() {
+        const checked = forward.querySelector("[name=transport_type]:checked");
+        return Boolean(checked) && checked.value === "manual";
+    }
+    function syncTravelMeans() {
+        forward.querySelectorAll("[data-travel]").forEach((el) => {
+            el.hidden = (el.dataset.travel === "manual") !== isManualTravel();
+        });
+    }
+    forward.addEventListener("change", (event) => { if (event.target.name === "transport_type") syncTravelMeans(); });
+    syncTravelMeans();
 
     // One-way distance home -> work location into `input`, with a status text. Calls done() afterwards.
     async function fetchDistance(destination, input, status, done) {
@@ -219,16 +233,6 @@
         const syncTravelFields = () => { travelFields.disabled = paysTravel.checked; };
         paysTravel.addEventListener("change", syncTravelFields);
 
-        // Manual travel means: an amount per hour replaces home location, remote days and distance
-        const isManualTravel = () => forward.querySelector("[name=transport_type]:checked").value === "manual";
-        const syncTravelMeans = () => {
-            travelFields.querySelectorAll("[data-travel]").forEach((el) => {
-                el.hidden = (el.dataset.travel === "manual") !== isManualTravel();
-            });
-        };
-        travelFields.addEventListener("change", (event) => { if (event.target.name === "transport_type") syncTravelMeans(); });
-        syncTravelMeans();
-
         // An empty target budget falls back to the vacancy's maximum (the API does the same): show it as placeholder
         const syncBudgetPlaceholder = () => {
             const option = vacancySelect.selectedOptions[0];
@@ -237,10 +241,8 @@
         syncBudgetPlaceholder();
 
         const runForward = debounce(async () => {
-            const data = baseData();
-            if (!isManualTravel()) delete data.travel_per_hour_override;
             try {
-                renderResult((await App.post(forward.dataset.endpoint, data)).result);
+                renderResult((await App.post(forward.dataset.endpoint, baseData())).result);
             } catch (err) { /* e.g. an empty or invalid number while typing */ }
         });
         const runDistance = debounce(() => {
@@ -282,7 +284,7 @@
         }
 
         function syncTravel(row) {
-            row.querySelector("[data-distance-box]").toggleAttribute("data-dimmed", field(row, "pays").checked);
+            row.querySelector("[data-distance-box]").toggleAttribute("data-dimmed", field(row, "pays").checked || isManualTravel());
         }
 
         function rowDistance(row) {
@@ -368,6 +370,9 @@
         linkRows.querySelectorAll("[data-link-row]").forEach(setupRow);
         activate(rows()[0] || null);
 
+        forward.addEventListener("change", (event) => {
+            if (event.target.name === "transport_type") linkRows.querySelectorAll("[data-link-row]").forEach(syncTravel);
+        });
         homeInput.addEventListener("input", runDistances);
         forward.addEventListener("input", (event) => { if (event.target !== homeInput) runRows(); });
         forward.addEventListener("change", runRows);

@@ -25,6 +25,7 @@
             <tr><td>{% trans "Hours / week" %}</td><td class="{{ ui.kv_value }}">{{ candidate.hours_per_week }}</td></tr>
             <tr><td>{% trans "Remote days" %}</td><td class="{{ ui.kv_value }}">{{ candidate.remote_days_per_week }}</td></tr>
             <tr><td>{% trans "Travel means" %}</td><td class="{{ ui.kv_value }}">{{ candidate.get_transport_type_display }}</td></tr>
+            {% if candidate.transport_type == "manual" %}<tr><td>{% trans "Travel costs / hour" %}</td><td class="{{ ui.kv_value }}">{% if candidate.travel_per_hour_override is not None %}€{{ candidate.travel_per_hour_override }}{% else %}—{% endif %}</td></tr>{% endif %}
         </table>
         {% if candidate.notes %}
             <div class="mt-5 border-t border-slate-200 pt-4">

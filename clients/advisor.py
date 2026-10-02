@@ -107,7 +107,7 @@ def suggest_tweaks(link) -> list[dict]:
     # Lever 4: cheaper travel means
     if pricing.travel_in_tariff > 0:
         for transport, label in candidate.Transport.choices:
-            if transport != candidate.transport_type and _rate(link, transport_type=transport) < current:
+            if transport not in (candidate.transport_type, candidate.Transport.MANUAL) and _rate(link, transport_type=transport) < current:
                 options.append(_option(link, "transport", _("Travel by %(means)s") % {"means": label.lower()},
                                        {"transport_type": transport}, current,
                                        _("Cheaper travel means lowers the travel costs.")))

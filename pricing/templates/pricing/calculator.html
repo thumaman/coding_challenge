@@ -37,9 +37,9 @@
                 <div class="flex flex-col items-start gap-1">
                     <span class="font-medium">{% trans "Travel means" %}</span>
                     <div class="inline-flex overflow-hidden rounded-md border border-slate-200 bg-white">
-                        <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
+                        <label><input type="radio" class="peer sr-only" name="transport_type" value="car"{% if initial.transport_type != "ov" and initial.transport_type != "manual" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Car" %}</span></label>
                         <label><input type="radio" class="peer sr-only" name="transport_type" value="ov"{% if initial.transport_type == "ov" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Public transport" %}</span></label>
-                        <label><input type="radio" class="peer sr-only" name="transport_type" value="manual"><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Manual" %}</span></label>
+                        <label><input type="radio" class="peer sr-only" name="transport_type" value="manual"{% if initial.transport_type == "manual" %} checked{% endif %}><span class="block cursor-pointer px-3.5 py-1.75 font-medium text-gray-500 peer-checked:bg-slate-900 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-blue-600">{% trans "Manual" %}</span></label>
                     </div>
                 </div>
                 <div class="flex flex-col gap-1" data-travel="auto">
@@ -51,7 +51,7 @@
                     <label for="id_travel_per_hour_override" class="font-medium">{% trans "Travel costs / hour" %}</label>
                     <div class="{{ ui.number_box }}">
                         <span class="{{ ui.number_box_unit }}">€</span>
-                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_per_hour_override" name="travel_per_hour_override" min="0" step="0.01" placeholder="0.00">
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_per_hour_override" name="travel_per_hour_override" value="{{ initial.travel_per_hour_override|default_if_none:''|unlocalize }}" min="0" step="0.01" placeholder="0.00">
                     </div>
                 </div>
                 <div class="flex flex-col gap-1" data-travel="auto">
