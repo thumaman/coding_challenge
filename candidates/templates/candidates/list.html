@@ -15,32 +15,16 @@
 
 {% block content %}
 <div class="{{ ui.dt_card }}">
-    <form class="mb-4 flex flex-wrap items-end gap-3" id="candidate-filters">
-        <!-- <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Status" %} -->
-        <!--     <select name="status" class="{{ ui.input }}"> -->
-        <!--         <option value="">{% trans "All" %}</option> -->
-        <!--         {% for value, label in statuses %}<option value="{{ value }}">{{ label }}</option>{% endfor %} -->
-        <!--     </select> -->
-        <!-- </label> -->
-        <label class="flex flex-col gap-1 text-xs text-gray-500">{% trans "Vacancy" %}
-            <select name="vacancy" class="{{ ui.input }}">
-                <option value="">{% trans "All" %}</option>
-                {% for v in vacancies %}<option value="{{ v.pk }}">{{ v }}</option>{% endfor %}
-            </select>
-        </label>
-    </form>
-
     <table id="candidates" class="display w-full">
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
+                <th>{% trans "Location" %}</th>
                 <!-- <th>{% trans "Role" %}</th> -->
                 <!-- <th>{% trans "Status" %}</th> -->
                 <th>{% trans "Salary / month" %}</th>
                 <th>{% trans "Hours" %}</th>
                 <th>{% trans "Remote days" %}</th>
-                <th>{% trans "Vacancy" %}</th>
-                <th>{% trans "Advised rate" %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -51,32 +35,23 @@
 {% block extra_js %}
 <script>
 const esc = DataTable.util.escapeHtml;
-const filters = document.getElementById("candidate-filters");
-const dataUrl = () => "{% url 'candidates:data' %}?" + new URLSearchParams(new FormData(filters));
-
 const table = new DataTable("#candidates", {
-    ajax: dataUrl(),
+    ajax: "{% url 'candidates:data' %}",
   layout: {topStart: "search", topEnd: {}, bottomStart: {info: true, pageLength: true}, bottomEnd: { paging: {firstLast: false }}},
   order: [],
     columns: [
         {data: "name", render: (d, t, row) => `<a href="${row.urls.detail}">${esc(d)}</a>`},
+        {data: "location", render: (d) => d ? esc(d) : "—"},
         <!-- {data: "role", render: (d) => esc(d)}, -->
         <!-- {data: "status"}, -->
         {data: "salary", render: (d, t) => t === "display" ? App.formatEuro(d) : Number(d)},
         {data: "hours"},
         {data: "remote"},
-        // One row per vacancy the candidate is considered for, with the advised rate for that vacancy
-        {data: "link", render: (l, t) => t !== "display" ? (l ? l.vacancy : "") :
-            (l ? `<a href="${l.url}" title="${esc(l.status)}">${esc(l.vacancy)}</a>` : "—")},
-        {data: "link", render: (l, t) => t !== "display" ? (l ? Number(l.rate) : -1) :
-            (l ? `<span class="${App.badgeClass(l.budget_status)}" title="max ${App.formatEuro(l.max_rate)}">${App.formatEuro(l.rate)}</span>` : "—")},
       {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", href: row.urls.update},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},
         ])},
     ],
 });
-
-filters.addEventListener("change", () => table.ajax.url(dataUrl()).load());
 </script>
 {% endblock %}

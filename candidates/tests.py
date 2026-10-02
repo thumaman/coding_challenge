@@ -144,31 +144,14 @@ class CandidateCrudTests(TestCase):
         link.refresh_from_db()
         self.assertEqual(link.travel_distance_km, Decimal("12.0"))
 
-    def test_data_endpoint(self):
+    def test_data_endpoint_one_row_per_candidate(self):
         candidate = Candidate.objects.create(first_name="A", last_name="B", expected_salary_month=6000)
         CandidateVacancy.objects.create(candidate=candidate, vacancy=self.vacancy)
         CandidateVacancy.objects.create(candidate=candidate, vacancy=make_vacancy("Cheap", max_rate=60))
+        Candidate.objects.create(first_name="C", last_name="D", expected_salary_month=5000)  # no vacancy
         data = self.client.get(reverse("candidates:data")).json()["data"]
-        # One row per vacancy
-        self.assertEqual([row["name"] for row in data], ["A B", "A B"])
-        self.assertEqual([row["link"]["rate"] for row in data], ["79.23", "79.23"])
-        self.assertEqual([row["link"]["budget_status"] for row in data], ["too_low", "over"])
-
-    def test_data_endpoint_candidate_without_vacancy(self):
-        Candidate.objects.create(first_name="A", last_name="B", expected_salary_month=6000)
-        data = self.client.get(reverse("candidates:data")).json()["data"]
-        self.assertEqual([row["link"] for row in data], [None])
-
-    def test_data_endpoint_vacancy_filter(self):
-        other = make_vacancy("Other")
-        for name, vacancy in (("In", self.vacancy), ("Out", other)):
-            candidate = Candidate.objects.create(first_name=name, last_name="X", expected_salary_month=5000)
-            CandidateVacancy.objects.create(candidate=candidate, vacancy=vacancy)
-        CandidateVacancy.objects.create(candidate=Candidate.objects.get(first_name="In"), vacancy=other)
-        data = self.client.get(reverse("candidates:data"), {"vacancy": self.vacancy.pk}).json()["data"]
-        # Only the row for the filtered vacancy, not the candidate's other vacancies
-        self.assertEqual([(row["name"], row["link"]["vacancy"]) for row in data], [("In X", str(self.vacancy))])
-
+        self.assertEqual(sorted(row["name"] for row in data), ["A B", "C D"])
+        self.assertNotIn("link", data[0])
 
 class CandidateDraftTests(TestCase):
     def setUp(self):

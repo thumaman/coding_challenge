@@ -24,50 +24,32 @@ from .models import Candidate, CandidateDraft
 def candidate_list(request):
     return render(request, "candidates/list.html", {
         "statuses": Candidate.Status.choices,
-        "vacancies": Vacancy.objects.select_related("client"),
         "draft_count": request.user.candidate_drafts.count(),
     })
 
 
 def candidate_data(request):
-    """JSON for the candidates DataTable (filters via query string): one row per vacancy a candidate is
-    considered for; candidates without a vacancy get a single row."""
-    qs = Candidate.objects.prefetch_related("links__vacancy__client")
+    """JSON for the candidates DataTable (filters via query string): one row per candidate, however many
+    vacancies they are considered for (the per-vacancy tariffs live on the candidate and vacancy pages)."""
+    qs = Candidate.objects.all()
     if status := request.GET.get("status"):
         qs = qs.filter(status=status)
-    vacancy = request.GET.get("vacancy")
-    if vacancy:
-        qs = qs.filter(vacancies=vacancy).distinct()
 
-    rows = []
-    for c in qs:
-        candidate = {
-            "id": c.pk,
-            "name": c.full_name,
-            "role": c.desired_role,
-            "status": c.get_status_display(),
-            "salary": str(c.expected_salary_month),
-            "hours": c.hours_per_week,
-            "remote": c.remote_days_per_week,
-            "urls": {
-                "detail": reverse("candidates:detail", args=[c.pk]),
-                "update": reverse("candidates:update", args=[c.pk]),
-                "delete": reverse("candidates:delete", args=[c.pk]),
-            },
-        }
-        links = [link for link in c.links.all() if not vacancy or str(link.vacancy_id) == vacancy]
-        if not links:
-            rows.append({**candidate, "link": None})
-        for link in links:
-            p = link.pricing
-            rows.append({**candidate, "link": {
-                "vacancy": str(link.vacancy),
-                "url": reverse("clients:detail", args=[link.vacancy_id]),
-                "status": link.get_status_display(),
-                "rate": str(p.final_rate),
-                "max_rate": str(p.max_rate),
-                "budget_status": p.budget_status,
-            }})
+    rows = [{
+        "id": c.pk,
+        "name": c.full_name,
+        "role": c.desired_role,
+        "location": c.city,
+        "status": c.get_status_display(),
+        "salary": str(c.expected_salary_month),
+        "hours": c.hours_per_week,
+        "remote": c.remote_days_per_week,
+        "urls": {
+            "detail": reverse("candidates:detail", args=[c.pk]),
+            "update": reverse("candidates:update", args=[c.pk]),
+            "delete": reverse("candidates:delete", args=[c.pk]),
+        },
+    } for c in qs]
     return JsonResponse({"data": rows})
 
 
