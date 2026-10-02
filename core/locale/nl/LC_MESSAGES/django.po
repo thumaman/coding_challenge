@@ -525,13 +525,15 @@ msgstr "Status voor %(vacancy)s gewijzigd naar %(status)s."
 
 #: clients/advisor.py:70
 msgid "Increase Margin or Salary"
-msgstr ""
+msgstr "Verhoog marge of salaris"
 
 #: clients/advisor.py:75
 msgid ""
 "Advised price is significantly lower than the client offer; consider "
 "increasing the margin or the candidate's salary."
 msgstr ""
+"De adviesprijs is aanzienlijk lager dan het aanbod van de klant; overweeg "
+"de marge of het salalris van de kandidaat te verhogen."
 
 #: clients/advisor.py:86
 msgid "Lower salary"
