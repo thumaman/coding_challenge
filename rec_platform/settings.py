@@ -30,17 +30,30 @@ ON_RAILWAY = "RAILWAY_ENVIRONMENT" in os.environ
 DEBUG = os.environ.get("DJANGO_DEBUG", "0" if ON_RAILWAY else "1") == "1"
 
 _DEV_SECRET_KEY = "django-insecure-bkcf%5ju8w=+zu92%r5!sh&33eekc8_+0g1+^1&%kaur)v(-n5"
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", _DEV_SECRET_KEY)
+SECRET_KEY = (os.environ.get("DJANGO_SECRET_KEY") or os.environ.get("SECRET_KEY") or "").strip() or _DEV_SECRET_KEY
 if not DEBUG and SECRET_KEY == _DEV_SECRET_KEY:
-    raise ImproperlyConfigured("Set the DJANGO_SECRET_KEY environment variable in production.")
+    # Names only (never values), to see what the platform actually passes in
+    related = sorted(name for name in os.environ if any(word in name.upper() for word in ("SECRET", "DJANGO", "DATABASE")))
+    raise ImproperlyConfigured(
+        "Set the DJANGO_SECRET_KEY environment variable in production (on the web service, then deploy). "
+        f"Related variables this process can see: {', '.join(related) or 'none'}."
+    )
 
-# Railway sets RAILWAY_PUBLIC_DOMAIN (e.g. myapp.up.railway.app); extra hosts via DJANGO_ALLOWED_HOSTS
+# Hosts: localhost, Railway's own *.up.railway.app domains (RAILWAY_PUBLIC_DOMAIN is not always passed in,
+# e.g. when the domain was generated after the deploy started) and custom domains via DJANGO_ALLOWED_HOSTS.
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
     host.strip()
     for host in [os.environ.get("RAILWAY_PUBLIC_DOMAIN", ""), *os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")]
     if host.strip()
 ]
-CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host not in ("localhost", "127.0.0.1")]
+if ON_RAILWAY:
+    ALLOWED_HOSTS.append(".up.railway.app")  # leading dot: any subdomain
+# Login and other forms POST over HTTPS from these origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://*" + host if host.startswith(".") else f"https://{host}"
+    for host in ALLOWED_HOSTS
+    if host not in ("localhost", "127.0.0.1")
+]
 
 # Railway terminates HTTPS at its proxy and forwards plain HTTP
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
