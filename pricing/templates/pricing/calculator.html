@@ -66,7 +66,7 @@
                 <div class="flex flex-col gap-1">
                     <label for="id_travel_distance_km" class="font-medium">{% trans "Travel distance one way" %}</label>
                     <div class="{{ ui.number_box }}">
-                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %}">
+                        <input type="number" class="{{ ui.number_box_input }}" id="id_travel_distance_km" name="travel_distance_km" data-role="distance" value="{{ initial.travel_distance_km|default_if_none:''|unlocalize }}" min="0" step="0.1" placeholder="{% trans 'calculated automatically' %} ">
                         <span class="{{ ui.number_box_unit }}">km</span>
                     </div>
                     <small class="text-gray-500" id="distance-status">{% trans "Choose a vacancy and enter the home location to calculate the distance." %}</small>
