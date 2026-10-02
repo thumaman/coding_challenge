@@ -1289,3 +1289,13 @@ msgstr "Notities bewerken"
 #: candidates/templates/candidates/form.html
 msgid "Done"
 msgstr "Klaar"
+
+msgid "Change status"
+msgstr "Status wijzigen"
+
+msgid "Unknown status."
+msgstr "Onbekende status."
+
+#, python-format
+msgid "Status for %(vacancy)s set to %(status)s."
+msgstr "Status voor %(vacancy)s gewijzigd naar %(status)s."

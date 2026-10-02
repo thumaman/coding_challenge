@@ -107,6 +107,19 @@ class CandidateCrudTests(TestCase):
         self.assertEqual(len(response.context["links"]), 2)
         self.assertContains(response, "Analyst")
 
+    def test_change_status_from_detail_page(self):
+        candidate = Candidate.objects.create(first_name="A", last_name="B", expected_salary_month=5000)
+        link = CandidateVacancy.objects.create(candidate=candidate, vacancy=self.vacancy, travel_distance_km=10)
+        detail = self.client.get(reverse("candidates:detail", args=[candidate.pk]))
+        self.assertContains(detail, reverse("candidates:link_status", args=[link.pk]))
+        url = reverse("candidates:link_status", args=[link.pk])
+        response = self.client.post(url, {"status": "proposed"}, headers={"X-Requested-With": "XMLHttpRequest"})
+        self.assertTrue(response.json()["ok"])
+        link.refresh_from_db()
+        self.assertEqual(link.status, "proposed")
+        self.assertEqual(self.client.post(url, {"status": "bogus"}).status_code, 400)
+        self.assertEqual(self.client.get(url).status_code, 405)
+
     def test_invalid_form_rerenders_page(self):
         response = self.client.post(reverse("candidates:create"), {**self.valid, "first_name": ""})
         self.assertEqual(response.status_code, 200)

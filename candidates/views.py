@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, UpdateView
 
 from clients.models import Vacancy
@@ -18,7 +19,7 @@ from pricing import constants as C
 from pricing.views import calculator_i18n
 
 from .forms import CandidateForm, CandidateVacancyFormSet
-from .models import Candidate, CandidateDraft
+from .models import Candidate, CandidateDraft, CandidateVacancy
 
 
 def candidate_list(request):
@@ -176,3 +177,21 @@ class CandidateDeleteView(ModalDeleteMixin, DeleteView):
 def candidate_detail(request, pk):
     candidate = get_object_or_404(Candidate.objects.prefetch_related("links__vacancy__client"), pk=pk)
     return render(request, "candidates/detail.html", advisor_panel_context(candidate))
+
+
+@require_POST
+def link_status(request, pk):
+    """Change a candidate's status for one vacancy (status pill on the tariff card, pricing/_calculator_panel.html)."""
+    link = get_object_or_404(CandidateVacancy.objects.select_related("candidate", "vacancy"), pk=pk)
+    status = request.POST.get("status")
+    if status not in CandidateVacancy.Status.values:
+        return JsonResponse({"ok": False, "message": str(_("Unknown status."))}, status=400)
+    link.status = status
+    link.save(update_fields=["status"])
+    message = _("Status for %(vacancy)s set to %(status)s.") % {
+        "vacancy": link.vacancy.title, "status": link.get_status_display(),
+    }
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"ok": True, "message": str(message)})
+    messages.success(request, message)
+    return redirect("candidates:detail", pk=link.candidate_id)
