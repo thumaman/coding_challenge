@@ -19,7 +19,7 @@ import math
 import ssl
 import urllib.parse
 import urllib.request
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP, ROUND_UP
 
 import certifi
 from django.conf import settings
@@ -170,10 +170,17 @@ def estimate_monthly_travel_cost(
         return final_ov_cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     if transport_method in ("car", "bicycle"):
+        distance = Decimal(str(one_way_distance_km))
         days = Decimal(str(days_worked_per_week))
-        workable_days = WORKABLE_DAYS_PER_YEAR_FULL_TIME * (days / FULL_TIME_DAYS_PER_WEEK)
+
+        # Calculate workable days and round UP to the nearest whole number (1)
+        raw_workable_days = WORKABLE_DAYS_PER_YEAR_FULL_TIME * (days / FULL_TIME_DAYS_PER_WEEK)
+        workable_days = raw_workable_days.quantize(Decimal("1"), rounding=ROUND_UP) # <-- CHANGED
+
+        # Formula: (Distance * 2 trips) * Workable Days * Rate / 12 months
         yearly_cost = (distance * 2) * workable_days * TAX_FREE_RATE_PER_KM
         monthly_cost = yearly_cost / MONTHS_IN_YEAR
+
         return monthly_cost.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     raise ValueError(f"Unknown transport method: {transport_method}")

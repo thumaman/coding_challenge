@@ -24,7 +24,7 @@ Calculations use unrounded Decimals; results are rounded to cents only on output
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_HALF_UP, ROUND_UP, Decimal
 
 from django.utils.translation import gettext as _
 
@@ -207,11 +207,16 @@ def _travel_steps(inp: PricingInput, travel: Decimal) -> list[dict]:
 
     # Car / bicycle: tax-free allowance for every return trip on an office day.
     # Per hour = yearly cost ÷ hours per year (the same as monthly cost ÷ hours per month).
-    days_per_year = T.WORKABLE_DAYS_PER_YEAR_FULL_TIME * office_days / T.FULL_TIME_DAYS_PER_WEEK
+    
+    # Calculate the raw days and ceil to the nearest whole number
+    raw_days_per_year = T.WORKABLE_DAYS_PER_YEAR_FULL_TIME * office_days / T.FULL_TIME_DAYS_PER_WEEK
+    days_per_year = raw_days_per_year.quantize(Decimal("1"), rounding=ROUND_UP)
+    
     remote = D(inp.remote_days_per_week)
     return [
         row("", _("Distance return trip"), f"{num(km * 2)} km", kind="text"),
-        row("×", _("Office days / year"), num(days_per_year.quantize(CENT)), kind="text",
+        # Removed .quantize(CENT) because it is now guaranteed to be a whole number
+        row("×", _("Office days / year"), num(days_per_year), kind="text",
             detail=_("excl. %(days)s remote days / week") % {"days": num(remote)} if remote else ""),
         row("×", _("Tax-free rate / km"), T.TAX_FREE_RATE_PER_KM),
         row("÷", _("Hours / year"), num(D(inp.hours_per_week) * 52), kind="hours"),
