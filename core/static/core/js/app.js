@@ -10,6 +10,14 @@
  *
  * Styling is Tailwind only. Shared component classes come from core/ui.py as window.UI.
  */
+
+function paintSlider(el) {
+  const min = parseFloat(el.min) || 0;
+  const max = parseFloat(el.max) || 100;
+  const v = Math.min(1, Math.max(0, (el.value - min) / (max - min)));
+  el.style.setProperty('--v', v);
+}
+
 (function () {
     "use strict";
 
@@ -240,4 +248,8 @@
         event.preventDefault();
         field.blur();
     });
+document.querySelectorAll('input[type=range].slider').forEach(el => {
+  paintSlider(el);
+  el.addEventListener('input', () => paintSlider(el));
+});
 })();

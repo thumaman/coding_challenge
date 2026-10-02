@@ -87,7 +87,7 @@
         <div class="flex flex-col gap-5">
             <div class="flex flex-col gap-3 {{ ui.card }}">
                 <h2 class="{{ ui.section_label }}">{% trans "Salary & hours" %}</h2>
-                {% include "pricing/_slider.html" with name="expected_salary_month" label=_("Desired gross salary / month") min=1500 max=12000 hard_max=999999 step=50 value=form.expected_salary_month.value|default:4500 unit_before="€" %}
+                {% include "pricing/_slider.html" with name="expected_salary_month" label=_("Desired gross salary / month") min=1500 max=25000 hard_max=25000 step=50 value=form.expected_salary_month.value|default:4500 unit_before="€" %}
                 {% for error in form.expected_salary_month.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}
                 {% include "pricing/_slider.html" with name="hours_per_week" label=_("Desired working hours / week") min=1 max=40 hard_max=60 step=1 value=form.hours_per_week.value|default:40 unit_after="h" %}
                 {% for error in form.hours_per_week.errors %}<small class="-mt-2 text-red-700">{{ error }}</small>{% endfor %}

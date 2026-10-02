@@ -41,3 +41,90 @@
     align-items: flex-start!important; 
     gap: 0.5rem;
 }
+
+.slider {
+  --h: 8px;          
+  --t: 20px;        
+  --th: var(--t);  
+  --fill: #2563eb;
+  --track: #e5e7eb;
+  --v: 0;         
+  --stop: calc(var(--t) / 2 + (100% - var(--t)) * var(--v));
+
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 28px;
+  cursor: pointer;
+}
+.slider:focus-visible { outline: 2px solid var(--fill); outline-offset: 4px; border-radius: 999px; }
+
+.slider::-webkit-slider-runnable-track {
+  height: var(--h);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--fill) var(--stop), var(--track) var(--stop));
+}
+.slider::-moz-range-track {
+  height: var(--h);
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--fill) var(--stop), var(--track) var(--stop));
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: var(--t);
+  height: var(--th);
+  margin-top: calc((var(--h) - var(--th)) / 2);
+  border-radius: 999px;
+  transition: transform .15s, box-shadow .15s;
+}
+.slider::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--t);
+  height: var(--th);
+  border-radius: 999px;
+  transition: transform .15s, box-shadow .15s;
+}
+
+.slider-1::-webkit-slider-thumb { background: #fff; border: 3px solid var(--fill); box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+.slider-1::-moz-range-thumb     { background: #fff; border: 3px solid var(--fill); box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+.slider-1:hover::-webkit-slider-thumb  { transform: scale(1.1); }
+.slider-1:active::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgb(37 99 235 / .2); }
+.slider-1:hover::-moz-range-thumb      { transform: scale(1.1); }
+.slider-1:active::-moz-range-thumb     { box-shadow: 0 0 0 6px rgb(37 99 235 / .2); }
+
+.slider-2 { --h: 3px; --t: 14px; --fill: #111827; --track: #d1d5db; }
+.slider-2::-webkit-slider-thumb { background: var(--fill); border: 0; }
+.slider-2::-moz-range-thumb     { background: var(--fill); border: 0; }
+.slider-2:active::-webkit-slider-thumb { transform: scale(1.5); }
+.slider-2:active::-moz-range-thumb     { transform: scale(1.5); }
+
+.slider-3 { --h: 16px; --t: 16px; --fill: #10b981; --track: #e5e7eb; }
+.slider-3::-webkit-slider-runnable-track { box-shadow: inset 0 1px 2px rgb(0 0 0 / .15); }
+.slider-3::-moz-range-track              { box-shadow: inset 0 1px 2px rgb(0 0 0 / .15); }
+.slider-3::-webkit-slider-thumb { background: #fff; border: 0; box-shadow: 0 1px 3px rgb(0 0 0 / .35); transform: scale(.8); }
+.slider-3::-moz-range-thumb     { background: #fff; border: 0; box-shadow: 0 1px 3px rgb(0 0 0 / .35); transform: scale(.8); }
+.slider-3:active::-webkit-slider-thumb { transform: scale(.95); }
+.slider-3:active::-moz-range-thumb     { transform: scale(.95); }
+
+.slider-4 { --h: 6px; --t: 10px; --th: 26px; --fill: #7c3aed; --track: #e5e7eb; }
+.slider-4::-webkit-slider-thumb { background: var(--fill); border: 0; border-radius: 4px; box-shadow: 0 2px 6px rgb(124 58 237 / .45); }
+.slider-4::-moz-range-thumb     { background: var(--fill); border: 0; border-radius: 4px; box-shadow: 0 2px 6px rgb(124 58 237 / .45); }
+.slider-4:active::-webkit-slider-thumb { transform: scaleY(1.1); }
+.slider-4:active::-moz-range-thumb     { transform: scaleY(1.1); }
+
+.slider-5 { --h: 10px; --t: 22px; --fill: #6366f1; --track: #e0e7ff; }
+.slider-5::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #6366f1, #06b6d4) 0 / var(--stop) 100% no-repeat, var(--track);
+}
+.slider-5::-moz-range-track {
+  background: linear-gradient(to right, #6366f1, #06b6d4) 0 / var(--stop) 100% no-repeat, var(--track);
+}
+.slider-5::-webkit-slider-thumb { background: #fff; border: 4px solid #06b6d4; box-shadow: 0 0 0 4px rgb(6 182 212 / .2), 0 4px 10px rgb(6 182 212 / .4); }
+.slider-5::-moz-range-thumb     { background: #fff; border: 4px solid #06b6d4; box-shadow: 0 0 0 4px rgb(6 182 212 / .2), 0 4px 10px rgb(6 182 212 / .4); }
+.slider-5:active::-webkit-slider-thumb { box-shadow: 0 0 0 8px rgb(6 182 212 / .25), 0 4px 10px rgb(6 182 212 / .4); }
+.slider-5:active::-moz-range-thumb     { box-shadow: 0 0 0 8px rgb(6 182 212 / .25), 0 4px 10px rgb(6 182 212 / .4); }
+
+@media (prefers-reduced-motion: reduce) {
+  .slider::-webkit-slider-thumb, .slider::-moz-range-thumb { transition: none; }
+}
