@@ -18,13 +18,36 @@
 
 <div class="mt-5 {{ ui.dt_card }}">
     <h2 class="{{ ui.h2 }}">{% trans "Best matching candidates" %}</h2>
-    {# TODO(Ivan): show score breakdown on hover, "link candidate to vacancy" action #}
     <table id="matches" class="display w-full">
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
                 <th>{% trans "Role" %}</th>
-                <th>{% trans "Score" %} /{{ max_score }}</th>
+                <th>
+                    <span class="inline-flex items-center gap-1">
+                        {% trans "Score" %} /{{ max_score }}
+                        <span class="group relative inline-flex">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" aria-hidden="true">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" />
+                            </svg>
+                            <span role="tooltip"
+                                  class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity
+                                        absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2
+                                        rounded-md bg-gray-800 px-3 py-2 text-xs font-normal normal-case
+                                        whitespace-normal text-left text-white shadow-lg pointer-events-none">
+{% blocktrans trimmed %}
+Within 10% of budget: +1<br>
+Exact match of remote days: +1<br>
+Fewer remote days than offered: +0.5<br>
+Hours per week match: +0.5<br>
+&lt; 25km travel: +1
+{% endblocktrans %}
+                            </span>
+                        </span>
+                    </span>
+                </th>
                 <th>{% trans "Remote days" %}</th>
                 <th>{% trans "Advised rate" %}</th>
             </tr>
