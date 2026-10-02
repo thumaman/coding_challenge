@@ -1,0 +1,11 @@
+{% load static %}
+{# Installable web app (PWA), included in <head> by base.html and the login page. #}
+{# The apple-* tags only affect "Add to Home Screen" on iPhone/iPad; desktop browsers ignore them. #}
+<link rel="manifest" href="{% url 'core:manifest' %}">
+<meta name="theme-color" content="#0f172a">
+<link rel="icon" href="{% static 'core/icons/icon.svg' %}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{% static 'core/icons/apple-touch-icon.png' %}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Recruiters">

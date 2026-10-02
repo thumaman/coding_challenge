@@ -15,7 +15,7 @@
 {# Inputs in cards, live tariff at the bottom (so nothing is shown before the form is filled in). #}
 {# Inputs carry the Candidate field names; data-field-map translates them for the pricing API in calculator.js. #}
 <div class="flex flex-col gap-5">
-    <form method="post" class="grid gap-5 lg:grid-cols-2" id="forward-form" novalidate autocomplete="off" data-enter-leaves-field
+    <form method="post" class="grid gap-5 max-lg:grid-cols-[minmax(0,1fr)] lg:grid-cols-2" id="forward-form" novalidate autocomplete="off" data-enter-leaves-field
           data-endpoint="{% url 'pricing:calculate' %}" data-distance-endpoint="{% url 'pricing:distance' %}"
           data-field-map="{{ field_map_json }}"
           {% if not object %}data-autosave="{% url 'candidates:draft_autosave' %}"{% endif %}>

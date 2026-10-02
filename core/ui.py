@@ -60,7 +60,9 @@ UI = {
         "rounded-lg border border-slate-200 bg-white p-5 shadow-sm "
         "[&_.dt-container]:overflow-visible! [&_.dt-layout-table]:overflow-visible! [&_td]:overflow-visible! "
         "[&_td]:align-middle [&_thead_th]:text-xs [&_thead_th]:uppercase [&_thead_th]:tracking-wide "
-        "[&_thead_th]:text-gray-500 [&_.dt-search_input]:w-60!"
+        "[&_thead_th]:text-gray-500 [&_.dt-search_input]:w-60! "
+        # Phones: less padding around and inside the table so it fits the screen
+        "max-sm:p-3 max-sm:[&_td]:px-1.5! max-sm:[&_th]:px-1.5! max-sm:[&_.dt-search_input]:w-full!"
     ),
     # Modal partials (core/_modal_form.html, core/_confirm_delete.html)
     "modal_header": "flex items-center justify-between border-b border-slate-200 px-5.5 py-4.5",
@@ -68,7 +70,7 @@ UI = {
     "modal_content": "max-h-[calc(90vh-140px)] overflow-y-auto px-5.5 py-5",
     "modal_footer": "flex justify-end gap-2.5 border-t border-slate-200 bg-slate-50 px-5.5 py-3.5",
     # Pricing summary: cost + travel + margin = tariff
-    "sum_grid": "flex flex-wrap items-stretch gap-2.5",
+    "sum_grid": "flex flex-wrap items-stretch gap-2.5 max-sm:relative",  # relative: anchors the phone dropdowns
     "sum_item": "flex min-w-27.5 flex-1 flex-col gap-1 rounded-lg bg-slate-100 px-3.5 py-3",
     "sum_label": "text-xs text-gray-500",
     "sum_value": "text-lg font-bold tabular-nums",
@@ -114,12 +116,13 @@ UI = {
         "text-white hover:bg-slate-800 group-open/steps:bg-slate-800 [&::-webkit-details-marker]:hidden"
     ),
     "steps_dropdown": (
-        "absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
+        # Phones: spans the whole row of tiles (anchored to sum_grid) instead of hanging off one tile
+        "absolute left-0 top-full z-30 mt-1.5 w-72 max-w-[calc(100vw-3rem)] max-sm:right-0 max-sm:w-auto rounded-lg border "
         "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 shadow-lg"
     ),
     # Same, opening upwards (for result cards at the bottom of a page)
     "steps_dropdown_up": (
-        "absolute left-0 bottom-full z-30 mb-1.5 w-72 max-w-[calc(100vw-3rem)] rounded-lg border "
+        "absolute left-0 bottom-full z-30 mb-1.5 w-72 max-w-[calc(100vw-3rem)] max-sm:right-0 max-sm:w-auto rounded-lg border "
         "border-slate-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 shadow-lg"
     ),
     "step_row": "flex items-baseline gap-2 py-1",

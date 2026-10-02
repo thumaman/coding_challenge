@@ -45,8 +45,8 @@ const table = new DataTable("#candidates", {
         <!-- {data: "role", render: (d) => esc(d)}, -->
         <!-- {data: "status"}, -->
         {data: "salary", render: (d, t) => t === "display" ? App.formatEuro(d) : Number(d)},
-        {data: "hours"},
-        {data: "remote"},
+        {data: "hours", className: "max-md:hidden"},  // secondary columns are hidden on phones
+        {data: "remote", className: "max-md:hidden"},
       {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", href: row.urls.update},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#candidates", danger: true},

@@ -22,8 +22,9 @@
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
-                <th>{% trans "Status" %}</th>
-                <th>{% trans "Role" %}</th>
+                {# Status, role and remote days are hidden on phones (max-md:hidden) #}
+                <th class="max-md:hidden">{% trans "Status" %}</th>
+                <th class="max-md:hidden">{% trans "Role" %}</th>
                 <th>
                     <span class="inline-flex items-center gap-1">
                         {% trans "Score" %} /{{ max_score }}
@@ -49,7 +50,7 @@ Hours per week match: +0.5<br>
                         </span>
                     </span>
                 </th>
-                <th>{% trans "Remote days" %}</th>
+                <th class="max-md:hidden">{% trans "Remote days" %}</th>
                 <th>{% trans "Advised rate" %}</th>
             </tr>
         </thead>
@@ -59,12 +60,12 @@ Hours per week match: +0.5<br>
                     <td>
                         <a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a>
                     </td>
-                    <td>
+                    <td class="max-md:hidden">
                         {% if row.link %}<span class="ml-1.5 {{ ui.badge.unknown }}" title="{% trans 'Considered for this vacancy' %}">{{ row.link.get_status_display }}</span>{% endif %}
                     </td>
-                    <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
+                    <td class="text-gray-500 max-md:hidden">{{ row.candidate.desired_role }}</td>
                     <td data-order="{{ row.score.total|stringformat:'s' }}">{{ row.score.total|floatformat:"-1" }}</td>
-                    <td>{{ row.candidate.remote_days_per_week }}</td>
+                    <td class="max-md:hidden">{{ row.candidate.remote_days_per_week }}</td>
                     <td data-order="{{ row.pricing.final_rate|stringformat:'s' }}"><span class="{{ row.pricing.budget_status|badge }}">€{{ row.pricing.final_rate|floatformat:2 }}</span></td>
                 </tr>
             {% endfor %}

@@ -3,10 +3,11 @@
 //   the cache is only a fallback when offline.
 // - CDN libraries (incl. Tailwind) and fonts (versioned URLs that never change): cache-first.
 // Bump CACHE when changing this file, so old caches are deleted on activate.
-const CACHE = "talentrate-v4";
+const CACHE = "talentrate-v5";
 const SHELL = [
     "{% static 'core/js/app.js' %}",
     "{% static 'core/icons/icon.svg' %}",
+    "{% static 'core/icons/icon-192.png' %}",
 ];
 
 self.addEventListener("install", (event) => {

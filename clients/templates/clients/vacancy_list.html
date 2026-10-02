@@ -49,11 +49,11 @@ const table = new DataTable("#vacancies", {
     columns: [
         {data: "title", render: (d, t, row) => `<a href="${row.urls.detail}">${DataTable.util.escapeHtml(d)}</a>`},
         {data: "client"},
-        {data: "city"},
+        {data: "city", className: "max-md:hidden"},  // secondary columns are hidden on phones
         {data: "max_rate", render: (d) => App.formatEuro(d)},
-        {data: "hours"},
-        {data: "remote"},
-        {data: "is_open", render: (d) => d ? `<span class="${App.badgeClass("ok")}">{% trans "Open" %}</span>` : `<span class="${App.badgeClass("unknown")}">{% trans "Closed" %}</span>`},
+        {data: "hours", className: "max-md:hidden"},
+        {data: "remote", className: "max-md:hidden"},
+        {data: "is_open", className: "max-md:hidden", render: (d) => d ? `<span class="${App.badgeClass("ok")}">{% trans "Open" %}</span>` : `<span class="${App.badgeClass("unknown")}">{% trans "Closed" %}</span>`},
       {data: null, title: "{% trans "Actions" %}", orderable: false, searchable: false, className: "dt-actions", render: (d, t, row) => App.rowMenu([
             {label: "{% trans "Edit" %}", href: row.urls.update},
             {label: "{% trans "Delete" %}", url: row.urls.delete, table: "#vacancies", danger: true},

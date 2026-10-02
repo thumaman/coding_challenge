@@ -10,22 +10,43 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Local development works without any configuration. In production (Railway) these come from
+# environment variables: DJANGO_SECRET_KEY, DJANGO_DEBUG, DJANGO_ALLOWED_HOSTS, DATABASE_URL.
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-bkcf%5ju8w=+zu92%r5!sh&33eekc8_+0g1+^1&%kaur)v(-n5"
+ON_RAILWAY = "RAILWAY_ENVIRONMENT" in os.environ
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Debug is on locally and off on Railway, unless DJANGO_DEBUG says otherwise
+DEBUG = os.environ.get("DJANGO_DEBUG", "0" if ON_RAILWAY else "1") == "1"
 
-ALLOWED_HOSTS = []
+_DEV_SECRET_KEY = "django-insecure-bkcf%5ju8w=+zu92%r5!sh&33eekc8_+0g1+^1&%kaur)v(-n5"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", _DEV_SECRET_KEY)
+if not DEBUG and SECRET_KEY == _DEV_SECRET_KEY:
+    raise ImproperlyConfigured("Set the DJANGO_SECRET_KEY environment variable in production.")
+
+# Railway sets RAILWAY_PUBLIC_DOMAIN (e.g. myapp.up.railway.app); extra hosts via DJANGO_ALLOWED_HOSTS
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [
+    host.strip()
+    for host in [os.environ.get("RAILWAY_PUBLIC_DOMAIN", ""), *os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")]
+    if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host not in ("localhost", "127.0.0.1")]
+
+# Railway terminates HTTPS at its proxy and forwards plain HTTP
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -46,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serves /static/ in production
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -81,11 +103,9 @@ WSGI_APPLICATION = "rec_platform.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# Local: db.sqlite3. Railway: the Postgres plugin's DATABASE_URL.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600),
 }
 
 
@@ -132,6 +152,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+if not DEBUG:
+    # Compressed files with content hashes in their names (cached forever); needs collectstatic
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    }
 
 # Auth: the whole platform is recruiter-only (LoginRequiredMiddleware above)
 LOGIN_URL = "login"

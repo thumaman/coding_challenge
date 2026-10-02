@@ -21,6 +21,22 @@ Optional: set `ANTHROPIC_API_KEY` to let Claude rank and explain the AI advisor'
 uv run python manage.py test             # pricing tests must reproduce €81.36 and €9,533.33
 ```
 
+## Deploying (Railway)
+
+The app runs on [Railway](https://railway.com); `railway.json` holds the start command (migrate, collectstatic, gunicorn).
+Locally nothing changes: without these variables the app runs in debug mode on `db.sqlite3`.
+
+1. New project → *Deploy from GitHub repo*, then add a **Postgres** database to the project.
+2. On the web service, set the variables:
+   - `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` (reference to the database)
+   - `DJANGO_SECRET_KEY` = a long random string (`python -c "import secrets; print(secrets.token_urlsafe(50))"`)
+   - optional: `ANTHROPIC_API_KEY` for the AI advisor, `DJANGO_ALLOWED_HOSTS` for a custom domain
+3. *Settings → Networking → Generate Domain*. Railway passes it as `RAILWAY_PUBLIC_DOMAIN`, which is allowed automatically.
+4. Create a login inside the running service: `railway ssh`, then `python manage.py createsuperuser`.
+   (`seed_demo` also works for demo data, but its `recruiter` / `recruiter` login is public knowledge: change the password.)
+
+**On an iPhone:** open the site in Safari → Share → *Add to Home Screen*. It opens full-screen like an app (PWA).
+
 ## Who owns what
 
 | Who | App | Branch |
