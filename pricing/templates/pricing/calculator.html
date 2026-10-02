@@ -74,10 +74,14 @@
     <div class="{{ ui.card }}">
         <p class="mb-3.5 text-gray-500">{% trans "Indicative. Travel costs are excluded until a concrete candidate is known." %}</p>
         <div class="{{ ui.sum_grid }}">
-            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Cost price / hour" %}</span><strong class="{{ ui.sum_value }}" id="reverse-cost">–</strong></div>
-            <div class="{{ ui.sum_item }}"><span class="{{ ui.sum_label }}">{% trans "Gross hourly wage" %}</span><strong class="{{ ui.sum_value }}" id="reverse-hourly">–</strong></div>
+            {% trans "Cost price / hour" as label %}{% trans "How is the cost price calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value_id="reverse-cost" steps_id="reverse-cost-steps" %}
+            <div class="{{ ui.sum_op }}" aria-hidden="true">→</div>
+            {% trans "Gross hourly wage" as label %}{% trans "How is the hourly wage calculated?" as hint %}
+            {% include "pricing/_steps_tile.html" with value_id="reverse-hourly" steps_id="reverse-hourly-steps" %}
+            <div class="{{ ui.sum_op }}" aria-hidden="true">→</div>
             {% trans "Max gross salary / month" as label %}{% trans "How is the salary calculated?" as hint %}
-            {% include "pricing/_steps_tile.html" with value_id="reverse-salary" steps_id="reverse-steps" dark=True %}
+            {% include "pricing/_steps_tile.html" with value_id="reverse-salary" steps_id="reverse-salary-steps" dark=True %}
         </div>
     </div>
     <form class="grid gap-x-10 gap-y-4 sm:grid-cols-2 {{ ui.card }}" id="reverse-form" data-endpoint="{% url 'pricing:reverse' %}" autocomplete="off">

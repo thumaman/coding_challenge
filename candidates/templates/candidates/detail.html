@@ -4,10 +4,6 @@
 {% block title %}{{ candidate.full_name }}{% endblock %}
 {% block heading %}{{ candidate.full_name }} <span class="text-gray-500">· {{ candidate.desired_role }}</span>{% endblock %}
 
-{% block page_actions %}
-    <a class="{{ ui.btn_edit }}" href="{% url 'candidates:update' candidate.pk %}">{% trans "Edit" %}</a>
-{% endblock %}
-
 {% block content %}
 {# TODO(Vidic): nicer profile layout. Pricing panel = Teun, advisor panel = Ivan. #}
 {# One tariff card per vacancy the candidate is considered for (on top), the profile below. #}

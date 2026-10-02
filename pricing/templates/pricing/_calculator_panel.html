@@ -38,7 +38,7 @@
         </div>
         {# Folded: the outcome stays visible next to the status #}
         <span class="{{ p.budget_status|badge }} group-data-open/card:hidden" title="{% trans 'Advised tariff' %}">€{{ p.advised_rate }}</span>
-        <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'pricing:calculator' %}?candidate={{ link.candidate_id }}&amp;vacancy={{ vacancy.pk }}">{% trans "Open in calculator" %}</a>
+        <a class="ml-auto {{ ui.btn_secondary }}" href="{% url 'candidates:update' link.candidate_id %}">{% trans "Edit" %}</a>
     </div>
     <div class="hidden group-data-open/card:block">
     <p class="mb-3.5 flex flex-wrap items-center gap-2">

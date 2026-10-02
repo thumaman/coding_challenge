@@ -312,15 +312,23 @@ def rate_to_salary(max_rate, margin=C.DEFAULT_MARGIN, cost_factor=C.DEFAULT_COST
         "hourly_wage": money(hourly),
         "weekly_salary": money(weekly),
         "monthly_salary": money(monthly),
-        # Compact chain for the salary dropdown
-        "steps": [
+        # One short chain per result tile's dropdown
+        "cost_steps": [
             row("", _("Client tariff / hour"), max_rate),
             row("−", _("Margin / hour"), margin),
             row("=", _("Cost price / hour"), cost),
+        ],
+        "hourly_steps": [
+            row("", _("Cost price / hour"), cost),
             row("÷", _("Cost price factor"), cost_factor, kind="factor"),
-            row("=", _("Hourly wage"), hourly),
-            row("=", _("Max gross salary / month"), monthly,
-                detail=_("× %(hours)s h × 13 ÷ 3") % {"hours": num(hours)}),
+            row("=", _("Gross hourly wage"), hourly),
+        ],
+        "salary_steps": [
+            row("", _("Gross hourly wage"), hourly),
+            row("×", _("Hours per week"), hours, kind="hours",
+                detail=_("= €%(amount)s / week") % {"amount": money(weekly)}),
+            row("×", _("Week → month"), "13 ÷ 3", kind="text"),
+            row("=", _("Max gross salary / month"), monthly),
         ],
         "breakdown": [
             {"title": _("Cost price"), "rows": [

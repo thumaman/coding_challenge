@@ -9,12 +9,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+{% with has_band=vacancy.min_salary|default_if_none:vacancy.max_salary %}
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 {% if has_band is not None %}lg:grid-cols-4{% else %}lg:grid-cols-3{% endif %}">
     <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Max client rate" %}</div><div class="mt-1.5 text-3xl font-bold">€{{ vacancy.max_rate_per_hour }}</div></div>
     <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Hours / week" %}</div><div class="mt-1.5 text-3xl font-bold">{{ vacancy.hours_per_week }}</div></div>
     <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Remote days allowed" %}</div><div class="mt-1.5 text-3xl font-bold">{{ vacancy.remote_days_allowed }}</div></div>
-    <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Salary range" %}</div><div class="mt-1.5 text-xl font-bold">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
+    {# Salary range: only when the vacancy has a salary band #}
+    {% if has_band is not None %}
+        <div class="{{ ui.card }}"><div class="text-gray-500">{% trans "Salary range" %}</div><div class="mt-1.5 text-xl font-bold">€{{ vacancy.min_salary|default:"–" }} – €{{ vacancy.max_salary|default:"–" }}</div></div>
+    {% endif %}
 </div>
+{% endwith %}
 
 <div class="mt-5 {{ ui.dt_card }}">
     <h2 class="{{ ui.h2 }}">{% trans "Best matching candidates" %}</h2>

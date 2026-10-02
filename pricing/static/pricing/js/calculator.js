@@ -362,7 +362,9 @@
             document.getElementById("reverse-cost").textContent = App.formatEuro(result.cost_price);
             document.getElementById("reverse-hourly").textContent = App.formatEuro(result.hourly_wage);
             document.getElementById("reverse-salary").textContent = App.formatEuro(result.monthly_salary);
-            renderSteps(document.getElementById("reverse-steps"), result.steps);
+            renderSteps(document.getElementById("reverse-cost-steps"), result.cost_steps);
+            renderSteps(document.getElementById("reverse-hourly-steps"), result.hourly_steps);
+            renderSteps(document.getElementById("reverse-salary-steps"), result.salary_steps);
         } catch (err) { /* invalid input while typing */ }
     });
     reverse.addEventListener("input", runReverse);

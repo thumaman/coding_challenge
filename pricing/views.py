@@ -114,7 +114,7 @@ def reverse_api(request):
         )
     except (TypeError, ValueError, ArithmeticError) as exc:
         return JsonResponse({"ok": False, "message": str(exc)}, status=400)
-    return JsonResponse({"ok": True, "result": {k: (v if k in ("breakdown", "steps") else str(v)) for k, v in result.items()}})
+    return JsonResponse({"ok": True, "result": {k: (v if isinstance(v, list) else str(v)) for k, v in result.items()}})
 
 
 @require_GET

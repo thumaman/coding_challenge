@@ -150,7 +150,9 @@ class PricingApiTests(TestCase):
         response = self.client.post(reverse("pricing:reverse"), json.dumps({"max_rate": 120}), content_type="application/json")
         result = response.json()["result"]
         self.assertEqual(result["monthly_salary"], "9533.33")
-        self.assertEqual(result["steps"][-1]["value"], "9533.33")
+        self.assertEqual(result["cost_steps"][-1]["value"], "110.00")
+        self.assertEqual(result["hourly_steps"][-1]["value"], "55.00")
+        self.assertEqual(result["salary_steps"][-1]["value"], "9533.33")
 
     @mock.patch("pricing.views.route_distance_km", return_value={"km": Decimal("45.9"), "source": "route"})
     def test_distance_endpoint(self, route):

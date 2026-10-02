@@ -1200,6 +1200,9 @@ msgstr ""
 msgid "How is the salary calculated?"
 msgstr "Hoe wordt het salaris berekend?"
 
+msgid "How is the hourly wage calculated?"
+msgstr "Hoe wordt het uurloon berekend?"
+
 #: pricing/templates/pricing/calculator.html:84
 msgid "What the client pays"
 msgstr "Wat de opdrachtgever betaalt"
