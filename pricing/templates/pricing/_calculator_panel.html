@@ -43,8 +43,8 @@
     <div class="hidden group-data-open/card:block">
     <p class="mb-3.5 flex flex-wrap items-center gap-2">
         <span class="{{ p.budget_status|badge }}">
-            {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum: too cheap?" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
-        </span>
+            {% if p.budget_status == "ok" %}{% trans "Within the client's budget" %}{% elif p.budget_status == "over" %}{% trans "Over the client's budget" %}{% elif p.budget_status == "too_low" %}{% trans "More than 10% below the client's maximum" %}{% else %}{% trans "No vacancy linked" %}{% endif %}
+        </span> 
         {% if p.max_rate %}<span class="text-gray-500">{% trans "client max" %} €{{ p.max_rate|floatformat:2 }}</span>{% endif %}
         {% if link.proposed_rate %}<span class="text-gray-500">· {% trans "proposed" %} €{{ link.proposed_rate }}</span>{% endif %}
     </p>

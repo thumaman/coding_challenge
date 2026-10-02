@@ -20,7 +20,11 @@ def _initial_from_candidate(candidate_id, vacancy_id=None):
 
     A vacancy the candidate isn't linked to is not prefilled, rather than swapped for another of their vacancies.
     """
-    candidate = Candidate.objects.prefetch_related("links__vacancy").filter(pk=candidate_id).first()
+    candidate = (
+        Candidate.objects.prefetch_related("links__vacancy")
+        .filter(pk=candidate_id)
+        .first()
+    )
     if not candidate:
         return {}
     links = list(candidate.links.all())
@@ -49,7 +53,7 @@ def calculator_i18n():
     return {
         "status": {
             "ok": _("Within the client's budget"),
-            "too_low": _("More than 10% below the client's maximum: too cheap?"),
+            "too_low": _("More than 10% below the client's maximum"),
             "over": _("Over the client's budget"),
             "unknown": _("Choose a vacancy to compare with the client's budget"),
         },
@@ -63,7 +67,9 @@ def calculator_i18n():
         "no_vacancy": _("No vacancy"),
         "no_results": _("No vacancies found"),
         "max": _("max"),
-        "distance_needed": _("Choose a vacancy and enter the home location to calculate the distance."),
+        "distance_needed": _(
+            "Choose a vacancy and enter the home location to calculate the distance."
+        ),
     }
 
 
@@ -71,14 +77,27 @@ def calculator(request):
     # TODO(Teun): proposed vs. max tariff bar with the −10% band
     vacancies = Vacancy.objects.filter(is_open=True).select_related("client")
     candidate_id = request.GET.get("candidate")
-    initial = _initial_from_candidate(candidate_id, request.GET.get("vacancy")) if candidate_id else {}
+    initial = (
+        _initial_from_candidate(candidate_id, request.GET.get("vacancy"))
+        if candidate_id
+        else {}
+    )
     i18n = calculator_i18n()
     # The calculator can also compare with a manually entered target budget (no vacancy needed)
-    i18n["status"]["unknown"] = _("Choose a vacancy or enter a target budget to compare")
+    i18n["status"]["unknown"] = _(
+        "Choose a vacancy or enter a target budget to compare"
+    )
     i18n["no_budget"] = _("none")
-    return render(request, "pricing/calculator.html", {
-        "vacancies": vacancies, "C": C, "i18n": i18n, "initial": initial,
-    })
+    return render(
+        request,
+        "pricing/calculator.html",
+        {
+            "vacancies": vacancies,
+            "C": C,
+            "i18n": i18n,
+            "initial": initial,
+        },
+    )
 
 
 def _payload(request):
@@ -101,7 +120,9 @@ def calculate_api(request):
         vacancy = Vacancy.objects.filter(pk=data["vacancy_id"]).first()
         data["max_rate"] = vacancy.max_rate_per_hour if vacancy else None
     try:
-        result = calculate(PricingInput(**{k: v for k, v in data.items() if k in INPUT_FIELDS}))
+        result = calculate(
+            PricingInput(**{k: v for k, v in data.items() if k in INPUT_FIELDS})
+        )
     except (TypeError, ValueError, ArithmeticError) as exc:
         return JsonResponse({"ok": False, "message": str(exc)}, status=400)
     return JsonResponse({"ok": True, "result": result.as_dict()})
@@ -112,7 +133,9 @@ def reverse_api(request):
     """POST {max_rate, margin, cost_factor, hours_per_week} -> indicative max monthly salary."""
     data = _payload(request)
     if data is None or not data.get("max_rate"):
-        return JsonResponse({"ok": False, "message": "max_rate is required"}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": "max_rate is required"}, status=400
+        )
     try:
         result = rate_to_salary(
             data["max_rate"],
@@ -122,16 +145,32 @@ def reverse_api(request):
         )
     except (TypeError, ValueError, ArithmeticError) as exc:
         return JsonResponse({"ok": False, "message": str(exc)}, status=400)
-    return JsonResponse({"ok": True, "result": {k: (v if isinstance(v, list) else str(v)) for k, v in result.items()}})
+    return JsonResponse(
+        {
+            "ok": True,
+            "result": {
+                k: (v if isinstance(v, list) else str(v)) for k, v in result.items()
+            },
+        }
+    )
 
 
 @require_GET
 def distance_api(request):
     """GET ?origin=<candidate home>&destination=<work location> -> one-way distance in km."""
-    origin, destination = request.GET.get("origin", ""), request.GET.get("destination", "")
+    origin, destination = (
+        request.GET.get("origin", ""),
+        request.GET.get("destination", ""),
+    )
     if not origin.strip() or not destination.strip():
-        return JsonResponse({"ok": False, "message": _("Enter both locations.")}, status=400)
+        return JsonResponse(
+            {"ok": False, "message": _("Enter both locations.")}, status=400
+        )
     result = route_distance_km(origin, destination)
     if result is None:
-        return JsonResponse({"ok": False, "message": _("Location not found.")}, status=404)
-    return JsonResponse({"ok": True, "km": str(result["km"]), "source": result["source"]})
+        return JsonResponse(
+            {"ok": False, "message": _("Location not found.")}, status=404
+        )
+    return JsonResponse(
+        {"ok": True, "km": str(result["km"]), "source": result["source"]}
+    )

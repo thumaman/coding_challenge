@@ -1162,8 +1162,8 @@ msgstr "Boven het budget van de opdrachtgever"
 
 #: pricing/templates/pricing/_calculator_panel.html:46
 #, python-format
-msgid "More than 10%% below the client's maximum: too cheap?"
-msgstr "Meer dan 10%% onder het maximum van de opdrachtgever: te goedkoop?"
+msgid "More than 10%% below the client's maximum"
+msgstr "Meer dan 10%% onder het maximum van de opdrachtgever"
 
 #: pricing/templates/pricing/_calculator_panel.html:46
 msgid "No vacancy linked"
@@ -1294,8 +1294,8 @@ msgid "Working hours / week"
 msgstr "Werkuren / week"
 
 #: pricing/views.py:52
-msgid "More than 10% below the client's maximum: too cheap?"
-msgstr "Meer dan 10% onder het maximum van de opdrachtgever: te goedkoop?"
+msgid "More than 10% below the client's maximum"
+msgstr "Meer dan 10% onder het maximum van de opdrachtgever"
 
 #: pricing/views.py:54
 msgid "Choose a vacancy to compare with the client's budget"
