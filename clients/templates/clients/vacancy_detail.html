@@ -22,6 +22,7 @@
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
+                <th>{% trans "Status" %}</th>
                 <th>{% trans "Role" %}</th>
                 <th>
                     <span class="inline-flex items-center gap-1">
@@ -57,6 +58,8 @@ Hours per week match: +0.5<br>
                 <tr>
                     <td>
                         <a href="{% url 'candidates:detail' row.candidate.pk %}">{{ row.candidate.full_name }}</a>
+                    </td>
+                    <td>
                         {% if row.link %}<span class="ml-1.5 {{ ui.badge.unknown }}" title="{% trans 'Considered for this vacancy' %}">{{ row.link.get_status_display }}</span>{% endif %}
                     </td>
                     <td class="text-gray-500">{{ row.candidate.desired_role }}</td>
