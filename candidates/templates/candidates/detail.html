@@ -11,9 +11,10 @@
 {% block content %}
 {# TODO(Vidic): nicer profile layout. Pricing panel = Teun, advisor panel = Ivan. #}
 {# One tariff card per vacancy the candidate is considered for (on top), the profile below. #}
+{# With several vacancies the cards start folded, so the page stays scannable. #}
 <div class="flex flex-col gap-5">
     {% for entry in links %}
-        {% include "pricing/_calculator_panel.html" with link=entry.link options=entry.options %}
+        {% include "pricing/_calculator_panel.html" with link=entry.link options=entry.options collapsed=links|length|add:"-1" %}
     {% empty %}
         <div class="{{ ui.card }} text-gray-500">{% trans "Not linked to a vacancy yet." %} <a href="{% url 'candidates:update' candidate.pk %}">{% trans "Add a vacancy" %}</a></div>
     {% endfor %}

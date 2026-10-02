@@ -144,6 +144,12 @@ function paintSlider(el) {
             menu.toggleAttribute("data-open");
             return;
         }
+        // Foldable card (e.g. the tariff cards on a candidate)
+        const fold = event.target.closest("[data-collapse-toggle]");
+        if (fold) {
+            const open = fold.closest("[data-collapsible]").toggleAttribute("data-open");
+            fold.setAttribute("aria-expanded", open);
+        }
         // The path, not the target: a click handler may already have removed the target (e.g. the vacancy picker re-renders its list)
         closeMenus(event.target, event.composedPath());
 

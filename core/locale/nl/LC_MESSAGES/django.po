@@ -645,13 +645,6 @@ msgstr "vacatureconcepten"
 msgid "Advisor: fit the client budget"
 msgstr "Adviseur: binnen het budget van de opdrachtgever blijven"
 
-#: clients/templates/clients/_advisor_panel.html:8
-#, python-format
-msgid "Current rate €%(rate)s exceeds the client maximum of €%(max)s. Options:"
-msgstr ""
-"Het huidige tarief van €%(rate)s is hoger dan het maximum van de "
-"opdrachtgever (€%(max)s). Opties:"
-
 #: clients/templates/clients/_advisor_panel.html:18
 msgid "No single tweak brings this tariff within budget."
 msgstr "Geen enkele aanpassing brengt dit tarief binnen het budget."
@@ -1083,6 +1076,10 @@ msgstr "afstand onbekend"
 msgid "client pays travel"
 msgstr "opdrachtgever betaalt reis"
 
+#: pricing/templates/pricing/_calculator_panel.html
+msgid "Show calculation"
+msgstr "Berekening tonen"
+
 #: pricing/templates/pricing/_calculator_panel.html:16
 msgid "Open in calculator"
 msgstr "Openen in calculator"
@@ -1289,3 +1286,26 @@ msgstr "Notities bewerken"
 #: candidates/templates/candidates/form.html
 msgid "Done"
 msgstr "Klaar"
+
+msgid "Change status"
+msgstr "Status wijzigen"
+
+msgid "Unknown status."
+msgstr "Onbekende status."
+
+#, python-format
+msgid "Status for %(vacancy)s set to %(status)s."
+msgstr "Status voor %(vacancy)s gewijzigd naar %(status)s."
+#: clients/templates/clients/_advisor_panel.html
+msgid "Advisor Insights"
+msgstr "Inzichten"
+
+#: clients/templates/clients/_advisor_panel.html
+#, python-format
+msgid "Current rate €%(rate)s is significantly below the client maximum of €%(max)s."
+msgstr "Het huidige tarief van €%(rate)s ligt aanzienlijk onder het klantmaximum van €%(max)s."
+
+#: clients/templates/clients/_advisor_panel.html
+#, python-format
+msgid "Current rate €%(rate)s exceeds the client maximum of €%(max)s. Options to lower it:"
+msgstr "Het huidige tarief van €%(rate)s overschrijdt het klantmaximum van €%(max)s. Opties om dit te verlagen:"
