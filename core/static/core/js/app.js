@@ -248,8 +248,25 @@ function paintSlider(el) {
         event.preventDefault();
         field.blur();
     });
-document.querySelectorAll('input[type=range].slider').forEach(el => {
-  paintSlider(el);
-  el.addEventListener('input', () => paintSlider(el));
-});
+    document.querySelectorAll('input[type=range].slider').forEach(slider => {
+      const number = document.getElementById(slider.dataset.sync);
+      paintSlider(slider);
+      if (!number) return;
+
+      // slider -> number field
+      slider.addEventListener('input', () => {
+        number.value = slider.value;
+        number.dispatchEvent(new Event('input', { bubbles: true })); // in case other code listens
+        paintSlider(slider);
+      });
+
+      // number field -> slider
+      const syncFromNumber = () => {
+        if (number.value === '' || isNaN(number.valueAsNumber)) return; // don't jump while typing
+        slider.value = number.value; // the browser clamps to min/max automatically
+        paintSlider(slider);
+      };
+      number.addEventListener('input', syncFromNumber);
+      number.addEventListener('change', syncFromNumber);
+    });
 })();
