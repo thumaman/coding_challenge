@@ -54,7 +54,7 @@
             <ul class="divide-y divide-slate-200 border-t border-slate-200">
                 {% for v in client.vacancies.all %}
                     <li class="flex items-center gap-2 py-2">
-                        <a class="min-w-0 flex-1 truncate" href="{% url 'clients:detail' v.pk %}">{{ v.title }}</a>
+                        <a class="min-w-0 flex-1 truncate underline text-blue-700 decoration-blue-500" href="{% url 'clients:detail' v.pk %}">{{ v.title }}</a>
                         <span class="text-xs text-gray-500 tabular-nums">max €{{ v.max_rate_per_hour }}</span>
                         <span class="{% if v.is_open %}{{ ui.badge.ok }}{% else %}{{ ui.badge.unknown }}{% endif %}">{% if v.is_open %}{% trans "Open" %}{% else %}{% trans "Closed" %}{% endif %}</span>
                     </li>
